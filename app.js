@@ -31,14 +31,25 @@
 
       // Check Reader auth state for nav
       supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session && session.user) {
+        const guestSession = localStorage.getItem('bw_guest_session');
+        const activeUser = (session && session.user) ? session.user : (guestSession ? JSON.parse(guestSession).user : null);
+        if (activeUser) {
           const navLink = document.getElementById('navLoginLink');
           if (navLink) {
             navLink.innerText = 'My Account';
-            navLink.title = session.user.email;
+            navLink.title = activeUser.email || 'Reader';
           }
         }
-      }).catch(() => {});
+      }).catch(() => {
+        const guestSession = localStorage.getItem('bw_guest_session');
+        if (guestSession) {
+          const navLink = document.getElementById('navLoginLink');
+          if (navLink) {
+            navLink.innerText = 'My Account';
+            navLink.title = 'Guest Reader';
+          }
+        }
+      });
     } else {
       console.log('[BeatWave] Supabase credentials not set in config.js — running local sync mode.');
     }

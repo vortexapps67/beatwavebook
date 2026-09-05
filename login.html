@@ -229,6 +229,12 @@
                   <span>Sign In to BeatWave</span>
                 </button>
 
+                <!-- Quick 1-Click Guest Reader Button -->
+                <button type="button" onclick="window.quickGuestLogin()" class="btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(0, 242, 254, 0.3); color: var(--color-accent-cyan); font-weight: 600;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                  <span>Instant Guest Reader &rarr;</span>
+                </button>
+
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
                   <button type="button" onclick="window.handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; padding: 0;">
                     Send Magic Link
@@ -648,7 +654,27 @@
     }
     checkRateLimit();
 
-    // 7. Render Reader Profile if signed in
+    // 7. Instant Guest Reader Login
+    window.quickGuestLogin = function() {
+      try {
+        const guestUser = {
+          user: {
+            email: 'guest.reader@beatwave.io',
+            user_metadata: { full_name: 'Guest Reader' }
+          }
+        };
+        safeStorage.set('bw_guest_session', JSON.stringify(guestUser));
+        window.renderReaderSession(guestUser);
+        window.showNotice('Welcome Guest Reader! Redirecting to BeatWave...', true);
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 600);
+      } catch(e) {
+        console.warn('Guest login error:', e);
+      }
+    };
+
+    // 7b. Render Reader Profile if signed in
     window.renderReaderSession = function(session) {
       try {
         const profileView = document.getElementById('readerProfileView');
@@ -656,8 +682,10 @@
         const navAuthLink = document.getElementById('navAuthLink');
         const resendConfirmCard = document.getElementById('resendConfirmCard');
 
-        if (session && session.user) {
-          const user = session.user;
+        const activeSession = session || (safeStorage.get('bw_guest_session') ? JSON.parse(safeStorage.get('bw_guest_session')) : null);
+
+        if (activeSession && activeSession.user) {
+          const user = activeSession.user;
           const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
           const initial = (name.charAt(0) || 'R').toUpperCase();
 
@@ -997,13 +1025,16 @@
 
     // 13. Sign Out
     window.handleSignOut = async function() {
-      if (!supabase) return;
       try {
-        await supabase.auth.signOut();
+        safeStorage.remove('bw_guest_session');
+        if (supabase) {
+          await supabase.auth.signOut();
+        }
         window.renderReaderSession(null);
         window.showNotice('You have been signed out cleanly.', true);
       } catch(e) {
         console.warn('Sign out err:', e);
+        window.renderReaderSession(null);
       }
     };
 
