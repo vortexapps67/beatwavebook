@@ -16,7 +16,27 @@
   <link rel="icon" type="image/png" href="beatwave new new.png">
   <link rel="apple-touch-icon" href="beatwave new new.png">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.5">
+  <style>
+    #particleCanvas, .ambient-bg-wrapper, .ambient-glow-orb {
+      position: fixed !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+    }
+    .liquid-nav-container {
+      pointer-events: none !important;
+    }
+    .liquid-glass-nav {
+      pointer-events: auto !important;
+    }
+    .subpage-wrapper, .auth-container, .auth-tabs, .auth-subtabs, .auth-tab-btn, .auth-subtab-btn, form, input, button, a {
+      pointer-events: auto !important;
+    }
+    .auth-tab-btn, .auth-subtab-btn, button, a, [onclick] {
+      cursor: pointer !important;
+    }
+  </style>
 </head>
 <body>
   <!-- Animated Background Layer -->
