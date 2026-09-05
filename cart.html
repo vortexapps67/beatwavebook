@@ -380,7 +380,8 @@
 
   <div class="toast-msg" id="toastBox"></div>
 
-  <script src="config.js"></script>
+  <script src="config.js?v=2.6"></script>
+  <script src="auth.js?v=2.6"></script>
   <script src="app.js"></script>
   <script>
     let activeTier = 'ebook';
@@ -389,10 +390,8 @@
 
     function selectCartTier(tier) {
       if (tier === 'print') {
-        if (window.notifyUser) {
-          window.notifyUser('Paperback Coming Soon 📖', "Collector's printed paperback is in printing! Digital E-Book is selected for instant access.", 'info');
-        } else if (typeof showToast === 'function') {
-          showToast('Paperback Edition Coming Soon! E-Book selected.');
+        if (window.BeatWaveAuth) {
+          BeatWaveAuth.toast('Paperback Coming Soon 📖', "Collector's printed paperback is in printing! Digital E-Book is selected for instant access.", 'info');
         } else {
           alert("Collector's printed paperback is in printing & coming soon! Digital E-Book is selected for instant access.");
         }
@@ -426,12 +425,6 @@
     }
     updateUpiLink(150);
 
-    // Read URL param if user navigated with ?tier=print
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('tier') === 'print') {
-      selectCartTier('print');
-    }
-
     function updateReaderAuthState(user) {
       const gateBox = document.getElementById('cartAuthGateBox');
       const statusCard = document.getElementById('cartAuthStatusCard');
@@ -440,13 +433,13 @@
       const userNameEl = document.getElementById('cartAuthUserName');
       const userEmailEl = document.getElementById('cartAuthUserEmail');
 
-      if (user) {
+      if (user && user.email) {
         isReaderAuthenticated = true;
         authenticatedReader = user;
         if (gateBox) gateBox.style.display = 'none';
         if (statusCard) statusCard.style.display = 'flex';
 
-        const name = (user.user_metadata && user.user_metadata.full_name) || user.name || (user.email ? user.email.split('@')[0] : 'Reader');
+        const name = (user.user_metadata && user.user_metadata.full_name) || user.name || user.email.split('@')[0];
         const email = user.email || '';
 
         if (userNameEl) userNameEl.innerText = name;
@@ -462,56 +455,35 @@
     }
 
     window.cartQuickGuestAccess = function() {
-      const guestUser = {
-        email: 'reader.' + Math.floor(Math.random() * 8999 + 1000) + '@beatwave.io',
-        user_metadata: { full_name: 'Valued Reader' }
-      };
-      localStorage.setItem('bw_guest_session', JSON.stringify({ user: guestUser }));
-      updateReaderAuthState(guestUser);
-      if (window.notifyUser) {
-        window.notifyUser('Reader Access Verified ✓', 'You can now proceed with your order reservation.', 'success');
+      const result = BeatWaveAuth.quickGuest();
+      if (result.success) {
+        updateReaderAuthState(result.user);
+        BeatWaveAuth.toast('Reader Access Verified ✓', 'You can now proceed with your order reservation.', 'success');
       }
     };
 
-    // Check reader authentication
-    try {
-      const localGuest = localStorage.getItem('bw_guest_session');
-      if (localGuest) {
-        const parsed = JSON.parse(localGuest);
-        if (parsed && parsed.user) updateReaderAuthState(parsed.user);
-      }
+    // Initialize reader authentication state
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentUser = BeatWaveAuth.getCurrentUser();
+      updateReaderAuthState(currentUser);
 
-      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
-        const client = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
-        client.auth.getSession().then(({ data: { session } }) => {
-          if (session && session.user) {
-            updateReaderAuthState(session.user);
-          } else if (!localGuest) {
-            updateReaderAuthState(null);
-          }
-        });
-      }
-    } catch(e) {
-      console.warn('Cart auth check error:', e);
-    }
+      BeatWaveAuth.onAuthStateChange(user => {
+        updateReaderAuthState(user);
+      });
+    });
 
     function copyUpiId() {
       const upi = "ghanshyamsharma.nlu@okicici";
       navigator.clipboard.writeText(upi).then(() => {
-        if (window.notifyUser) window.notifyUser('UPI ID Copied 📋', `${upi} copied to clipboard!`, 'success');
-        else alert('UPI ID copied: ' + upi);
+        BeatWaveAuth.toast('UPI ID Copied 📋', `${upi} copied to clipboard!`, 'success');
       }).catch(() => {
-        if (window.notifyUser) window.notifyUser('UPI ID 📋', upi, 'info');
+        BeatWaveAuth.toast('UPI ID 📋', upi, 'info');
       });
     }
 
     async function submitCartOrder() {
       if (!isReaderAuthenticated) {
-        if (window.notifyUser) {
-          window.notifyUser('Sign In Required 🔐', 'Please sign in or click "1-Click Continue as Reader" above to place an order.', 'warning');
-        } else {
-          alert('Please sign in or continue as reader to link this order.');
-        }
+        BeatWaveAuth.toast('Sign In Required 🔐', 'Please sign in or click "1-Click Continue as Reader" above to place an order.', 'warning');
         const gateBox = document.getElementById('cartAuthGateBox');
         if (gateBox) {
           gateBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -527,26 +499,20 @@
       const sender = document.getElementById('cartSenderName').value.trim() || name;
 
       if (!name || !email || !phone) {
-        if (window.notifyUser) window.notifyUser('Missing Details', 'Please fill your name, email, and phone number.', 'warning');
-        else alert('Please fill your name, email, and phone number.');
-        return;
-      }
-      if (activeTier === 'print' && !address) {
-        if (window.notifyUser) window.notifyUser('Address Required', 'Please provide your shipping delivery address with PIN code.', 'warning');
-        else alert('Please provide your shipping delivery address with PIN code.');
+        BeatWaveAuth.toast('Missing Details', 'Please fill your name, email, and phone number.', 'warning');
         return;
       }
 
       const orderId = 'BW-' + Math.floor(100000 + Math.random() * 900000);
-      const amount = activeTier === 'print' ? 290 : 150;
-      const tierName = activeTier === 'print' ? "Collector's Printed Copy" : "Digital E-Book Edition";
+      const amount = 150;
+      const tierName = "Digital E-Book Edition";
 
       const orderData = {
         id: orderId,
         customer_name: name,
         email: email,
         phone: phone,
-        tier_id: activeTier,
+        tier_id: 'ebook',
         tier_name: tierName,
         amount: amount,
         delivery_address: address || 'N/A (Digital)',
@@ -556,22 +522,8 @@
         created_at: new Date().toISOString()
       };
 
-      if (window.notifyUser) {
-        window.notifyUser('Order Placed! 🚀', `Order reference ${orderId} saved to live database.`, 'success');
-      }
-
-      // Push to Supabase
-      try {
-        if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
-          const client = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
-          await client.from('book_orders').insert([orderData]);
-        }
-      } catch(e) {
-        console.warn('Saved order locally:', e.message);
-      }
-
-      // Save active order locally
-      localStorage.setItem('bw_last_order', JSON.stringify(orderData));
+      BeatWaveAuth.toast('Order Placed! 🚀', `Order reference ${orderId} saved.`, 'success');
+      await BeatWaveAuth.saveOrder(orderData);
 
       // Redirect to Thank You Page
       setTimeout(() => {

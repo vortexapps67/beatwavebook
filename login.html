@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Authentication — The Story of BeatWave</title>
+  <title>Reader Account — The Story of BeatWave</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,7 @@
   <link rel="icon" type="image/png" href="beatwave new new.png">
   <link rel="apple-touch-icon" href="beatwave new new.png">
 
+  <!-- Style Sheet -->
   <link rel="stylesheet" href="styles.css?v=2.6">
   <style>
     #particleCanvas, .ambient-bg-wrapper, .ambient-glow-orb {
@@ -24,74 +25,20 @@
       pointer-events: none !important;
       z-index: 0 !important;
     }
-    .liquid-nav-container {
-      pointer-events: none !important;
-    }
-    .liquid-glass-nav {
-      pointer-events: auto !important;
-    }
-    .subpage-wrapper, .auth-container, .auth-tabs, .auth-subtabs, .auth-tab-btn, .auth-subtab-btn, form, input, button, a {
-      pointer-events: auto !important;
-    }
-    .auth-tab-btn, .auth-subtab-btn, button, a, [onclick] {
-      cursor: pointer !important;
+    .liquid-nav-container { pointer-events: none !important; }
+    .liquid-glass-nav { pointer-events: auto !important; }
+    .subpage-wrapper, .auth-container, form, input, button, a { pointer-events: auto !important; }
+    button, a, [onclick] { cursor: pointer !important; }
+
+    .auth-glass-box {
+      background: rgba(18, 16, 32, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
   </style>
-  <script>
-    // Immediate Global Tab Switching (Available instantaneously before any sub-script loads)
-    function switchReaderMode(mode) {
-      try {
-        var signInBtn = document.getElementById('subTabSignInBtn');
-        var signUpBtn = document.getElementById('subTabSignUpBtn');
-        var signInForm = document.getElementById('signInForm');
-        var signUpForm = document.getElementById('signUpForm');
-        var authNotice = document.getElementById('authNotice');
-        var forgotPasswordBox = document.getElementById('forgotPasswordBox');
-
-        if (mode === 'signup') {
-          if (signInBtn) signInBtn.classList.remove('is-active');
-          if (signUpBtn) signUpBtn.classList.add('is-active');
-          if (signInForm) signInForm.style.display = 'none';
-          if (signUpForm) signUpForm.style.display = 'block';
-        } else {
-          if (signUpBtn) signUpBtn.classList.remove('is-active');
-          if (signInBtn) signInBtn.classList.add('is-active');
-          if (signUpForm) signUpForm.style.display = 'none';
-          if (signInForm) signInForm.style.display = 'block';
-        }
-        if (authNotice) authNotice.style.display = 'none';
-        if (forgotPasswordBox) forgotPasswordBox.style.display = 'none';
-      } catch(e) {
-        console.error('switchReaderMode error:', e);
-      }
-    }
-    window.switchReaderMode = switchReaderMode;
-
-    function switchAuthTab(tab) {
-      if (tab === 'admin') {
-        window.location.href = 'admin.html';
-        return;
-      }
-      try {
-        var tabReaderBtn = document.getElementById('tabReaderBtn');
-        var tabAdminBtn = document.getElementById('tabAdminBtn');
-        var readerAuthView = document.getElementById('readerAuthView');
-        var adminAuthView = document.getElementById('adminAuthView');
-        var authNotice = document.getElementById('authNotice');
-        var resendConfirmCard = document.getElementById('resendConfirmCard');
-
-        if (tabReaderBtn) tabReaderBtn.classList.add('is-active');
-        if (tabAdminBtn) tabAdminBtn.classList.remove('is-active');
-        if (readerAuthView) readerAuthView.style.display = 'block';
-        if (adminAuthView) adminAuthView.style.display = 'none';
-        if (authNotice) authNotice.style.display = 'none';
-        if (resendConfirmCard) resendConfirmCard.style.display = 'none';
-      } catch(e) {
-        console.error('switchAuthTab error:', e);
-      }
-    }
-    window.switchAuthTab = switchAuthTab;
-  </script>
 </head>
 <body>
   <!-- Animated Background Layer -->
@@ -164,266 +111,198 @@
     </nav>
   </header>
 
-  <main class="subpage-wrapper">
-    <div class="container" style="max-width: 820px;">
-      <div class="auth-container">
-        <!-- Master Auth Tabs: Reader Account vs Admin Portal -->
-        <div class="auth-tabs">
-          <button type="button" class="auth-tab-btn is-active" id="tabReaderBtn" onclick="window.switchAuthTab('reader')">
-            Reader Account
-          </button>
-          <button type="button" class="auth-tab-btn" id="tabAdminBtn" onclick="window.switchAuthTab('admin')">
-            Author Admin
-          </button>
-        </div>
-
-        <!-- Rate Limit Alert Card -->
-        <div class="rate-limit-card" id="rateLimitCard">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div>
-            <strong>Too many attempts.</strong>
-            <div style="font-size: 0.78rem;">Please wait <span id="rateLimitTimer" style="font-weight: 800; font-family: var(--font-mono);">60</span>s before trying again.</div>
-          </div>
-        </div>
-
-        <!-- Notification Banner -->
-        <div id="authNotice" style="display: none; padding: 14px; border-radius: var(--radius-md); font-size: 0.86rem; line-height: 1.45;"></div>
-
-        <!-- Resend Verification Card (Displayed if Email Not Confirmed) -->
-        <div id="resendConfirmCard" class="resend-box" style="display: none;">
-          <div><strong>Email Verification Required</strong></div>
-          <p id="resendPromptText" style="margin: 0; color: var(--color-ink-muted);">Please check your inbox &amp; spam folder to confirm your reader account.</p>
-          <button type="button" id="btnResendEmail" class="btn-secondary" style="padding: 6px 16px; font-size: 0.8rem; margin-top: 6px;" onclick="handleResendConfirmation()">
-            <span>Resend Confirmation Email</span>
-          </button>
-        </div>
-
+  <main class="subpage-wrapper" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
+    <div class="container" style="max-width: 780px;">
+      
+      <div class="auth-glass-box">
+        
         <!-- ============================================ -->
-        <!-- TAB 1: READER ACCOUNT VIEW                  -->
+        <!-- VIEW 1: AUTHENTICATED READER PROFILE & ORDERS -->
         <!-- ============================================ -->
-        <div id="readerAuthView">
-          
-          <!-- STATE A: Authenticated Reader Profile Card & Orders -->
-          <div id="readerProfileView" style="display: none;">
-            <div class="reader-profile-card">
-              <div class="reader-avatar-circle" id="profileAvatar">R</div>
-              <div class="reader-profile-info">
-                <h3 id="profileName" style="font-size: 1.3rem; margin: 0;">Reader</h3>
-                <span id="profileEmail" style="font-size: 0.85rem; color: var(--color-ink-muted); font-family: var(--font-mono);">reader@email.com</span>
-                <span class="reader-badge-verified">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                  Verified Reader
-                </span>
-              </div>
-
-              <div class="reader-profile-actions">
-                <a href="index.html" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-purple)); color: #000; font-weight: 800;">
-                  <span>Enter Story &amp; Read Book &rarr;</span>
-                </a>
-                <a href="cart.html" class="btn-secondary" style="width: 100%; justify-content: center;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                  <span>Order Another Edition</span>
-                </a>
-                <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; color: var(--color-accent-red); border-color: rgba(255, 80, 80, 0.25);" onclick="handleSignOut()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                  <span>Sign Out / Switch Account</span>
-                </button>
-              </div>
+        <div id="readerProfileView" style="display: none;">
+          <div class="reader-profile-card">
+            <div class="reader-avatar-circle" id="profileAvatar">R</div>
+            <div class="reader-profile-info">
+              <h2 id="profileName" style="font-size: 1.4rem; margin: 0;">Reader</h2>
+              <span id="profileEmail" style="font-size: 0.85rem; color: var(--color-ink-muted); font-family: var(--font-mono);">reader@email.com</span>
+              <span class="reader-badge-verified">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                Verified Reader
+              </span>
             </div>
 
-            <!-- Reader's Active Orders & Book Downloads Section -->
-            <div class="reader-orders-container" id="readerOrdersContainer" style="margin-top: var(--space-xl);">
-              <div class="reader-orders-header">
-                <div>
-                  <h4 style="font-size: 1.15rem; margin: 0; color: #fff;">My Book Orders &amp; Downloads</h4>
-                  <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin: 0;">Instant access to purchased editions &amp; shipping dispatch</p>
-                </div>
-                <button type="button" onclick="loadReaderOrders()" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                  <span>Refresh Orders</span>
-                </button>
-              </div>
-              <div id="readerOrdersList" class="reader-orders-grid">
-                <div style="text-align: center; padding: var(--space-lg); color: var(--color-ink-faint); font-size: 0.85rem;">
-                  Loading your orders...
-                </div>
-              </div>
+            <div class="reader-profile-actions">
+              <a href="index.html" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-purple)); color: #000; font-weight: 800;">
+                <span>Enter Story &amp; Read Book &rarr;</span>
+              </a>
+              <a href="cart.html" class="btn-secondary" style="width: 100%; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span>Order Another Edition</span>
+              </a>
+              <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; color: var(--color-accent-red); border-color: rgba(255, 80, 80, 0.25);" onclick="handleSignOutClick()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Sign Out / Switch Account</span>
+              </button>
             </div>
           </div>
 
-          <!-- STATE B: Reader Forms (Sign In vs Sign Up) -->
-          <div id="readerFormsContainer">
-            <!-- Reader Sub-tabs: Sign In vs Sign Up -->
-            <div class="auth-subtabs">
-              <button type="button" class="auth-subtab-btn is-active" id="subTabSignInBtn" onclick="window.switchReaderMode('signin')">Sign In</button>
-              <button type="button" class="auth-subtab-btn" id="subTabSignUpBtn" onclick="window.switchReaderMode('signup')">Create Account</button>
+          <!-- Reader's Active Orders & Book Downloads Section -->
+          <div class="reader-orders-container" style="margin-top: var(--space-xl);">
+            <div class="reader-orders-header">
+              <div>
+                <h3 style="font-size: 1.15rem; margin: 0; color: #fff;">My Book Orders &amp; Downloads</h3>
+                <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin: 0;">Instant access to purchased editions &amp; shipping dispatch</p>
+              </div>
+              <button type="button" onclick="renderReaderOrders()" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                <span>Refresh Orders</span>
+              </button>
             </div>
-
-            <!-- SUB-FORM 1: SIGN IN -->
-            <form id="signInForm" onsubmit="window.handleReaderSignIn(event)">
-              <div style="text-align: center; margin-bottom: var(--space-md);">
-                <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Welcome Back</h3>
-                <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Sign in to access your digital books and tracking ledger.</p>
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: var(--space-md);">
-                <div class="form-group">
-                  <label class="form-label" for="loginEmail">Email Address *</label>
-                  <input type="email" id="loginEmail" class="form-input" placeholder="e.g. reader@gmail.com" required autocomplete="email">
-                </div>
-
-                <div class="form-group">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label class="form-label" for="loginPassword">Password *</label>
-                    <button type="button" onclick="window.toggleForgotPasswordBox(true)" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.76rem; cursor: pointer; padding: 0;">
-                      Forgot Password?
-                    </button>
-                  </div>
-                  <div class="password-field-wrap">
-                    <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required minlength="6" autocomplete="current-password">
-                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('loginPassword', this)" title="Show / Hide Password">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <button type="submit" id="btnSubmitSignIn" class="btn-primary" style="width: 100%; margin-top: 4px;">
-                  <span>Sign In to BeatWave</span>
-                </button>
-
-                <!-- Quick 1-Click Guest Reader Button -->
-                <button type="button" onclick="window.quickGuestLogin()" class="btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(0, 242, 254, 0.3); color: var(--color-accent-cyan); font-weight: 600;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  <span>Instant Guest Reader &rarr;</span>
-                </button>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
-                  <button type="button" onclick="window.handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; padding: 0;">
-                    Send Magic Link
-                  </button>
-                  <button type="button" onclick="window.switchReaderMode('signup')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
-                    New reader? <span style="color: #fff; text-decoration: underline;">Create Account</span>
-                  </button>
-                </div>
-
-                <div style="text-align: center; margin-top: 8px;">
-                  <a href="index.html" style="color: var(--color-ink-muted); font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                    &larr; <span>Skip &amp; Read Book on Homepage</span>
-                  </a>
-                </div>
-              </div>
-            </form>
-
-            <!-- SUB-FORM 2: CREATE ACCOUNT (SIGN UP) -->
-            <form id="signUpForm" style="display: none;" onsubmit="window.handleReaderSignUp(event)">
-              <div style="text-align: center; margin-bottom: var(--space-md);">
-                <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Create Reader Account</h3>
-                <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Join readers worldwide exploring the true story of BeatWave.</p>
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: var(--space-md);">
-                <div class="form-group">
-                  <label class="form-label" for="signUpName">Full Name *</label>
-                  <input type="text" id="signUpName" class="form-input" placeholder="e.g. Rahul Sharma" required autocomplete="name">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="signUpEmail">Email Address *</label>
-                  <input type="email" id="signUpEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required autocomplete="email">
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="signUpPassword">Choose Password (min 6 chars) *</label>
-                  <div class="password-field-wrap">
-                    <input type="password" id="signUpPassword" class="form-input" placeholder="Create a secure password" required minlength="6" autocomplete="new-password">
-                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('signUpPassword', this)" title="Show / Hide Password">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="signUpConfirmPassword">Confirm Password *</label>
-                  <div class="password-field-wrap">
-                    <input type="password" id="signUpConfirmPassword" class="form-input" placeholder="Re-enter password" required minlength="6" autocomplete="new-password">
-                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('signUpConfirmPassword', this)" title="Show / Hide Password">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div style="font-size: 0.74rem; color: var(--color-ink-faint); line-height: 1.4;">
-                  &bull; A Supabase verification email will be dispatched to verify your account address.
-                </div>
-
-                <button type="submit" id="btnSubmitSignUp" class="btn-primary" style="width: 100%;">
-                  <span>Create Free Account</span>
-                </button>
-
-                <div style="text-align: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
-                  <button type="button" onclick="window.switchReaderMode('signin')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
-                    Already have an account? <span style="color: var(--color-accent-cyan); text-decoration: underline;">Sign In</span>
-                  </button>
-                </div>
-
-                <div style="text-align: center; margin-top: 4px;">
-                  <a href="index.html" style="color: var(--color-ink-muted); font-size: 0.78rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                    &larr; <span>Skip &amp; Read Book on Homepage</span>
-                  </a>
-                </div>
-              </div>
-            </form>
-
-            <!-- SUB-FORM 3: FORGOT PASSWORD BOX -->
-            <div id="forgotPasswordBox" style="display: none; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: var(--radius-lg); padding: var(--space-md); margin-top: var(--space-md);">
-              <h4 style="font-size: 0.95rem; margin-bottom: 6px; color: var(--color-accent-cyan);">Reset Reader Password</h4>
-              <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin-bottom: var(--space-sm);">Enter your email address and we'll dispatch a secure recovery link.</p>
-              <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
-                <input type="email" id="resetEmail" class="form-input" placeholder="Your registered email address">
-                <div style="display: flex; gap: var(--space-xs); margin-top: 4px;">
-                  <button type="button" class="btn-primary" style="flex: 1; padding: 8px;" onclick="handleResetPassword()">
-                    <span>Send Reset Link</span>
-                  </button>
-                  <button type="button" class="btn-secondary" style="padding: 8px 12px;" onclick="toggleForgotPasswordBox(false)">
-                    <span>Cancel</span>
-                  </button>
-                </div>
-              </div>
+            <div id="readerOrdersList" class="reader-orders-grid" style="margin-top: var(--space-md);">
+              <!-- Rendered via JS -->
             </div>
-
           </div>
         </div>
 
         <!-- ============================================ -->
-        <!-- TAB 2: AUTHOR ADMIN PORTAL                  -->
+        <!-- VIEW 2: READER AUTHENTICATION FORMS          -->
         <!-- ============================================ -->
-        <div id="adminAuthView" style="display: none;">
-          <div style="text-align: center; margin-bottom: var(--space-md);">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); color: var(--color-accent-cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-xs); box-shadow: 0 0 20px rgba(0,242,254,0.2);">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Author Admin Portal</h3>
-            <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Enter master password to access live Supabase order ledger and approve payments.</p>
+        <div id="readerFormsView">
+          <!-- Top Tab Switcher: Sign In vs Create Account -->
+          <div class="auth-subtabs" style="margin-bottom: var(--space-lg);">
+            <button type="button" class="auth-subtab-btn is-active" id="tabBtnSignIn" onclick="switchAuthMode('signin')">
+              Sign In
+            </button>
+            <button type="button" class="auth-subtab-btn" id="tabBtnSignUp" onclick="switchAuthMode('signup')">
+              Create Account
+            </button>
           </div>
 
-          <form id="adminAuthForm" onsubmit="handleAdminLogin(event)">
+          <!-- Notice Box -->
+          <div id="authNoticeBox" style="display: none; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: var(--space-md); line-height: 1.4;"></div>
+
+          <!-- 1. SIGN IN FORM -->
+          <form id="signInForm" onsubmit="handleSignInSubmit(event)">
+            <div style="text-align: center; margin-bottom: var(--space-md);">
+              <h2 style="font-size: 1.45rem; margin-bottom: 4px;">Welcome Back Reader</h2>
+              <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Sign in to access your digital book edition and live tracking.</p>
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: var(--space-md);">
               <div class="form-group">
-                <label class="form-label" for="adminPass">Master Password *</label>
+                <label class="form-label" for="loginEmail">Email Address *</label>
+                <input type="email" id="loginEmail" class="form-input" placeholder="e.g. reader@gmail.com" required autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label class="form-label" for="loginPassword">Password *</label>
+                  <button type="button" onclick="toggleForgotPassword(true)" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.76rem; cursor: pointer; padding: 0;">
+                    Forgot Password?
+                  </button>
+                </div>
                 <div class="password-field-wrap">
-                  <input type="password" id="adminPass" class="form-input" placeholder="Enter master password..." required autocomplete="current-password">
-                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('adminPass', this)" title="Show / Hide Password">
+                  <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required minlength="6" autocomplete="current-password">
+                  <button type="button" class="password-toggle-btn" onclick="toggleFieldPass('loginPassword', this)" title="Show / Hide Password">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
               </div>
 
-              <button type="submit" id="btnAdminSubmit" class="btn-primary" style="width: 100%;">
-                <span>Unlock Author Panel</span>
+              <button type="submit" id="btnSignInSubmit" class="btn-primary" style="width: 100%; margin-top: 4px; padding: 12px; font-weight: 800;">
+                <span>Sign In to BeatWave</span>
               </button>
+
+              <!-- 1-Click Instant Guest Login -->
+              <button type="button" onclick="handleGuestLoginClick()" class="btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(0, 242, 254, 0.3); color: var(--color-accent-cyan); font-weight: 600; padding: 10px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span>Instant Guest Reader &rarr;</span>
+              </button>
+
+              <div style="text-align: center; font-size: 0.8rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: var(--color-ink-muted);">Don't have an account yet?</span>
+                <button type="button" onclick="switchAuthMode('signup')" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; font-weight: 700; padding: 0 4px;">
+                  Create Free Account
+                </button>
+              </div>
+
+              <div style="text-align: center; margin-top: 2px;">
+                <a href="index.html" style="color: var(--color-ink-muted); font-size: 0.78rem; text-decoration: none;">
+                  &larr; Skip &amp; Read Book on Homepage
+                </a>
+              </div>
             </div>
           </form>
+
+          <!-- 2. SIGN UP FORM (CREATE ACCOUNT) -->
+          <form id="signUpForm" style="display: none;" onsubmit="handleSignUpSubmit(event)">
+            <div style="text-align: center; margin-bottom: var(--space-md);">
+              <h2 style="font-size: 1.45rem; margin-bottom: 4px;">Create Reader Account</h2>
+              <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Join readers worldwide exploring the true story of BeatWave.</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="form-group">
+                <label class="form-label" for="signUpName">Full Name *</label>
+                <input type="text" id="signUpName" class="form-input" placeholder="e.g. Rahul Sharma" required autocomplete="name">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signUpEmail">Email Address *</label>
+                <input type="email" id="signUpEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signUpPassword">Choose Password (min 6 chars) *</label>
+                <div class="password-field-wrap">
+                  <input type="password" id="signUpPassword" class="form-input" placeholder="Create a secure password" required minlength="6" autocomplete="new-password">
+                  <button type="button" class="password-toggle-btn" onclick="toggleFieldPass('signUpPassword', this)" title="Show / Hide Password">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signUpConfirmPassword">Confirm Password *</label>
+                <div class="password-field-wrap">
+                  <input type="password" id="signUpConfirmPassword" class="form-input" placeholder="Re-enter password" required minlength="6" autocomplete="new-password">
+                  <button type="button" class="password-toggle-btn" onclick="toggleFieldPass('signUpConfirmPassword', this)" title="Show / Hide Password">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="btnSignUpSubmit" class="btn-primary" style="width: 100%; margin-top: 4px; padding: 12px; font-weight: 800;">
+                <span>Create Free Account</span>
+              </button>
+
+              <div style="text-align: center; font-size: 0.8rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: var(--color-ink-muted);">Already have an account?</span>
+                <button type="button" onclick="switchAuthMode('signin')" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; font-weight: 700; padding: 0 4px;">
+                  Sign In
+                </button>
+              </div>
+
+              <div style="text-align: center; margin-top: 2px;">
+                <a href="index.html" style="color: var(--color-ink-muted); font-size: 0.78rem; text-decoration: none;">
+                  &larr; Skip &amp; Read Book on Homepage
+                </a>
+              </div>
+            </div>
+          </form>
+
+          <!-- 3. FORGOT PASSWORD DRAWER -->
+          <div id="forgotPassBox" style="display: none; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: var(--radius-lg); padding: var(--space-md); margin-top: var(--space-md);">
+            <h4 style="font-size: 0.95rem; margin-bottom: 4px; color: var(--color-accent-cyan);">Reset Password</h4>
+            <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin-bottom: var(--space-sm);">Enter your registered email to receive a recovery link.</p>
+            <div style="display: flex; gap: var(--space-xs);">
+              <input type="email" id="resetPassEmail" class="form-input" placeholder="Your registered email address" style="flex: 1;">
+              <button type="button" class="btn-primary" onclick="handleResetPassClick()" style="padding: 8px 14px; font-size: 0.8rem;">Send Link</button>
+              <button type="button" class="btn-secondary" onclick="toggleForgotPassword(false)" style="padding: 8px 12px; font-size: 0.8rem;">Cancel</button>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </main>
@@ -432,7 +311,7 @@
   <footer class="footer-statement">
     <div class="container">
       <div class="footer-grid">
-        <!-- Brand / Story Column -->
+        <!-- Brand Column -->
         <div class="footer-col footer-col-brand">
           <a href="index.html" class="footer-brand-header">
             <img src="beatwave new new.png" alt="BeatWave Logo" class="footer-logo">
@@ -441,13 +320,8 @@
           <p class="footer-tagline">
             The untold journey of three high school friends building India's premier ad-free open-source music streaming app.
           </p>
-          <p class="footer-subquote">
-            &ldquo;The instrument is open. The code is transparent. The story is yours to read.&rdquo;
-          </p>
           <div class="footer-badges">
-            <span class="footer-badge">
-              <span class="footer-badge-dot"></span> Open Source FOSS
-            </span>
+            <span class="footer-badge"><span class="footer-badge-dot"></span> Open Source FOSS</span>
             <span class="footer-mii-badge">
               <img src="Make_In_India.png" alt="Make In India" class="footer-mii-logo" onerror="this.style.display='none'">
               <span>Made in India</span>
@@ -455,19 +329,19 @@
           </div>
         </div>
 
-        <!-- Quick Links Column -->
+        <!-- Quick Links -->
         <div class="footer-col">
           <h4 class="footer-col-title">Quick Links</h4>
           <ul class="footer-links-list">
-            <li><a href="index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> <span>Home & Overview</span></a></li>
-            <li><a href="index.html#chapters"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> <span>Table of Contents</span></a></li>
-            <li><a href="cart.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> <span>Order Book & Cart</span></a></li>
-            <li><a href="track.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span>Track Live Order</span></a></li>
-            <li><a href="login.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span>Reader Account</span></a></li>
+            <li><a href="index.html">Home &amp; Overview</a></li>
+            <li><a href="cart.html">Order Book &amp; Cart</a></li>
+            <li><a href="track.html">Track Live Order</a></li>
+            <li><a href="login.html">Reader Account</a></li>
+            <li><a href="admin.html">Admin Dashboard</a></li>
           </ul>
         </div>
 
-        <!-- Developer Details Column (Vortex Apps) -->
+        <!-- Developer Details (Vortex Apps) -->
         <div class="footer-col">
           <h4 class="footer-col-title">Developer &amp; Creator</h4>
           <div class="footer-dev-card">
@@ -480,22 +354,14 @@
                 <span class="footer-dev-sub">Indie Software Studio</span>
               </div>
             </div>
-
             <div class="footer-dev-links">
               <a href="https://vortexapps.vercel.app" target="_blank" rel="noopener noreferrer" class="footer-dev-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span>vortexapps.vercel.app</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               </a>
-
               <a href="https://instagram.com/vortex.apps" target="_blank" rel="noopener noreferrer" class="footer-dev-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                 <span>@vortex.apps</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               </a>
-
               <a href="mailto:beatwave790@gmail.com" class="footer-dev-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 <span>beatwave790@gmail.com</span>
               </a>
             </div>
@@ -506,14 +372,10 @@
       <!-- Footer Bottom Bar -->
       <div class="footer-bottom-bar">
         <div class="footer-meta-copy">
-          <span>&copy; 2026 Vortex Apps &middot; BeatWave</span>
-          <span>&middot;</span>
-          <span>All Rights Reserved</span>
+          <span>&copy; 2026 Vortex Apps &middot; BeatWave &middot; All Rights Reserved</span>
         </div>
-
         <div class="footer-bottom-actions">
           <a href="https://github.com/vortexapps67/beatwavebook.git" target="_blank" rel="noopener noreferrer" class="footer-github-link">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
             <span>GitHub Repository</span>
           </a>
           <a href="admin.html" class="admin-lock-btn">
@@ -525,432 +387,128 @@
     </div>
   </footer>
 
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="bwToastContainer"></div>
+
+  <!-- Scripts -->
   <script src="config.js?v=2.6"></script>
+  <script src="auth.js?v=2.6"></script>
   <script>
-    // Safe Local Storage Wrapper (Prevents crashes in incognito/restricted contexts)
-    const safeStorage = {
-      get: function(key) {
-        try { return localStorage.getItem(key); } catch(e) { return null; }
-      },
-      set: function(key, val) {
-        try { localStorage.setItem(key, String(val)); } catch(e) {}
-      },
-      remove: function(key) {
-        try { localStorage.removeItem(key); } catch(e) {}
+    // 1. Tab Mode Switcher
+    function switchAuthMode(mode) {
+      const btnIn = document.getElementById('tabBtnSignIn');
+      const btnUp = document.getElementById('tabBtnSignUp');
+      const formIn = document.getElementById('signInForm');
+      const formUp = document.getElementById('signUpForm');
+      const notice = document.getElementById('authNoticeBox');
+      const forgot = document.getElementById('forgotPassBox');
+
+      if (mode === 'signup') {
+        if (btnIn) btnIn.classList.remove('is-active');
+        if (btnUp) btnUp.classList.add('is-active');
+        if (formIn) formIn.style.display = 'none';
+        if (formUp) formUp.style.display = 'block';
+      } else {
+        if (btnUp) btnUp.classList.remove('is-active');
+        if (btnIn) btnIn.classList.add('is-active');
+        if (formUp) formUp.style.display = 'none';
+        if (formIn) formIn.style.display = 'block';
       }
-    };
+      if (notice) notice.style.display = 'none';
+      if (forgot) forgot.style.display = 'none';
+    }
+    window.switchAuthMode = switchAuthMode;
+    window.switchReaderMode = switchAuthMode;
 
-    // 1. Tab & Sub-tab Handlers (Global + Window Scope)
-    window.switchReaderMode = function(mode) {
-      try {
-        const signInBtn = document.getElementById('subTabSignInBtn');
-        const signUpBtn = document.getElementById('subTabSignUpBtn');
-        const signInForm = document.getElementById('signInForm');
-        const signUpForm = document.getElementById('signUpForm');
-        const authNotice = document.getElementById('authNotice');
-        const forgotPasswordBox = document.getElementById('forgotPasswordBox');
-
-        if (mode === 'signup') {
-          if (signInBtn) signInBtn.classList.remove('is-active');
-          if (signUpBtn) signUpBtn.classList.add('is-active');
-          if (signInForm) signInForm.style.display = 'none';
-          if (signUpForm) signUpForm.style.display = 'block';
-        } else {
-          if (signUpBtn) signUpBtn.classList.remove('is-active');
-          if (signInBtn) signInBtn.classList.add('is-active');
-          if (signUpForm) signUpForm.style.display = 'none';
-          if (signInForm) signInForm.style.display = 'block';
-        }
-        if (authNotice) authNotice.style.display = 'none';
-        if (forgotPasswordBox) forgotPasswordBox.style.display = 'none';
-      } catch(err) {
-        console.error('switchReaderMode error:', err);
+    // Show/Hide Notice
+    function showNotice(msg, isSuccess = false) {
+      const box = document.getElementById('authNoticeBox');
+      if (!box) return;
+      box.innerHTML = msg;
+      box.style.display = 'block';
+      if (isSuccess) {
+        box.style.background = 'rgba(0, 255, 136, 0.12)';
+        box.style.border = '1px solid rgba(0, 255, 136, 0.35)';
+        box.style.color = '#00ff88';
+      } else {
+        box.style.background = 'rgba(255, 80, 80, 0.12)';
+        box.style.border = '1px solid rgba(255, 80, 80, 0.35)';
+        box.style.color = '#ff6060';
       }
-    };
-    function switchReaderMode(mode) { window.switchReaderMode(mode); }
-
-    window.switchAuthTab = function(tab) {
-      if (tab === 'admin') {
-        window.location.href = 'admin.html';
-        return;
-      }
-      try {
-        const tabReaderBtn = document.getElementById('tabReaderBtn');
-        const tabAdminBtn = document.getElementById('tabAdminBtn');
-        const readerAuthView = document.getElementById('readerAuthView');
-        const adminAuthView = document.getElementById('adminAuthView');
-        const authNotice = document.getElementById('authNotice');
-        const resendConfirmCard = document.getElementById('resendConfirmCard');
-
-        if (tabReaderBtn) tabReaderBtn.classList.add('is-active');
-        if (tabAdminBtn) tabAdminBtn.classList.remove('is-active');
-        if (readerAuthView) readerAuthView.style.display = 'block';
-        if (adminAuthView) adminAuthView.style.display = 'none';
-        if (authNotice) authNotice.style.display = 'none';
-        if (resendConfirmCard) resendConfirmCard.style.display = 'none';
-      } catch(err) {
-        console.error('switchAuthTab error:', err);
-      }
-    };
-    function switchAuthTab(tab) { window.switchAuthTab(tab); }
-
-    // 2. Audio-Visual Notification Suite
-    function playAudioCue(type) {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') ctx.resume();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        const now = ctx.currentTime;
-        if (type === 'success') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
-          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.22);
-          gain.gain.setValueAtTime(0.06, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-          osc.start(now);
-          osc.stop(now + 0.4);
-        } else if (type === 'error' || type === 'warning') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(320, now);
-          osc.frequency.exponentialRampToValueAtTime(220, now + 0.18);
-          gain.gain.setValueAtTime(0.06, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-          osc.start(now);
-          osc.stop(now + 0.22);
-        } else {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, now);
-          osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
-          gain.gain.setValueAtTime(0.05, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-          osc.start(now);
-          osc.stop(now + 0.28);
-        }
-      } catch(e) {}
     }
 
-    window.notifyUser = function(title, msg, type = 'info', duration = 4500) {
-      let container = document.getElementById('bwToastContainer');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'bwToastContainer';
-        document.body.appendChild(container);
+    // Toggle Password Visibility
+    function toggleFieldPass(id, btn) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+      } else {
+        input.type = 'password';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
       }
+    }
+    window.toggleFieldPass = toggleFieldPass;
 
-      const toast = document.createElement('div');
-      toast.className = `bw-toast bw-toast-${type}`;
-
-      let iconSymbol = '🌊';
-      if (type === 'success') iconSymbol = '✓';
-      else if (type === 'error') iconSymbol = '✕';
-      else if (type === 'warning') iconSymbol = '⚠';
-
-      toast.innerHTML = `
-        <div class="bw-toast-icon">${iconSymbol}</div>
-        <div class="bw-toast-content">
-          <div class="bw-toast-title">${title}</div>
-          ${msg ? `<div class="bw-toast-msg">${msg}</div>` : ''}
-        </div>
-        <button type="button" class="bw-toast-close" title="Dismiss">&times;</button>
-        <div class="bw-toast-progress" style="animation-duration: ${duration}ms;"></div>
-      `;
-
-      container.appendChild(toast);
-      playAudioCue(type);
-
-      const removeToast = () => {
-        if (toast.classList.contains('is-leaving')) return;
-        toast.classList.add('is-leaving');
-        setTimeout(() => {
-          if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 350);
-      };
-
-      const timer = setTimeout(removeToast, duration);
-      const closeBtn = toast.querySelector('.bw-toast-close');
-      if (closeBtn) {
-        closeBtn.onclick = () => {
-          clearTimeout(timer);
-          removeToast();
-        };
+    // Forgot Password Box Toggle
+    function toggleForgotPassword(show) {
+      const box = document.getElementById('forgotPassBox');
+      if (box) box.style.display = show ? 'block' : 'none';
+      if (show) {
+        const mail = document.getElementById('loginEmail')?.value || '';
+        const resetInput = document.getElementById('resetPassEmail');
+        if (resetInput && mail) resetInput.value = mail;
       }
-    };
+    }
+    window.toggleForgotPassword = toggleForgotPassword;
 
-    window.showNotice = function(msg, isSuccess = false) {
-      try {
-        const el = document.getElementById('authNotice');
-        if (el) {
-          el.innerHTML = msg;
-          el.style.display = 'block';
-          if (isSuccess) {
-            el.style.background = 'rgba(0, 255, 136, 0.12)';
-            el.style.border = '1px solid rgba(0, 255, 136, 0.35)';
-            el.style.color = '#00ff88';
-          } else {
-            el.style.background = 'rgba(255, 80, 80, 0.12)';
-            el.style.border = '1px solid rgba(255, 80, 80, 0.35)';
-            el.style.color = '#ff7070';
-          }
-        }
-      } catch(e) {}
-    };
+    // 2. Render Reader Profile State
+    function renderReaderUI(user) {
+      const profileView = document.getElementById('readerProfileView');
+      const formsView = document.getElementById('readerFormsView');
+      const navLink = document.getElementById('navAuthLink');
 
-    // 3. Password Field Visibility Toggle
-    window.togglePasswordVisibility = function(inputId, btn) {
-      try {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-        if (input.type === 'password') {
-          input.type = 'text';
-          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-        } else {
-          input.type = 'password';
-          btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-        }
-      } catch(e) {}
-    };
+      if (user && user.email) {
+        const name = (user.user_metadata && user.user_metadata.full_name) || user.name || user.email.split('@')[0];
+        const initial = (name.charAt(0) || 'R').toUpperCase();
 
-    // 4. Forgot Password Toggle
-    window.toggleForgotPasswordBox = function(show = true) {
-      try {
-        const box = document.getElementById('forgotPasswordBox');
-        if (!box) return;
-        box.style.display = show ? 'block' : 'none';
-        if (show) {
-          const loginEmail = (document.getElementById('loginEmail')?.value || '').trim() || safeStorage.get('bw_saved_email') || '';
-          const resetEmail = document.getElementById('resetEmail');
-          if (loginEmail && resetEmail) resetEmail.value = loginEmail;
-        }
-      } catch(e) {}
-    };
+        document.getElementById('profileName').innerText = name;
+        document.getElementById('profileEmail').innerText = user.email;
+        document.getElementById('profileAvatar').innerText = initial;
 
-    // 5. Initialize Supabase Client
-    let supabase = null;
-    try {
-      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined' && supabaseConfig.supabaseUrl) {
-        supabase = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
+        if (profileView) profileView.style.display = 'block';
+        if (formsView) formsView.style.display = 'none';
+        if (navLink) { navLink.innerText = 'My Account'; navLink.title = user.email; }
+
+        renderReaderOrders(user.email);
+      } else {
+        if (profileView) profileView.style.display = 'none';
+        if (formsView) formsView.style.display = 'block';
+        if (navLink) { navLink.innerText = 'Login'; }
       }
-    } catch(e) {
-      console.warn('Supabase initialization notice:', e);
     }
 
-    function getSafeRedirectUrl() {
-      try {
-        if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
-          return window.location.origin + window.location.pathname;
-        }
-      } catch (e) {}
-      return undefined;
-    }
-
-    // 6. Rate Limiter with safeStorage
-    let failedAttempts = parseInt(safeStorage.get('bw_failed_auth_attempts') || '0');
-    let lockoutUntil = parseInt(safeStorage.get('bw_auth_lockout_until') || '0');
-    let rateLimitTimerInterval = null;
-
-    function checkRateLimit() {
-      try {
-        const now = Date.now();
-        if (lockoutUntil && now < lockoutUntil) {
-          const remaining = Math.ceil((lockoutUntil - now) / 1000);
-          showRateLimitBanner(remaining);
-          return true;
-        } else if (lockoutUntil && now >= lockoutUntil) {
-          lockoutUntil = 0;
-          failedAttempts = 0;
-          safeStorage.remove('bw_auth_lockout_until');
-          safeStorage.set('bw_failed_auth_attempts', '0');
-          const card = document.getElementById('rateLimitCard');
-          if (card) card.style.display = 'none';
-          if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
-        }
-      } catch(e) {}
-      return false;
-    }
-
-    function recordFailedAttempt() {
-      try {
-        failedAttempts++;
-        safeStorage.set('bw_failed_auth_attempts', failedAttempts.toString());
-        if (failedAttempts >= 5) {
-          lockoutUntil = Date.now() + 60000;
-          safeStorage.set('bw_auth_lockout_until', lockoutUntil.toString());
-          showRateLimitBanner(60);
-        }
-      } catch(e) {}
-    }
-
-    function showRateLimitBanner(seconds) {
-      try {
-        const card = document.getElementById('rateLimitCard');
-        const timer = document.getElementById('rateLimitTimer');
-        if (card) card.style.display = 'flex';
-        if (timer) timer.innerText = seconds;
-
-        if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
-        rateLimitTimerInterval = setInterval(() => {
-          const now = Date.now();
-          const rem = Math.ceil((lockoutUntil - now) / 1000);
-          if (rem <= 0) {
-            clearInterval(rateLimitTimerInterval);
-            checkRateLimit();
-          } else if (timer) {
-            timer.innerText = rem;
-          }
-        }, 1000);
-      } catch(e) {}
-    }
-    checkRateLimit();
-
-    // 7. Instant Guest Reader Login
-    window.quickGuestLogin = function() {
-      try {
-        const guestUser = {
-          user: {
-            email: 'guest.reader@beatwave.io',
-            user_metadata: { full_name: 'Guest Reader' }
-          }
-        };
-        safeStorage.set('bw_guest_session', JSON.stringify(guestUser));
-        window.renderReaderSession(guestUser);
-        window.showNotice('Welcome Guest Reader! Redirecting to BeatWave...', true);
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 600);
-      } catch(e) {
-        console.warn('Guest login error:', e);
-      }
-    };
-
-    // 7b. Render Reader Profile if signed in
-    window.renderReaderSession = function(session) {
-      try {
-        const profileView = document.getElementById('readerProfileView');
-        const formsContainer = document.getElementById('readerFormsContainer');
-        const navAuthLink = document.getElementById('navAuthLink');
-        const resendConfirmCard = document.getElementById('resendConfirmCard');
-
-        const activeSession = session || (safeStorage.get('bw_guest_session') ? JSON.parse(safeStorage.get('bw_guest_session')) : null);
-
-        if (activeSession && activeSession.user) {
-          const user = activeSession.user;
-          const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
-          const initial = (name.charAt(0) || 'R').toUpperCase();
-
-          const pName = document.getElementById('profileName');
-          const pEmail = document.getElementById('profileEmail');
-          const pAvatar = document.getElementById('profileAvatar');
-          const btnTrack = document.getElementById('btnProfileTrack');
-
-          if (pName) pName.innerText = name;
-          if (pEmail) pEmail.innerText = user.email;
-          if (pAvatar) pAvatar.innerText = initial;
-          if (btnTrack) btnTrack.href = 'track.html?orderId=' + encodeURIComponent(user.email);
-
-          if (profileView) profileView.style.display = 'block';
-          if (formsContainer) formsContainer.style.display = 'none';
-          if (resendConfirmCard) resendConfirmCard.style.display = 'none';
-
-          if (navAuthLink) {
-            navAuthLink.innerText = 'My Account';
-            navAuthLink.title = user.email;
-          }
-
-          // Trigger live reader order load
-          window.loadReaderOrders(user.email);
-        } else {
-          if (profileView) profileView.style.display = 'none';
-          if (formsContainer) formsContainer.style.display = 'block';
-          if (navAuthLink) {
-            navAuthLink.innerText = 'Login';
-          }
-        }
-      } catch(e) {
-        console.error('renderReaderSession error:', e);
-      }
-    };
-
-    // 7c. Live Reader Orders & Instant Download Loader
-    window.loadReaderOrders = async function(overrideEmail) {
+    // 3. Render Reader Orders & Instant Download
+    async function renderReaderOrders(email) {
       const listContainer = document.getElementById('readerOrdersList');
       if (!listContainer) return;
 
-      let email = overrideEmail;
-      if (!email) {
-        const guest = safeStorage.get('bw_guest_session') ? JSON.parse(safeStorage.get('bw_guest_session')) : null;
-        if (guest && guest.user) email = guest.user.email;
-      }
-      if (!email && supabase) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session && session.user) email = session.user.email;
-        } catch(e) {}
-      }
+      const currentUser = BeatWaveAuth.getCurrentUser();
+      const queryEmail = email || (currentUser ? currentUser.email : '');
 
-      if (!email) {
-        listContainer.innerHTML = `<div style="text-align: center; padding: var(--space-lg); color: var(--color-ink-muted); font-size: 0.85rem;">Please sign in to view your orders.</div>`;
-        return;
-      }
+      if (!queryEmail) return;
 
-      listContainer.innerHTML = `
-        <div style="text-align: center; padding: var(--space-lg); color: var(--color-accent-cyan); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          <span>Fetching your live orders...</span>
-        </div>
-      `;
+      listContainer.innerHTML = `<div style="text-align: center; padding: var(--space-lg); color: var(--color-accent-cyan); font-size: 0.85rem;">Loading your orders...</div>`;
 
-      let orders = [];
-
-      // 1. Fetch from Supabase
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('book_orders')
-            .select('*')
-            .ilike('email', email)
-            .order('created_at', { ascending: false });
-
-          if (!error && Array.isArray(data)) {
-            orders = data;
-          }
-        } catch(e) {
-          console.warn('Supabase orders fetch error:', e);
-        }
-      }
-
-      // 2. Fetch local storage orders and merge
-      try {
-        const localAll = JSON.parse(safeStorage.get('bw_supabase_orders') || '[]');
-        const lastOrder = JSON.parse(safeStorage.get('bw_last_order') || 'null');
-        const localCandidates = [...localAll];
-        if (lastOrder) localCandidates.push(lastOrder);
-
-        const emailLower = email.toLowerCase().trim();
-        localCandidates.forEach(loc => {
-          if (loc && loc.id && ((loc.email && loc.email.toLowerCase().trim() === emailLower) || emailLower === 'guest.reader@beatwave.io')) {
-            if (!orders.some(o => o.id === loc.id)) {
-              orders.push(loc);
-            }
-          }
-        });
-      } catch(e) {}
-
-      // Sort by created_at desc
-      orders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      const orders = await BeatWaveAuth.getOrders(queryEmail);
 
       if (orders.length === 0) {
         listContainer.innerHTML = `
           <div style="text-align: center; padding: var(--space-xl) var(--space-md); background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: var(--radius-lg);">
             <div style="font-size: 2rem; margin-bottom: 8px; opacity: 0.7;">📖</div>
-            <h5 style="font-size: 1rem; color: #fff; margin-bottom: 4px;">No Orders Found for ${email}</h5>
-            <p style="font-size: 0.8rem; color: var(--color-ink-muted); margin-bottom: var(--space-md); max-width: 400px; margin-left: auto; margin-right: auto;">
+            <h4 style="font-size: 1rem; color: #fff; margin-bottom: 4px;">No Orders Found for ${queryEmail}</h4>
+            <p style="font-size: 0.8rem; color: var(--color-ink-muted); margin-bottom: var(--space-md);">
               You haven't ordered an edition yet, or your order was placed with another email address.
             </p>
             <a href="cart.html" class="btn-primary" style="display: inline-flex; padding: 8px 20px; font-size: 0.82rem; text-decoration: none;">
@@ -971,16 +529,16 @@
         if (isVerified) {
           badgeClass = 'status-verified';
           badgeLabel = status === 'SHIPPED' ? 'Shipped & Live' : (status === 'DELIVERED' ? 'Delivered' : 'Paid & Verified');
-        } else if (status === 'REJECTED' || status === 'CANCELLED') {
+        } else if (status === 'CANCELLED' || status === 'REJECTED') {
           badgeClass = 'status-rejected';
           badgeLabel = 'Cancelled';
         }
 
         return `
-          <div class="reader-order-card" style="background: rgba(18, 16, 32, 0.75); border: 1px solid ${isVerified ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 255, 255, 0.08)'}; border-radius: var(--radius-lg); padding: var(--space-md); margin-bottom: var(--space-sm); position: relative; overflow: hidden; backdrop-filter: blur(12px);">
+          <div class="reader-order-card" style="background: rgba(18, 16, 32, 0.75); border: 1px solid ${isVerified ? 'rgba(0, 255, 136, 0.35)' : 'rgba(255, 255, 255, 0.08)'}; border-radius: var(--radius-lg); padding: var(--space-md); margin-bottom: var(--space-sm); position: relative; overflow: hidden; backdrop-filter: blur(12px);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
               <div>
-                <span style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--color-ink-faint); letter-spacing: 0.05em;">ORDER ID</span>
+                <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-ink-faint); letter-spacing: 0.05em;">ORDER ID</span>
                 <div style="font-family: var(--font-mono); font-size: 1.05rem; font-weight: 800; color: var(--color-accent-cyan);">${order.id || 'BW-ORDER'}</div>
                 <div style="font-size: 0.72rem; color: var(--color-ink-muted); margin-top: 2px;">Placed on ${formattedDate}</div>
               </div>
@@ -989,10 +547,10 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); margin-bottom: 12px; font-size: 0.82rem;">
               <div>
-                <span style="color: #fff; font-weight: 700;">${order.tier_name || 'BeatWave Book Edition'}</span>
+                <span style="color: #fff; font-weight: 700;">${order.tier_name || order.tier_id || 'Digital E-Book Edition'}</span>
                 ${order.payment_method ? `<span style="color: var(--color-ink-muted); font-size: 0.72rem; margin-left: 6px;">(${order.payment_method})</span>` : ''}
               </div>
-              <div style="font-family: var(--font-mono); font-weight: 800; color: #fff;">&#8377;${order.amount || 150}</div>
+              <div style="font-family: var(--font-mono); font-weight: 800; color: #fff;">₹${order.amount || 150}</div>
             </div>
 
             ${isVerified ? `
@@ -1019,527 +577,171 @@
           </div>
         `;
       }).join('');
-    };
+    }
+    window.renderReaderOrders = renderReaderOrders;
+    window.loadReaderOrders = renderReaderOrders;
 
-    // 8. Frictionless Sign In Handler
-    window.handleReaderSignIn = async function(e) {
+    // 4. Form Handlers
+    async function handleSignInSubmit(e) {
       if (e) e.preventDefault();
-
-      const emailInput = document.getElementById('loginEmail');
-      const passInput = document.getElementById('loginPassword');
-      const email = emailInput?.value.trim();
-      const password = passInput?.value;
+      const email = document.getElementById('loginEmail')?.value.trim();
+      const password = document.getElementById('loginPassword')?.value;
+      const btn = document.getElementById('btnSignInSubmit');
 
       if (!email || !password) {
-        window.showNotice('Please enter both your email address and password.');
-        window.notifyUser('Required Fields', 'Please enter both your email address and password.', 'warning');
+        showNotice('Please enter your email and password.');
         return;
       }
 
-      const submitBtn = document.getElementById('btnSubmitSignIn');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Verifying Account...';
-      }
+      if (btn) { btn.disabled = true; btn.innerText = 'Verifying Account...'; }
 
-      let authenticatedSession = null;
-      let userName = safeStorage.get('bw_saved_name') || email.split('@')[0];
+      const result = await BeatWaveAuth.signIn(email, password);
 
-      // Try Supabase auth
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (!error && data && data.session) {
-            authenticatedSession = data.session;
-            if (data.session.user && data.session.user.user_metadata && data.session.user.user_metadata.full_name) {
-              userName = data.session.user.user_metadata.full_name;
-            }
-          } else if (error) {
-            const errMsg = (error.message || '').toLowerCase();
-            // If email not confirmed or rate-limited or existing user, still gracefully authenticate reader!
-            if (errMsg.includes('confirm') || errMsg.includes('rate limit') || error.code === 'email_not_confirmed' || error.status === 429) {
-              console.log('Allowing unconfirmed/rate-limited reader direct access:', email);
-              authenticatedSession = {
-                user: {
-                  id: (data && data.user && data.user.id) || ('usr_' + Math.random().toString(36).substring(2, 9)),
-                  email: email,
-                  user_metadata: { full_name: userName }
-                }
-              };
-            }
-          }
-        } catch(err) {
-          console.warn('Supabase sign-in catch:', err);
-        }
-      }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<span>Sign In to BeatWave</span>'; }
 
-      // Fallback: If Supabase was offline or returned credential mismatch during local dev, check local stored account
-      if (!authenticatedSession) {
-        const localAccounts = JSON.parse(safeStorage.get('bw_local_users') || '{}');
-        if (localAccounts[email]) {
-          userName = localAccounts[email].name || userName;
-          authenticatedSession = {
-            user: {
-              id: localAccounts[email].id || ('usr_' + Math.random().toString(36).substring(2, 9)),
-              email: email,
-              user_metadata: { full_name: userName }
-            }
-          };
-        } else {
-          // Direct frictionless reader login fallback
-          authenticatedSession = {
-            user: {
-              id: 'usr_' + Math.random().toString(36).substring(2, 9),
-              email: email,
-              user_metadata: { full_name: userName }
-            }
-          };
-        }
-      }
+      if (result.success) {
+        BeatWaveAuth.toast('Welcome Back! 👋', `Signed in as ${result.user.email}`, 'success');
+        showNotice('Signed In Successfully! Redirecting...', true);
+        renderReaderUI(result.user);
 
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
-      }
-
-      // Persist session
-      safeStorage.set('bw_guest_session', JSON.stringify(authenticatedSession));
-      safeStorage.set('bw_saved_email', email);
-      safeStorage.set('bw_saved_name', userName);
-
-      window.showNotice('Signed In Successfully! Loading your reader profile...', true);
-      window.notifyUser('Welcome Back! 👋', `Signed in as ${userName} (${email}).`, 'success');
-      window.renderReaderSession(authenticatedSession);
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get('redirect') || 'index.html';
-      setTimeout(() => {
-        window.location.href = targetUrl.endsWith('.html') ? targetUrl : (targetUrl + '.html');
-      }, 700);
-    };
-
-    // 9. Instant 100% Reliable Sign Up Handler
-    window.handleReaderSignUp = async function(e) {
-      if (e) e.preventDefault();
-
-      const nameInput = document.getElementById('signUpName');
-      const emailInput = document.getElementById('signUpEmail');
-      const passInput = document.getElementById('signUpPassword');
-      const confirmInput = document.getElementById('signUpConfirmPassword');
-
-      const name = nameInput?.value.trim();
-      const email = emailInput?.value.trim();
-      const password = passInput?.value;
-      const confirmPass = confirmInput?.value;
-
-      if (!name) {
-        window.showNotice('Please enter your full name.');
-        window.notifyUser('Missing Name', 'Please enter your full name.', 'warning');
-        return;
-      }
-      if (!email || !email.includes('@')) {
-        window.showNotice('Please enter a valid email address.');
-        window.notifyUser('Invalid Email', 'Please enter a valid email address.', 'warning');
-        return;
-      }
-      if (!password || password.length < 6) {
-        window.showNotice('Password must be at least 6 characters long.');
-        window.notifyUser('Short Password', 'Password must be at least 6 characters long.', 'warning');
-        return;
-      }
-      if (password !== confirmPass) {
-        window.showNotice('Passwords do not match. Please verify both password fields.');
-        window.notifyUser('Password Mismatch', 'Passwords do not match.', 'error');
-        return;
-      }
-
-      const submitBtn = document.getElementById('btnSubmitSignUp');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Creating Reader Account...';
-      }
-
-      let createdSession = null;
-      let remoteUserId = null;
-
-      // Register with Supabase
-      if (supabase) {
-        try {
-          const redirectUrl = getSafeRedirectUrl();
-          const signUpOptions = { data: { full_name: name } };
-          if (redirectUrl) signUpOptions.emailRedirectTo = redirectUrl;
-
-          const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: signUpOptions
-          });
-
-          if (!error && data) {
-            if (data.session) createdSession = data.session;
-            if (data.user && data.user.id) remoteUserId = data.user.id;
-          }
-        } catch(err) {
-          console.warn('Supabase sign up warning:', err);
-        }
-      }
-
-      // Ensure active reader session is ALWAYS created instantly
-      if (!createdSession) {
-        createdSession = {
-          user: {
-            id: remoteUserId || ('usr_' + Math.random().toString(36).substring(2, 9)),
-            email: email,
-            user_metadata: { full_name: name }
-          }
-        };
-      }
-
-      // Save to local registry so user is remembered
-      try {
-        const localAccounts = JSON.parse(safeStorage.get('bw_local_users') || '{}');
-        localAccounts[email] = { name: name, id: createdSession.user.id, email: email };
-        safeStorage.set('bw_local_users', JSON.stringify(localAccounts));
-      } catch(e) {}
-
-      // Try background profile upsert
-      if (supabase && createdSession.user.id) {
-        try {
-          supabase.from('profiles').upsert({
-            id: createdSession.user.id,
-            email: email,
-            full_name: name,
-            updated_at: new Date().toISOString()
-          }).then(() => {}).catch(() => {});
-        } catch(e) {}
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Create Free Account</span>';
-      }
-
-      safeStorage.set('bw_guest_session', JSON.stringify(createdSession));
-      safeStorage.set('bw_saved_email', email);
-      safeStorage.set('bw_saved_name', name);
-
-      window.showNotice(`Welcome to BeatWave, ${name}! Your account is ready.`, true);
-      window.notifyUser('Account Created! 🎉', `Welcome ${name}! Entering story...`, 'success');
-      window.renderReaderSession(createdSession);
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetUrl = urlParams.get('redirect') || 'index.html';
-      setTimeout(() => {
-        window.location.href = targetUrl.endsWith('.html') ? targetUrl : (targetUrl + '.html');
-      }, 700);
-    };
-
-    // 10. Resend Confirmation Email
-    let resendCooldown = 0;
-    window.handleResendConfirmation = async function() {
-      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail')?.value.trim() || document.getElementById('signUpEmail')?.value.trim() || safeStorage.get('bw_saved_email');
-      if (!email) {
-        window.showNotice('Please enter your email to resend confirmation.');
-        window.notifyUser('Missing Email', 'Please enter your email address.', 'warning');
-        return;
-      }
-      if (resendCooldown > 0) {
-        window.showNotice(`Please wait ${resendCooldown}s before requesting another confirmation email.`);
-        window.notifyUser('Cooldown Active', `Please wait ${resendCooldown}s before requesting again.`, 'warning');
-        return;
-      }
-
-      const resendBtn = document.getElementById('btnResendEmail');
-      if (resendBtn) {
-        resendBtn.disabled = true;
-        resendBtn.innerText = 'Dispatching...';
-      }
-
-      try {
-        const redirectUrl = getSafeRedirectUrl();
-        const resendOptions = {};
-        if (redirectUrl) {
-          resendOptions.emailRedirectTo = redirectUrl;
-        }
-
-        const { error } = await supabase.auth.resend({
-          type: 'signup',
-          email: email,
-          options: resendOptions
-        });
-
-        if (error) {
-          window.showNotice('Resend Notice: ' + error.message);
-          window.notifyUser('Resend Notice', error.message, 'error');
-          if (resendBtn) {
-            resendBtn.disabled = false;
-            resendBtn.innerText = 'Resend Confirmation Email';
-          }
-        } else {
-          window.showNotice('Fresh confirmation email dispatched to ' + email + '! Check your inbox.', true);
-          window.notifyUser('Email Dispatched ✉️', `Fresh verification link sent to ${email}!`, 'success');
-          resendCooldown = 60;
-          const cdInterval = setInterval(() => {
-            resendCooldown--;
-            if (resendCooldown <= 0) {
-              clearInterval(cdInterval);
-              if (resendBtn) {
-                resendBtn.disabled = false;
-                resendBtn.innerText = 'Resend Confirmation Email';
-              }
-            } else if (resendBtn) {
-              resendBtn.innerText = `Wait ${resendCooldown}s`;
-            }
-          }, 1000);
-        }
-      } catch(err) {
-        if (resendBtn) {
-          resendBtn.disabled = false;
-          resendBtn.innerText = 'Resend Confirmation Email';
-        }
-        window.showNotice('Error resending email: ' + err.message);
-        window.notifyUser('Error Resending Email', err.message, 'error');
-      }
-    };
-
-    // 11. Magic Link
-    window.handleSendMagicLink = async function() {
-      const email = document.getElementById('loginEmail')?.value.trim();
-      if (!email) {
-        window.showNotice('Please type your email address above to receive a Magic Login Link.');
-        window.notifyUser('Email Required', 'Type your email address above to get a Magic Link.', 'warning');
-        document.getElementById('loginEmail')?.focus();
-        return;
-      }
-      if (!supabase) return;
-
-      try {
-        const redirectUrl = getSafeRedirectUrl();
-        const otpOptions = {};
-        if (redirectUrl) {
-          otpOptions.emailRedirectTo = redirectUrl;
-        }
-
-        const { error } = await supabase.auth.signInWithOtp({
-          email: email,
-          options: otpOptions
-        });
-
-        if (error) {
-          window.showNotice('Magic Link Notice: ' + error.message);
-          window.notifyUser('Magic Link Notice', error.message, 'error');
-        } else {
-          window.showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
-          window.notifyUser('Magic Link Sent! ✉️', `Check ${email} to sign in with 1 tap.`, 'success');
-        }
-      } catch(err) {
-        window.showNotice('Error sending magic link: ' + err.message);
-        window.notifyUser('Magic Link Error', err.message, 'error');
-      }
-    };
-
-    // 12. Password Reset
-    window.handleResetPassword = async function() {
-      const email = document.getElementById('resetEmail')?.value.trim();
-      if (!email) {
-        window.notifyUser('Email Required', 'Please enter your registered email address.', 'warning');
-        return;
-      }
-      if (!supabase) return;
-
-      try {
-        const redirectUrl = getSafeRedirectUrl();
-        const resetOptions = {};
-        if (redirectUrl) {
-          resetOptions.redirectTo = redirectUrl;
-        }
-
-        const { error } = await supabase.auth.resetPasswordForEmail(email, resetOptions);
-
-        if (error) {
-          window.showNotice('Password Reset Notice: ' + error.message);
-          window.notifyUser('Reset Error', error.message, 'error');
-        } else {
-          window.showNotice('Password reset link sent to ' + email + '! Check your inbox.', true);
-          window.notifyUser('Reset Link Dispatched 🔑', `Password recovery link sent to ${email}!`, 'success');
-          window.toggleForgotPasswordBox(false);
-        }
-      } catch(err) {
-        window.showNotice('Error resetting password: ' + err.message);
-        window.notifyUser('Reset Error', err.message, 'error');
-      }
-    };
-
-    // 13. Sign Out
-    window.handleSignOut = async function() {
-      try {
-        safeStorage.remove('bw_guest_session');
-        if (supabase) {
-          await supabase.auth.signOut();
-        }
-        window.renderReaderSession(null);
-        window.showNotice('You have been signed out cleanly.', true);
-        window.notifyUser('Signed Out 👋', 'You have been signed out cleanly. See you soon!', 'info');
-      } catch(e) {
-        console.warn('Sign out err:', e);
-        window.renderReaderSession(null);
-      }
-    };
-
-    // 14. Admin Auth
-    async function verifyAdminSecret(pass) {
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.rpc('verify_admin_access', { pass_attempt: pass });
-          if (!error && typeof data === 'boolean') return data;
-        } catch(e) {}
-      }
-      try {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
-        const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        return hash === '006657998771eb1ef75d0a26f8824af99da8bf4f7261d3a4d896708286a618eb';
-      } catch(e) {
-        return false;
-      }
-    }
-
-    window.handleAdminLogin = async function(e) {
-      if (e) e.preventDefault();
-      if (checkRateLimit()) return;
-
-      const pass = document.getElementById('adminPass')?.value.trim();
-      const isValid = await verifyAdminSecret(pass);
-
-      if (isValid) {
-        try { sessionStorage.setItem('bw_admin_auth', 'true'); } catch(e) {}
-        window.showNotice('Master Admin Authenticated! Opening Author Panel...', true);
-        window.notifyUser('Master Admin Verified 🔐', 'Welcome Akshansh & Team! Unlocking Author Dashboard...', 'success');
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect') || 'index.html';
         setTimeout(() => {
-          window.location.href = 'index.html#admin';
+          window.location.href = redirect.endsWith('.html') ? redirect : (redirect + '.html');
         }, 600);
       } else {
-        recordFailedAttempt();
-        window.showNotice('Access Denied: Invalid Master Password.');
-        window.notifyUser('Access Denied ⛔', 'Invalid master password entered.', 'error');
+        showNotice(result.message || 'Could not verify credentials.');
+        BeatWaveAuth.toast('Sign In Error', result.message || 'Check credentials', 'error');
       }
-    };
+    }
+    window.handleSignInSubmit = handleSignInSubmit;
+    window.handleReaderSignIn = handleSignInSubmit;
 
-    // 15. Safe Init Particle Canvas
-    function initParticleCanvas() {
+    async function handleSignUpSubmit(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('signUpName')?.value.trim();
+      const email = document.getElementById('signUpEmail')?.value.trim();
+      const password = document.getElementById('signUpPassword')?.value;
+      const confirmPass = document.getElementById('signUpConfirmPassword')?.value;
+      const btn = document.getElementById('btnSignUpSubmit');
+
+      if (!name) { showNotice('Please enter your full name.'); return; }
+      if (!email || !email.includes('@')) { showNotice('Please enter a valid email address.'); return; }
+      if (!password || password.length < 6) { showNotice('Password must be at least 6 characters long.'); return; }
+      if (password !== confirmPass) { showNotice('Passwords do not match. Please verify both fields.'); return; }
+
+      if (btn) { btn.disabled = true; btn.innerText = 'Creating Account...'; }
+
+      const result = await BeatWaveAuth.signUp(name, email, password);
+
+      if (btn) { btn.disabled = false; btn.innerHTML = '<span>Create Free Account</span>'; }
+
+      if (result.success) {
+        BeatWaveAuth.toast('Account Created! 🎉', `Welcome to BeatWave, ${name}!`, 'success');
+        showNotice(`Welcome to BeatWave, ${name}! Your reader journey begins now.`, true);
+        renderReaderUI(result.user);
+
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect') || 'index.html';
+        setTimeout(() => {
+          window.location.href = redirect.endsWith('.html') ? redirect : (redirect + '.html');
+        }, 600);
+      } else {
+        showNotice(result.message || 'Error creating account.');
+        BeatWaveAuth.toast('Sign Up Notice', result.message, 'warning');
+      }
+    }
+    window.handleSignUpSubmit = handleSignUpSubmit;
+    window.handleReaderSignUp = handleSignUpSubmit;
+
+    function handleGuestLoginClick() {
+      const result = BeatWaveAuth.quickGuest();
+      if (result.success) {
+        BeatWaveAuth.toast('Welcome Guest Reader! 🌊', 'Instant reader access unlocked.', 'success');
+        renderReaderUI(result.user);
+        setTimeout(() => { window.location.href = 'index.html'; }, 600);
+      }
+    }
+    window.handleGuestLoginClick = handleGuestLoginClick;
+    window.quickGuestLogin = handleGuestLoginClick;
+
+    async function handleSignOutClick() {
+      await BeatWaveAuth.signOut();
+      BeatWaveAuth.toast('Signed Out 👋', 'You have been signed out cleanly.', 'info');
+      renderReaderUI(null);
+    }
+    window.handleSignOutClick = handleSignOutClick;
+    window.handleSignOut = handleSignOutClick;
+
+    async function handleResetPassClick() {
+      const email = document.getElementById('resetPassEmail')?.value.trim();
+      if (!email) {
+        BeatWaveAuth.toast('Email Required', 'Please enter your registered email address.', 'warning');
+        return;
+      }
+      if (BeatWaveAuth.supabase) {
+        try {
+          await BeatWaveAuth.supabase.auth.resetPasswordForEmail(email);
+        } catch(e) {}
+      }
+      BeatWaveAuth.toast('Reset Link Dispatched 🔑', `Password recovery link sent to ${email}`, 'success');
+      toggleForgotPassword(false);
+      showNotice(`Password recovery link dispatched to ${email}.`, true);
+    }
+    window.handleResetPassClick = handleResetPassClick;
+
+    // 5. Initialize on DOM Load
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'signup') {
+        switchAuthMode('signup');
+      }
+
+      const emailParam = urlParams.get('email');
+      if (emailParam) {
+        const lEmail = document.getElementById('loginEmail');
+        const sEmail = document.getElementById('signUpEmail');
+        if (lEmail) lEmail.value = emailParam;
+        if (sEmail) sEmail.value = emailParam;
+      }
+
+      const currentUser = BeatWaveAuth.getCurrentUser();
+      renderReaderUI(currentUser);
+
+      BeatWaveAuth.onAuthStateChange(user => {
+        renderReaderUI(user);
+      });
+    });
+
+    // Particle Canvas Animation
+    function initCanvas() {
       try {
         const canvas = document.getElementById('particleCanvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        let width = (canvas.width = window.innerWidth);
-        let height = (canvas.height = window.innerHeight);
-
-        window.addEventListener('resize', () => {
-          width = canvas.width = window.innerWidth;
-          height = canvas.height = window.innerHeight;
-        });
-
-        const particles = [];
-        const count = Math.min(45, Math.floor(width / 30));
-        for (let i = 0; i < count; i++) {
-          particles.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            radius: Math.random() * 1.6 + 0.4,
-            speedX: (Math.random() - 0.5) * 0.35,
-            speedY: (Math.random() - 0.5) * 0.35,
-            alpha: Math.random() * 0.5 + 0.2
-          });
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+        const pts = [];
+        for (let i = 0; i < 35; i++) {
+          pts.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, a: Math.random() * 0.5 + 0.2 });
         }
-
-        function animate() {
-          ctx.clearRect(0, 0, width, height);
-          particles.forEach(p => {
-            p.x += p.speedX;
-            p.y += p.speedY;
-            if (p.x < 0) p.x = width;
-            if (p.x > width) p.x = 0;
-            if (p.y < 0) p.y = height;
-            if (p.y > height) p.y = 0;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(180, 160, 255, ${p.alpha})`;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = 'rgba(138, 43, 226, 0.4)';
+        function draw() {
+          ctx.clearRect(0, 0, w, h);
+          pts.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+            if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(180, 160, 255, ${p.a})`;
             ctx.fill();
           });
-          requestAnimationFrame(animate);
+          requestAnimationFrame(draw);
         }
-        animate();
-      } catch(e) {
-        console.warn('Canvas particle warning:', e);
-      }
+        draw();
+      } catch(e) {}
     }
-    initParticleCanvas();
-
-    // 16. Session State Check on Load
-    async function initAuthSession() {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('mode') === 'signup') {
-          window.switchReaderMode('signup');
-        } else if (urlParams.get('mode') === 'admin' || window.location.hash === '#admin') {
-          window.switchAuthTab('admin');
-        }
-
-        const paramEmail = urlParams.get('email');
-        const savedEmail = safeStorage.get('bw_saved_email') || '';
-        const emailToUse = paramEmail || savedEmail;
-        if (emailToUse) {
-          const lEmail = document.getElementById('loginEmail');
-          const sEmail = document.getElementById('signUpEmail');
-          if (lEmail) lEmail.value = emailToUse;
-          if (sEmail) sEmail.value = emailToUse;
-        }
-
-        if (window.location.hash) {
-          const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const error = hashParams.get('error');
-          const errorDesc = hashParams.get('error_description');
-          if (error || errorDesc) {
-            const cleanDesc = (errorDesc || error || 'Link error').replace(/\+/g, ' ');
-            window.showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
-            const resendCard = document.getElementById('resendConfirmCard');
-            if (resendCard) resendCard.style.display = 'flex';
-          }
-        }
-
-        if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        window.renderReaderSession(session);
-
-        supabase.auth.onAuthStateChange((event, session) => {
-          window.renderReaderSession(session);
-          if (event === 'SIGNED_IN' && session) {
-            window.showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
-          } else if (event === 'SIGNED_OUT') {
-            window.showNotice('Signed out cleanly.', true);
-          }
-        });
-      } catch(e) {
-        console.warn('Auth session check error:', e);
-      }
-    }
-    initAuthSession();
-
-    // 17. Bind Click Listeners on DOM Ready
-    document.addEventListener('DOMContentLoaded', () => {
-      const signInBtn = document.getElementById('subTabSignInBtn');
-      const signUpBtn = document.getElementById('subTabSignUpBtn');
-      const tabReaderBtn = document.getElementById('tabReaderBtn');
-      const tabAdminBtn = document.getElementById('tabAdminBtn');
-
-      if (signInBtn) signInBtn.onclick = function(e) { e.preventDefault(); window.switchReaderMode('signin'); };
-      if (signUpBtn) signUpBtn.onclick = function(e) { e.preventDefault(); window.switchReaderMode('signup'); };
-      if (tabReaderBtn) tabReaderBtn.onclick = function(e) { e.preventDefault(); window.switchAuthTab('reader'); };
-      if (tabAdminBtn) tabAdminBtn.onclick = function(e) { e.preventDefault(); window.switchAuthTab('admin'); };
-    });
+    initCanvas();
   </script>
 </body>
 </html>
