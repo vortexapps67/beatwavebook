@@ -784,6 +784,163 @@
     }
   }
 
+  // ==========================================================================
+  // MASTER REDESIGN: 14 CHAPTER EXCERPTS & READING MODAL
+  // ==========================================================================
+  const CHAPTER_EXCERPTS = {
+    1: {
+      act: 'ACT I · CHAPTER 01',
+      title: 'The Spark of Inspiration',
+      content: `
+        <p>It was 2:14 AM on a chilly Tuesday in late November. The three of us—Akshansh, Aarav Sharma, and Aarav Singh—were crammed on a shared Discord voice call, screens glowing in dark bedrooms across the city.</p>
+        <p>We were trying to study for upcoming school board tests while listening to an indie lo-fi playlist. Then, right at the climax of a track, a screeching 30-second commercial for car insurance blared through our headphones.</p>
+        <blockquote>&ldquo;Why is every music app on earth treated like an advertising billboard? Why can’t an app just play music?&rdquo;</blockquote>
+        <p>Akshansh pulled up a terminal window. Aarav Sharma opened Figma and sketched the first minimalist wireframe. That midnight call didn’t end in sleep. At 4:22 AM, the initial repository was pushed: <code>commit 01: init beatwave</code>.</p>
+      `
+    },
+    2: {
+      act: 'ACT I · CHAPTER 02',
+      title: 'Fix One, Get 3 More Bugs',
+      content: `
+        <p>Building an Android audio player is deceptive. You think it's just passing an audio URL to a media player. Then real devices get involved.</p>
+        <p>On cheap hardware, the audio buffer would desync. If someone received a WhatsApp call while listening, BeatWave would resume playing simultaneously over the phone call. When the phone screen turned off, Android’s battery optimizer would aggressively murder our playback thread.</p>
+        <blockquote>&ldquo;We spent 4 days tracking down a memory leak that turned out to be an unclosed audio session cache inflating the RAM to 1.8GB before crashing.&rdquo;</blockquote>
+        <p>We learned git branches, heap dumps, and ExoPlayer architecture at 3:00 AM while drinking instant black coffee.</p>
+      `
+    },
+    3: {
+      act: 'ACT I · CHAPTER 03',
+      title: 'End Of BeatWave (Almost)',
+      content: `
+        <p>By January, the pressure caught up with us. School exams were two weeks away. Our parents were asking why our eyes were bloodshot every morning.</p>
+        <p>To make matters worse, an external API we relied on for song metadata silently changed its payload schema. When we woke up, nothing loaded. The app was a blank black rectangle.</p>
+        <blockquote>&ldquo;We sat on call for two hours in complete silence. We almost deleted the repository.&rdquo;</blockquote>
+        <p>Then Aarav Singh said: <em>'If we quit today, we’re just three kids who gave up on a school project. If we fix this today, we’re engineers.'</em> We rewrote the network layer from scratch that night.</p>
+      `
+    },
+    4: {
+      act: 'ACT I · CHAPTER 04',
+      title: 'The First Beat',
+      content: `
+        <p>On a Thursday evening at 6:40 PM, build <code>0.4.2-alpha</code> compiled without a single compiler warning.</p>
+        <p>Akshansh tapped play on his phone. The first song streamed instantly. Gapless. Smooth 60 FPS scrubber. Zero trackers sending analytics packets to ad networks. Just clean, unfiltered sound.</p>
+        <blockquote>&ldquo;For five straight minutes, none of us said a word. We just listened to the music.&rdquo;</blockquote>
+        <p>It was the proof of concept that changed everything.</p>
+      `
+    },
+    5: {
+      act: 'ACT II · CHAPTER 05',
+      title: 'did it work?',
+      content: `
+        <p>We exported the first signed APK and posted the direct download link on our class WhatsApp group and a private student Discord server.</p>
+        <p>The message was simple: <em>'We built a music player with zero ads. Tell us if it crashes.'</em> Within an hour, 18 people were streaming. The server logs showed active audio handshakes.</p>
+        <p>It worked. And now real people were listening.</p>
+      `
+    },
+    6: {
+      act: 'ACT II · CHAPTER 06',
+      title: 'Double Life: Students and Developers',
+      content: `
+        <p>During the day, we were ordinary high school students sitting through chemistry lectures and trigonometry problem sets.</p>
+        <p>Underneath desks, phones would buzz with GitHub issues: <em>'Audio stutter on Redmi Note 10'</em>, <em>'Lock screen controls not showing album art'</em>. During recess, we’d huddle by the cafeteria stairs connecting to weak hotspots to push hotfix patches before afternoon classes.</p>
+        <blockquote>&ldquo;We lived two completely parallel lives for eight months.&rdquo;</blockquote>
+      `
+    },
+    7: {
+      act: 'ACT II · CHAPTER 07',
+      title: 'V3: The New Era',
+      content: `
+        <p>By spring, BeatWave was buckling under its amateur codebase. We decided on a complete architectural rewrite: BeatWave V3.</p>
+        <p>We ditched the spaghetti code, built a unified audio engine, and introduced intelligent local caching. BeatWave wasn’t an experimental hack anymore—it was turning into a high-performance audio client.</p>
+      `
+    },
+    8: {
+      act: 'ACT II · CHAPTER 08',
+      title: 'May 7th 2026: The Century Mark',
+      content: `
+        <p>May 7th was a Tuesday. We had an internal dashboard showing concurrent active streams.</p>
+        <p>At 8:14 PM, the live counter ticked from 99 to <strong>100</strong>. One hundred distinct humans, across schools and cities, listening to music through code three students wrote in their bedrooms.</p>
+        <blockquote>&ldquo;Crossing 100 listeners felt bigger than any Silicon Valley IPO.&rdquo;</blockquote>
+      `
+    },
+    9: {
+      act: 'ACT II · CHAPTER 09',
+      title: 'The Link Engine: 150 Users',
+      content: `
+        <p>Word of mouth began spreading beyond our social circles. Friends shared APK links with cousins in Delhi, Mumbai, and Bengaluru.</p>
+        <p>When we hit 150 concurrent streams, our initial free-tier cloud instance choked. The audio packets queue overflowed. We had 24 hours to engineer our 'Link Engine' load balancer or watch the entire network go dark.</p>
+      `
+    },
+    10: {
+      act: 'ACT III · CHAPTER 10',
+      title: 'Liquid Glass: The V4 Redesign',
+      content: `
+        <p>Aarav Sharma spent two weeks researching glassmorphism shaders, specular refraction, and liquid backdrop blurs.</p>
+        <p>Every audio app looked like a sterile corporate dashboard. We wanted BeatWave V4 to look like an instrument—liquid glass floating over deep midnight ambient gradients, reflecting album colors in real-time.</p>
+        <blockquote>&ldquo;When V4 dropped, users couldn’t believe this was built by teenagers without a design agency.&rdquo;</blockquote>
+      `
+    },
+    11: {
+      act: 'ACT III · CHAPTER 11',
+      title: 'The Double Century: 200 Waves',
+      content: `
+        <p>The V4 redesign ignited user growth. 200 listeners turned into a steady, loyal community.</p>
+        <p>People started requesting custom playlists, sleep timers, and equalizer presets. BeatWave was no longer our private secret; it was a living community instrument.</p>
+      `
+    },
+    12: {
+      act: 'ACT III · CHAPTER 12',
+      title: 'The Flop Era',
+      content: `
+        <p>Growth isn’t linear. In mid-summer, a buggy release caused notification crashes on older Android versions. Daily active users dipped by 25% in three days.</p>
+        <p>The silence was deafening. We learned how fragile software trust is, and spent 72 straight hours testing across 14 borrowed test devices to earn our users back.</p>
+      `
+    },
+    13: {
+      act: 'ACT III · CHAPTER 13',
+      title: 'The Viral Thread',
+      content: `
+        <p>A user posted a screen recording of BeatWave V4’s Liquid Glass audio visualizer on Twitter and Reddit with the caption: <em>'Three high school kids built this ad-free music app and it’s better than Spotify.'</em></p>
+        <p>The tweet exploded. Within 12 hours, the GitHub star count quadrupled and our server bandwidth spiked 800%.</p>
+      `
+    },
+    14: {
+      act: 'ACT III · CHAPTER 14',
+      title: 'One Thousand: The Promised Party',
+      content: `
+        <p>On the very first night, back in November at 3:00 AM, Aarav Singh had joked: <em>'If we ever hit 1,000 users, we’re ordering the biggest pizza in the city.'</em></p>
+        <p>When the dashboard crossed 1,000 active Waves, we didn’t just order pizza—we released the full source code to the world, and decided to write down every honest lesson in this book.</p>
+        <blockquote>&ldquo;The instrument is open. The code is transparent. The story is yours to read.&rdquo;</blockquote>
+      `
+    }
+  };
+
+  window.openExcerptModal = function (chNum) {
+    const data = CHAPTER_EXCERPTS[chNum] || CHAPTER_EXCERPTS[1];
+    const modal = document.getElementById('excerptModal');
+    const badge = document.getElementById('excerptActBadge');
+    const title = document.getElementById('excerptTitle');
+    const body = document.getElementById('excerptContent');
+
+    if (!modal || !badge || !title || !body) return;
+
+    badge.innerText = data.act;
+    title.innerText = data.title;
+    body.innerHTML = `
+      <h3>${data.title}</h3>
+      ${data.content}
+    `;
+
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeExcerptModal = function () {
+    const modal = document.getElementById('excerptModal');
+    if (modal) modal.classList.remove('is-open');
+    document.body.style.overflow = '';
+  };
+
   // Initialize 100x Polish on document ready
   document.addEventListener('DOMContentLoaded', () => {
     initCinematicPreloader();

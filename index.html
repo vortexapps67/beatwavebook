@@ -98,35 +98,56 @@
       <div class="container diptych-grid reveal-init">
         <!-- Left: Story positioning -->
         <div class="diptych-left">
-          <div class="hero-tag">
-            <span class="tag-dot"></span>
-            <span>The Official Chronicle &middot; Vortex Apps</span>
+          <div class="studio-timecode-strip">
+            <span class="studio-rec-dot"></span>
+            <span>VORTEX ARCHIVE // 02:14 AM // BENGALURU // 14 CHAPTERS</span>
           </div>
           <h1>The Story of BeatWave</h1>
           <p class="hero-subtitle">
-            How a late-night study call at 2:00 AM sparked an independent software rebellion—ditching commercial ad trackers to build India’s cleanest open-source audio player.
+            How three high school friends turned an infuriating 2:00 AM Discord call into India’s cleanest ad-free open-source music player. The raw, unfiltered 14-chapter confession.
           </p>
 
           <div class="hero-quote-box">
             &ldquo;We were studying, writing code, and every second song on our shared stream was interrupted by high-volume tracking ads. That night, we stopped complaining and started building.&rdquo;
-            <span>&mdash; Excerpt from Chapter 1 &middot; The Spark of Inspiration</span>
+            <span>&mdash; Chapter 1 &middot; The Spark of Inspiration</span>
           </div>
 
-          <div class="hero-actions">
+          <!-- Hero Audio Oscilloscope Deck -->
+          <div class="hero-oscilloscope-bar">
+            <div class="oscilloscope-left">
+              <div class="oscilloscope-bars">
+                <span class="oscilloscope-bar"></span>
+                <span class="oscilloscope-bar"></span>
+                <span class="oscilloscope-bar"></span>
+                <span class="oscilloscope-bar"></span>
+                <span class="oscilloscope-bar"></span>
+              </div>
+              <div>
+                <div class="oscilloscope-text">BeatWave Synth Frequency &middot; 432Hz</div>
+                <div class="oscilloscope-sub">Synthesized binaural ambient audio track</div>
+              </div>
+            </div>
+            <button class="track-action-btn" onclick="toggleAmbientAudio()" id="heroAudioBtn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Play Synth</span>
+            </button>
+          </div>
+
+          <div class="hero-actions" style="margin-top: var(--space-md);">
             <button class="btn-primary" onclick="scrollToPricing()">
               <span>Order Your Copy</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <button class="btn-secondary" onclick="flipBookCard()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-              <span>Inspect Back Cover</span>
+            <button class="btn-secondary" onclick="openExcerptModal(1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <span>Read Chapter 1 Excerpt</span>
             </button>
           </div>
 
           <div class="hero-badges-row">
             <span>&check; 14 Full Chapters</span>
-            <span>&check; E-Book (&#8377;150)</span>
-            <span>&check; Printed Softcover (&#8377;250)</span>
+            <span>&check; Digital Master (&#8377;150)</span>
+            <span>&check; Collector's Paperback (&#8377;250)</span>
           </div>
         </div>
 
@@ -143,108 +164,210 @@
             </div>
           </div>
 
-          <div class="book-controls">
+          <div class="book-controls" style="display: flex; gap: var(--space-xs);">
             <button class="book-flip-pill" onclick="flipBookCard()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              <span id="flipButtonLabel">Click to Flip Cover</span>
+              <span id="flipButtonLabel">Flip 3D Cover</span>
+            </button>
+            <button class="book-flip-pill" onclick="openExcerptModal(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Preview Excerpt</span>
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Inside The Book: Chapters (First 4 Highlighted + Expandable Full 14) -->
+    <!-- FLIGHT RECORDER STUDIO TIMELINE -->
+    <section class="flight-recorder-section reveal-init">
+      <div class="container">
+        <div class="flight-recorder-grid">
+          <div class="flight-card">
+            <div class="flight-card-tag">02:00 AM &middot; GENESIS</div>
+            <div class="flight-card-title">The Late Night Call</div>
+            <div class="flight-card-desc">Three friends studying, frustrated by corporate audio tracking ads. The decision to build our own player.</div>
+          </div>
+          <div class="flight-card">
+            <div class="flight-card-tag">BUILD V1 &middot; REALITY</div>
+            <div class="flight-card-title">Fix One, Get 3 Bugs</div>
+            <div class="flight-card-desc">Async thread collisions, Android memory leaks, and learning system architecture the hard way.</div>
+          </div>
+          <div class="flight-card">
+            <div class="flight-card-tag">MAY 7TH &middot; MILESTONE</div>
+            <div class="flight-card-title">The Century Mark</div>
+            <div class="flight-card-desc">First 100 listeners reached completely organic while juggling high school exam study schedules.</div>
+          </div>
+          <div class="flight-card">
+            <div class="flight-card-tag">V4 &middot; ARCHITECTURE</div>
+            <div class="flight-card-title">Liquid Glass Redesign</div>
+            <div class="flight-card-desc">The breakthrough UI overhaul that gave BeatWave its signature aesthetic identity.</div>
+          </div>
+          <div class="flight-card">
+            <div class="flight-card-tag">1,000 WAVES &middot; CLIMAX</div>
+            <div class="flight-card-title">The Promised Party</div>
+            <div class="flight-card-desc">Hitting the 1,000 active listener mark and fulfilling the pact made in Chapter 1.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MASTER STUDIO TRACKLIST (All 14 Chapters Organized by Narrative Acts) -->
     <section class="section" id="book-preview">
       <div class="container">
         <div class="section-head reveal-init">
-          <span class="section-eyebrow">Table of Contents</span>
-          <h2>Inside The Unfiltered Journey</h2>
-          <p>Fourteen chapters of genuine indie development: late-night debugging, breaking production, viral threads, and triumphs.</p>
+          <span class="section-eyebrow">Studio Tracklist &middot; 14 Chapters</span>
+          <h2>Inside The Master Archive</h2>
+          <p>The complete unredacted chronicle of high school developers creating a modern open-source music player.</p>
         </div>
 
-        <!-- First 4 Chapters -->
-        <div class="chapters-grid reveal-init">
-          <article class="chapter-card">
-            <span class="chapter-num">01 &middot; CHAPTER ONE</span>
-            <h3 class="chapter-title">The Spark of Inspiration</h3>
-            <p class="chapter-desc">
-              Three friends on an endless 2:00 AM Discord call pushed to the edge by disruptive tracking ads. The moment frustration turned into the first commit of an ad-free client.
-            </p>
-          </article>
+        <div class="tracklist-acts-wrapper reveal-init">
+          <!-- ACT I -->
+          <div class="tracklist-act">
+            <div class="act-header">
+              <div>
+                <span class="act-label">ACT I &middot; CHAPTERS 01 &ndash; 04</span>
+                <h3 class="act-title">The Midnight Spark &amp; The First Builds</h3>
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink-faint);">Pages 1 &ndash; 48</span>
+            </div>
+            <div class="tracklist-rows">
+              <div class="track-row" onclick="openExcerptModal(1)">
+                <span class="track-num">01</span>
+                <div class="track-info">
+                  <span class="track-name">The Spark of Inspiration</span>
+                  <span class="track-meta">The 2:00 AM Discord call · Commercial tracking anger · The first commit</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(2)">
+                <span class="track-num">02</span>
+                <div class="track-info">
+                  <span class="track-name">Fix One, Get 3 More Bugs</span>
+                  <span class="track-meta">Async thread collisions · ExoPlayer memory leaks · Android crashes</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(3)">
+                <span class="track-num">03</span>
+                <div class="track-info">
+                  <span class="track-name">End Of BeatWave (Almost)</span>
+                  <span class="track-meta">Exams approaching · Broken APIs · The pact to keep shipping</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(4)">
+                <span class="track-num">04</span>
+                <div class="track-info">
+                  <span class="track-name">The First Beat</span>
+                  <span class="track-meta">Zero telemetry · The first clean gapless audio playback</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+            </div>
+          </div>
 
-          <article class="chapter-card">
-            <span class="chapter-num">02 &middot; CHAPTER TWO</span>
-            <h3 class="chapter-title">Fix One, Get 3 More Bugs</h3>
-            <p class="chapter-desc">
-              The brutal reality of young self-taught developers facing playback memory leaks, async thread collisions, and Android lifecycle crashes.
-            </p>
-          </article>
+          <!-- ACT II -->
+          <div class="tracklist-act">
+            <div class="act-header">
+              <div>
+                <span class="act-label">ACT II &middot; CHAPTERS 05 &ndash; 09</span>
+                <h3 class="act-title">The Underground Surge &amp; Double Life</h3>
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink-faint);">Pages 49 &ndash; 112</span>
+            </div>
+            <div class="tracklist-rows">
+              <div class="track-row" onclick="openExcerptModal(5)">
+                <span class="track-num">05</span>
+                <div class="track-info">
+                  <span class="track-name">did it work?</span>
+                  <span class="track-meta">Releasing the first APK link into the wild</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(6)">
+                <span class="track-num">06</span>
+                <div class="track-info">
+                  <span class="track-name">Double Life: Students and Developers</span>
+                  <span class="track-meta">Classes by day, hotfixes by midnight · School Wi-Fi deployments</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(7)">
+                <span class="track-num">07</span>
+                <div class="track-info">
+                  <span class="track-name">V3: The New Era</span>
+                  <span class="track-meta">Complete rewrite · Moving from hobby script to engineered architecture</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(8)">
+                <span class="track-num">08</span>
+                <div class="track-info">
+                  <span class="track-name">May 7th 2026: The Century Mark</span>
+                  <span class="track-meta">Crossing 100 simultaneous daily listeners</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+              <div class="track-row" onclick="openExcerptModal(9)">
+                <span class="track-num">09</span>
+                <div class="track-info">
+                  <span class="track-name">The Link Engine: 150 Users</span>
+                  <span class="track-meta">Scaling infrastructure · Resolving server bottleneck spikes</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
+              </div>
+            </div>
+          </div>
 
-          <article class="chapter-card">
-            <span class="chapter-num">03 &middot; CHAPTER THREE</span>
-            <h3 class="chapter-title">End Of BeatWave (Almost)</h3>
-            <p class="chapter-desc">
-              When motivation collapsed, APIs broke, and school exams approached. The pivotal team decision that kept the repository alive when quitting was easy.
-            </p>
-          </article>
-
-          <article class="chapter-card">
-            <span class="chapter-num">04 &middot; CHAPTER FOUR</span>
-            <h3 class="chapter-title">The First Beat</h3>
-            <p class="chapter-desc">
-              The first stable build where audio played gaplessly with zero telemetry hooks. The feeling of listening to pure music on an app built by your own hands.
-            </p>
-          </article>
-        </div>
-
-        <!-- Expandable Full 14-Chapter Journey -->
-        <div class="toc-expand-container reveal-init">
-          <button class="btn-toggle-toc" onclick="toggleFullToc()">
-            <span id="tocToggleText">Explore All 14 Chapters</span>
-            <svg id="tocChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s;"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-
-          <div class="all-chapters-drawer" id="allChaptersDrawer">
-            <div class="chapters-subgrid">
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">05</span>
-                <span class="chapter-mini-title">did it work?</span>
+          <!-- ACT III -->
+          <div class="tracklist-act">
+            <div class="act-header">
+              <div>
+                <span class="act-label">ACT III &middot; CHAPTERS 10 &ndash; 14</span>
+                <h3 class="act-title">Liquid Glass, The Viral Wave &amp; 1,000 Listeners</h3>
               </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">06</span>
-                <span class="chapter-mini-title">Double Life: Students and Developers</span>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink-faint);">Pages 113 &ndash; 178</span>
+            </div>
+            <div class="tracklist-rows">
+              <div class="track-row" onclick="openExcerptModal(10)">
+                <span class="track-num">10</span>
+                <div class="track-info">
+                  <span class="track-name">Liquid Glass: The V4 Redesign</span>
+                  <span class="track-meta">Refraction shaders · Glassmorphism aesthetic leap</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
               </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">07</span>
-                <span class="chapter-mini-title">V3: The New Era</span>
+              <div class="track-row" onclick="openExcerptModal(11)">
+                <span class="track-num">11</span>
+                <div class="track-info">
+                  <span class="track-name">The Double Century: 200 Waves</span>
+                  <span class="track-meta">Community adoption outside school circles</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
               </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">08</span>
-                <span class="chapter-mini-title">May 7th 2026: The Century Mark</span>
+              <div class="track-row" onclick="openExcerptModal(12)">
+                <span class="track-num">12</span>
+                <div class="track-info">
+                  <span class="track-name">The Flop Era</span>
+                  <span class="track-meta">A week of silence, retention drops, and lessons in user love</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
               </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">09</span>
-                <span class="chapter-mini-title">The Link Engine: 150 Users</span>
+              <div class="track-row" onclick="openExcerptModal(13)">
+                <span class="track-num">13</span>
+                <div class="track-info">
+                  <span class="track-name">The Viral Thread</span>
+                  <span class="track-meta">Online discovery · The morning the dashboard exploded</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
               </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">10</span>
-                <span class="chapter-mini-title">Liquid Glass: The V4 Redesign</span>
-              </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">11</span>
-                <span class="chapter-mini-title">The Double Century: 200 Waves</span>
-              </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">12</span>
-                <span class="chapter-mini-title">The Flop Era</span>
-              </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">13</span>
-                <span class="chapter-mini-title">The Viral Thread</span>
-              </div>
-              <div class="chapter-mini-node">
-                <span class="chapter-mini-num">14</span>
-                <span class="chapter-mini-title">One Thousand : The Promised Party</span>
+              <div class="track-row" onclick="openExcerptModal(14)">
+                <span class="track-num">14</span>
+                <div class="track-info">
+                  <span class="track-name">One Thousand: The Promised Party</span>
+                  <span class="track-meta">1,000+ active listeners · Keeping the promise made on night one</span>
+                </div>
+                <button class="track-action-btn"><span>Read Excerpt</span></button>
               </div>
             </div>
           </div>
@@ -484,6 +607,31 @@
           The Vortex Apps team will verify the payment and dispatch your book updates directly to your WhatsApp and Email.
         </p>
         <button class="btn-primary" style="width: 100%;" onclick="closeCheckoutModal()">Close Window</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXCERPT READER MODAL (Masterclass Reading Drawer) -->
+  <div class="excerpt-modal-overlay" id="excerptModal" onclick="if(event.target === this) closeExcerptModal()">
+    <div class="excerpt-modal-card">
+      <div class="excerpt-modal-header">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-accent-cyan); font-weight: 700; letter-spacing: 0.06em;" id="excerptActBadge">ACT I &middot; CHAPTER 01</span>
+          <h3 id="excerptTitle" style="margin: 0; font-size: 1.35rem; color: #fff;">The Spark of Inspiration</h3>
+        </div>
+        <button onclick="closeExcerptModal()" class="modal-close" style="background:none; border:none; color:var(--color-ink-muted); font-size:1.6rem; cursor:pointer; padding: 4px 8px;">&times;</button>
+      </div>
+      <div class="excerpt-modal-body" id="excerptContent">
+        <!-- Injected dynamically via app.js -->
+      </div>
+      <div class="excerpt-modal-footer">
+        <span style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-ink-faint);">Read all 14 chapters in full</span>
+        <div style="display: flex; gap: var(--space-xs);">
+          <button class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="closeExcerptModal()">Close</button>
+          <button class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;" onclick="closeExcerptModal(); scrollToPricing();">
+            <span>Get Full Book</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

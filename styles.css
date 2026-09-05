@@ -1960,8 +1960,371 @@ a {
   filter: drop-shadow(0 10px 30px rgba(0, 242, 254, 0.3));
 }
 
+/* ==========================================================================
+   MASTER REDESIGN ARCHIVAL SUITE: STUDIO FLIGHT RECORDER & TRACKLIST
+   ========================================================================== */
+
+/* 1. Studio Timecode Tape */
+.studio-timecode-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+  margin-bottom: var(--space-sm);
+  width: fit-content;
+}
+
+.studio-rec-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent-red);
+  box-shadow: 0 0 10px var(--color-accent-red);
+  animation: studioRecPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes studioRecPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.3); }
+}
+
+/* 2. Hero Interactive Oscilloscope Deck */
+.hero-oscilloscope-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  background: rgba(13, 9, 28, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-lg);
+  margin-top: var(--space-md);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.oscilloscope-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.oscilloscope-bars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+
+.oscilloscope-bar {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--color-accent-cyan);
+  animation: oscFrequency 0.9s ease-in-out infinite alternate;
+}
+
+.oscilloscope-bar:nth-child(1) { animation-delay: 0.1s; height: 10px; }
+.oscilloscope-bar:nth-child(2) { animation-delay: 0.3s; height: 18px; }
+.oscilloscope-bar:nth-child(3) { animation-delay: 0.15s; height: 8px; }
+.oscilloscope-bar:nth-child(4) { animation-delay: 0.4s; height: 16px; }
+.oscilloscope-bar:nth-child(5) { animation-delay: 0.25s; height: 12px; }
+
+@keyframes oscFrequency {
+  0% { transform: scaleY(0.3); opacity: 0.4; }
+  100% { transform: scaleY(1.3); opacity: 1; }
+}
+
+.oscilloscope-text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-ink);
+}
+
+.oscilloscope-sub {
+  font-size: 0.7rem;
+  color: var(--color-ink-faint);
+}
+
+/* 3. Flight Recorder Horizontal Timeline */
+.flight-recorder-section {
+  padding: var(--space-2xl) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+}
+
+.flight-recorder-grid {
+  display: flex;
+  gap: var(--space-lg);
+  min-width: 820px;
+  justify-content: space-between;
+}
+
+.flight-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.flight-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 242, 254, 0.3);
+  transform: translateY(-2px);
+}
+
+.flight-card-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-accent-cyan);
+  margin-bottom: 4px;
+}
+
+.flight-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--color-ink);
+}
+
+.flight-card-desc {
+  font-size: 0.78rem;
+  color: var(--color-ink-muted);
+  line-height: 1.4;
+}
+
+/* 4. Master Studio Tracklist (Table of Contents Redesign) */
+.tracklist-acts-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+.tracklist-act {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.act-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.act-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.act-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tracklist-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.track-row {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px var(--space-md);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.track-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+.track-row.is-active-preview {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: rgba(0, 242, 254, 0.3);
+}
+
+.track-num {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-accent-warm);
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.track-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.track-meta {
+  font-size: 0.78rem;
+  color: var(--color-ink-faint);
+  line-height: 1.4;
+}
+
+.track-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.track-row:hover .track-action-btn {
+  background: var(--color-accent-cyan);
+  color: #000;
+  border-color: var(--color-accent-cyan);
+}
+
+/* 5. Excerpt Reader Modal / Sheet */
+.excerpt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(4, 2, 10, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.excerpt-modal-overlay.is-open {
+  display: flex;
+}
+
+.excerpt-modal-card {
+  max-width: 680px;
+  width: 100%;
+  max-height: 88vh;
+  background: #090614;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 242, 254, 0.15);
+  overflow: hidden;
+  animation: excerptSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes excerptSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.excerpt-modal-header {
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.excerpt-modal-body {
+  padding: var(--space-xl);
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-ink-muted);
+}
+
+.excerpt-modal-body h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: var(--space-xs);
+}
+
+.excerpt-modal-body p {
+  margin-bottom: var(--space-md);
+  font-size: 0.96rem;
+}
+
+.excerpt-modal-body blockquote {
+  border-left: 3px solid var(--color-accent-cyan);
+  padding-left: var(--space-md);
+  margin: var(--space-lg) 0;
+  font-style: normal;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+  padding: var(--space-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.excerpt-modal-footer {
+  padding: var(--space-md) var(--space-xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
 @media (max-width: 768px) {
   .cart-grid {
     grid-template-columns: 1fr;
   }
+  .track-row {
+    grid-template-columns: 40px 1fr;
+  }
+  .track-action-btn {
+    grid-column: 2 / -1;
+    width: fit-content;
+    margin-top: 4px;
+  }
 }
+
