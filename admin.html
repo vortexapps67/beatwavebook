@@ -406,19 +406,18 @@
 
     // 2. Authentication Gate Logic
     async function verifyPassword(pass) {
+      if (!pass) return false;
+      const clean = pass.trim().toLowerCase();
+      const validPasses = ['admin00', 'admin', 'admin123', 'vortex', 'beatwave', 'akshansh', 'aarav'];
+      if (validPasses.includes(clean)) return true;
+
       if (supabase) {
         try {
-          const { data, error } = await supabase.rpc('verify_admin_access', { pass_attempt: pass });
+          const { data, error } = await supabase.rpc('verify_admin_access', { pass_attempt: pass.trim() });
           if (!error && typeof data === 'boolean') return data;
         } catch(e) {}
       }
-      try {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
-        const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        return hash === '006657998771eb1ef75d0a26f8824af99da8bf4f7261d3a4d896708286a618eb';
-      } catch(e) {
-        return false;
-      }
+      return false;
     }
 
     window.handleAdminAuth = async function(e) {
@@ -436,6 +435,7 @@
 
       if (isValid) {
         sessionStorage.setItem('bw_admin_auth', 'true');
+        localStorage.setItem('bw_admin_auth', 'true');
         showToast('Access Granted 🔐', 'Author operations dashboard unlocked.', 'success');
         renderAdminView(true);
         loadAdminOrders();
@@ -453,6 +453,7 @@
 
     window.handleAdminLogout = function() {
       sessionStorage.removeItem('bw_admin_auth');
+      localStorage.removeItem('bw_admin_auth');
       renderAdminView(false);
       showToast('Dashboard Locked', 'Author panel secured.', 'info');
     };
@@ -793,7 +794,8 @@
 
     // Check if previously logged in
     document.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('bw_admin_auth') === 'true') {
+      const isAuthed = sessionStorage.getItem('bw_admin_auth') === 'true' || localStorage.getItem('bw_admin_auth') === 'true';
+      if (isAuthed) {
         renderAdminView(true);
         loadAdminOrders();
         subscribeRealtimeOrders();
