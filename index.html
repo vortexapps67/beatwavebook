@@ -23,6 +23,45 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- CINEMATIC PRELOADER (100x Polish) -->
+  <div class="bw-preloader" id="bwPreloader" aria-label="Loading BeatWave Experience">
+    <div class="bw-preloader-ambient-glow"></div>
+    <div class="bw-preloader-content">
+      <div class="bw-preloader-emblem">
+        <div class="bw-preloader-emblem-ring"></div>
+        <div class="bw-preloader-emblem-halo"></div>
+        <img src="beatwave new new.png" alt="BeatWave Logo">
+      </div>
+      <div class="bw-preloader-wave" aria-hidden="true">
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+        <span class="bw-preloader-bar"></span>
+      </div>
+      <div class="bw-preloader-counter" id="preloaderCounter">00%</div>
+      <div class="bw-preloader-track">
+        <div class="bw-preloader-fill" id="preloaderFill"></div>
+      </div>
+      <div class="bw-preloader-status" id="preloaderStatus">Tuning audio frequencies...</div>
+    </div>
+  </div>
+
+  <!-- AMBIENT SYNTH AUDIO PILL (100x Polish) -->
+  <div class="ambient-audio-pill" id="ambientAudioPill" onclick="toggleAmbientAudio()" title="Toggle BeatWave Ambient Synth Frequency">
+    <div class="ambient-audio-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </div>
+    <span id="audioPillLabel">Play Synth Frequency</span>
+    <div class="ambient-audio-bars">
+      <span class="ambient-audio-bar"></span>
+      <span class="ambient-audio-bar"></span>
+      <span class="ambient-audio-bar"></span>
+    </div>
+  </div>
+
   <!-- Animated Background Layer (bg-glow.png + dynamic orbs) -->
   <div class="ambient-bg-wrapper">
     <div class="ambient-bg-img"></div>
@@ -56,7 +95,7 @@
   <main>
     <!-- 15 · Split Studio Hero -->
     <section class="hero-section" id="story">
-      <div class="container diptych-grid">
+      <div class="container diptych-grid reveal-init">
         <!-- Left: Story positioning -->
         <div class="diptych-left">
           <div class="hero-tag">
@@ -117,14 +156,14 @@
     <!-- Inside The Book: Chapters (First 4 Highlighted + Expandable Full 14) -->
     <section class="section" id="book-preview">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal-init">
           <span class="section-eyebrow">Table of Contents</span>
           <h2>Inside The Unfiltered Journey</h2>
           <p>Fourteen chapters of genuine indie development: late-night debugging, breaking production, viral threads, and triumphs.</p>
         </div>
 
         <!-- First 4 Chapters -->
-        <div class="chapters-grid">
+        <div class="chapters-grid reveal-init">
           <article class="chapter-card">
             <span class="chapter-num">01 &middot; CHAPTER ONE</span>
             <h3 class="chapter-title">The Spark of Inspiration</h3>
@@ -159,7 +198,7 @@
         </div>
 
         <!-- Expandable Full 14-Chapter Journey -->
-        <div class="toc-expand-container">
+        <div class="toc-expand-container reveal-init">
           <button class="btn-toggle-toc" onclick="toggleFullToc()">
             <span id="tocToggleText">Explore All 14 Chapters</span>
             <svg id="tocChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s;"><path d="M6 9l6 6 6-6"/></svg>
@@ -216,13 +255,13 @@
     <!-- PRICING MATRIX (2 Tiers Only: E-Book ₹150, Physical ₹250) -->
     <section class="section" id="pricing">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal-init">
           <span class="section-eyebrow">Pricing & Formats</span>
           <h2>Select Your Edition</h2>
           <p>Direct from the makers. 100% of proceeds support independent open-source server nodes.</p>
         </div>
 
-        <div class="pricing-grid-2">
+        <div class="pricing-grid-2 reveal-init">
           <!-- Card 1: E-Book -->
           <div class="pricing-card featured">
             <div class="tier-badge">Instant Digital</div>
@@ -296,7 +335,7 @@
     <!-- Authors -->
     <section class="section" id="authors">
       <div class="container">
-        <div class="authors-box">
+        <div class="authors-box reveal-init">
           <img src="beatwave new new.png" alt="Vortex Apps" class="authors-avatar">
           <div class="authors-info">
             <span class="hero-tag" style="margin: 0;">Authored by Vortex Apps</span>

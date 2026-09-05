@@ -590,4 +590,205 @@
     }
   });
 
+  // ==========================================================================
+  // 100x POLISH SUITE: CINEMATIC PRELOADER CONTROLLER
+  // ==========================================================================
+  function initCinematicPreloader() {
+    const preloader = document.getElementById('bwPreloader');
+    const counter = document.getElementById('preloaderCounter');
+    const fill = document.getElementById('preloaderFill');
+    const status = document.getElementById('preloaderStatus');
+
+    if (!preloader || !counter || !fill || !status) return;
+
+    const milestones = [
+      { at: 18, text: 'Tuning audio engine...' },
+      { at: 40, text: 'Compiling 14 chapter chronicles...' },
+      { at: 65, text: 'Synthesizing Liquid Glass UI...' },
+      { at: 86, text: 'Synchronizing Supabase realtime...' },
+      { at: 100, text: 'BeatWave 2026 Ready' }
+    ];
+
+    let currentPercent = 0;
+    const targetPercent = 100;
+    const duration = 1200; // 1.2s smooth cinematic load
+    const startTime = performance.now();
+
+    function updatePreloader(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      currentPercent = Math.floor(eased * targetPercent);
+
+      counter.innerText = (currentPercent < 10 ? '0' : '') + currentPercent + '%';
+      fill.style.width = currentPercent + '%';
+
+      // Update status text
+      for (let i = milestones.length - 1; i >= 0; i--) {
+        if (currentPercent >= milestones[i].at) {
+          if (status.innerText !== milestones[i].text) {
+            status.style.opacity = '0';
+            setTimeout(() => {
+              status.innerText = milestones[i].text;
+              status.style.opacity = '1';
+            }, 80);
+          }
+          break;
+        }
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(updatePreloader);
+      } else {
+        counter.innerText = '100%';
+        fill.style.width = '100%';
+        setTimeout(() => {
+          preloader.classList.add('is-loaded');
+          triggerInitialScrollReveal();
+          setTimeout(() => {
+            preloader.style.display = 'none';
+          }, 850);
+        }, 220);
+      }
+    }
+
+    requestAnimationFrame(updatePreloader);
+  }
+
+  // ==========================================================================
+  // 100x POLISH SUITE: CARD SPOTLIGHT CURSOR TRACKING
+  // ==========================================================================
+  function initCardSpotlights() {
+    document.querySelectorAll('.spotlight-card, .chapter-card, .pricing-card, .cart-item-card').forEach(card => {
+      card.classList.add('spotlight-card');
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+  }
+
+  // ==========================================================================
+  // 100x POLISH SUITE: SCROLL REVEAL (IntersectionObserver)
+  // ==========================================================================
+  function initScrollReveal() {
+    const elements = document.querySelectorAll('.reveal-init');
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    elements.forEach(el => observer.observe(el));
+  }
+
+  function triggerInitialScrollReveal() {
+    document.querySelectorAll('.hero-section .reveal-init').forEach(el => {
+      el.classList.add('reveal-visible');
+    });
+  }
+
+  // ==========================================================================
+  // 100x POLISH SUITE: AMBIENT SYNTH FREQUENCY AUDIO (Web Audio API)
+  // ==========================================================================
+  let audioCtx = null;
+  let isAudioPlaying = false;
+  let synthGain = null;
+  let synthInterval = null;
+
+  window.toggleAmbientAudio = function () {
+    const pill = document.getElementById('ambientAudioPill');
+    const label = document.getElementById('audioPillLabel');
+
+    if (!isAudioPlaying) {
+      startSynthTheme();
+      isAudioPlaying = true;
+      if (pill) pill.classList.add('is-playing');
+      if (label) label.innerText = 'Freq 432Hz Active';
+    } else {
+      stopSynthTheme();
+      isAudioPlaying = false;
+      if (pill) pill.classList.remove('is-playing');
+      if (label) label.innerText = 'Play Synth Frequency';
+    }
+  };
+
+  function startSynthTheme() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      synthGain = audioCtx.createGain();
+      synthGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      synthGain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 1.2);
+      synthGain.connect(audioCtx.destination);
+
+      // Warm cinematic progression: D3, F3, A3, C4, E4
+      const chordPitches = [146.83, 174.61, 220.00, 261.63, 329.63];
+      let noteIdx = 0;
+
+      function playSoftChord() {
+        if (!isAudioPlaying || !audioCtx) return;
+        const baseFreq = chordPitches[noteIdx % chordPitches.length];
+        noteIdx++;
+
+        const osc = audioCtx.createOscillator();
+        const noteGain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(680, audioCtx.currentTime);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+
+        noteGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        noteGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.8);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.8);
+
+        osc.connect(filter);
+        filter.connect(noteGain);
+        noteGain.connect(synthGain);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 4.0);
+      }
+
+      playSoftChord();
+      synthInterval = setInterval(playSoftChord, 2200);
+    } catch(e) {
+      console.warn('Audio synthesis notice:', e);
+    }
+  }
+
+  function stopSynthTheme() {
+    if (synthGain && audioCtx) {
+      try {
+        synthGain.gain.setValueAtTime(synthGain.gain.value, audioCtx.currentTime);
+        synthGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+      } catch(e) {}
+    }
+    if (synthInterval) {
+      clearInterval(synthInterval);
+      synthInterval = null;
+    }
+  }
+
+  // Initialize 100x Polish on document ready
+  document.addEventListener('DOMContentLoaded', () => {
+    initCinematicPreloader();
+    initCardSpotlights();
+    initScrollReveal();
+  });
+
 })();
