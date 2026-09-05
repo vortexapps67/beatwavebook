@@ -251,6 +251,7 @@
   </footer>
 
   <script src="config.js"></script>
+  <script src="app.js"></script>
   <script>
     let supabaseClient = null;
     try {
@@ -321,8 +322,14 @@
 
       if (found) {
         renderTrackingResult(found);
+        if (window.notifyUser) {
+          window.notifyUser('Order Located 🔍', `Order ${found.id} found — Current status: ${found.status || 'PENDING'}`, 'success');
+        }
       } else {
         document.getElementById('trackNotFound').style.display = 'block';
+        if (window.notifyUser) {
+          window.notifyUser('Order Not Found ❌', `No matching order found for "${query}". Check Order ID or phone.`, 'error');
+        }
       }
     }
 

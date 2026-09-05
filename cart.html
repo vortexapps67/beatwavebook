@@ -369,6 +369,16 @@
       }
     } catch(e) {}
 
+    function copyUpiId() {
+      const upi = "akshanshsinha67@axl";
+      navigator.clipboard.writeText(upi).then(() => {
+        if (window.notifyUser) window.notifyUser('UPI ID Copied 📋', 'akshanshsinha67@axl copied to clipboard!', 'success');
+        else alert('UPI ID copied: ' + upi);
+      }).catch(() => {
+        if (window.notifyUser) window.notifyUser('UPI ID 📋', upi, 'info');
+      });
+    }
+
     async function submitCartOrder() {
       const name = document.getElementById('cartName').value.trim();
       const email = document.getElementById('cartEmail').value.trim();
@@ -377,11 +387,13 @@
       const sender = document.getElementById('cartSenderName').value.trim() || name;
 
       if (!name || !email || !phone) {
-        alert('Please fill your name, email, and phone number.');
+        if (window.notifyUser) window.notifyUser('Missing Details', 'Please fill your name, email, and phone number.', 'warning');
+        else alert('Please fill your name, email, and phone number.');
         return;
       }
       if (activeTier === 'print' && !address) {
-        alert('Please provide your shipping delivery address with PIN code.');
+        if (window.notifyUser) window.notifyUser('Address Required', 'Please provide your shipping delivery address with PIN code.', 'warning');
+        else alert('Please provide your shipping delivery address with PIN code.');
         return;
       }
 
@@ -404,6 +416,10 @@
         created_at: new Date().toISOString()
       };
 
+      if (window.notifyUser) {
+        window.notifyUser('Order Placed! 🚀', `Order reference ${orderId} saved to live database.`, 'success');
+      }
+
       // Push to Supabase
       try {
         if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
@@ -418,7 +434,9 @@
       localStorage.setItem('bw_last_order', JSON.stringify(orderData));
 
       // Redirect to Thank You Page
-      window.location.href = `thankyou.html?orderId=${orderId}&name=${encodeURIComponent(name)}&amount=${amount}`;
+      setTimeout(() => {
+        window.location.href = `thankyou.html?orderId=${orderId}&name=${encodeURIComponent(name)}&amount=${amount}`;
+      }, 700);
     }
   </script>
 </body>

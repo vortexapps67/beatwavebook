@@ -234,15 +234,17 @@
 
   window.copyUpiId = function () {
     navigator.clipboard.writeText(paymentConfig.upiId).then(() => {
-      showToast('UPI ID copied: ' + paymentConfig.upiId);
+      window.notifyUser('UPI ID Copied 📋', `${paymentConfig.upiId} copied to clipboard!`, 'success');
     }).catch(() => {
-      showToast('UPI ID: ' + paymentConfig.upiId);
+      window.notifyUser('UPI ID 📋', paymentConfig.upiId, 'info');
     });
   };
 
   window.submitOrderFinal = async function () {
     const sender = document.getElementById('paymentSenderName')?.value.trim() || tempOrderData.customer_name;
     tempOrderData.sender_handle = sender;
+
+    window.notifyUser('Placing Order 🚀', `Submitting ${tempOrderData.id} to Supabase...`, 'info', 3000);
 
     // Save to Supabase (or fallback locally)
     if (isSupabaseConfigured && supabaseClient) {
@@ -268,7 +270,7 @@
     document.getElementById('paymentStage').style.display = 'none';
     document.getElementById('successStage').style.display = 'block';
     document.getElementById('confirmedOrderId').innerText = activeOrderId;
-    showToast('Order recorded successfully!');
+    window.notifyUser('Order Confirmed! 🎉', `Order ${activeOrderId} recorded in database. Vortex Apps will verify payment.`, 'success', 6000);
   }
 
   function saveOrderLocally(order) {
@@ -359,9 +361,11 @@
     const isValid = await verifyPassHash(entered);
     if (isValid) {
       sessionStorage.setItem('bw_admin_auth', 'true');
+      window.notifyUser('Master Access Granted 🔐', 'Welcome back, Akshansh & Vortex Apps Team!', 'success');
       showAdminDashboard();
     } else {
       document.getElementById('adminErrorMsg').innerText = 'Access Denied: Incorrect Password';
+      window.notifyUser('Access Denied ⛔', 'Incorrect master password entered.', 'error');
     }
   };
 
@@ -493,10 +497,16 @@
           .eq('id', orderId);
 
         if (error) throw error;
-        showToast(`Order ${orderId} marked as ${newStatus}`);
+        if (newStatus === 'PAID') {
+          window.notifyUser('Payment Verified! ✅', `Order ${orderId} marked as PAID. Book unlocked.`, 'success');
+        } else if (newStatus === 'SHIPPED') {
+          window.notifyUser('Order Shipped! 📦', `Order ${orderId} marked as SHIPPED.`, 'success');
+        } else {
+          window.notifyUser('Status Updated 📝', `Order ${orderId} is now ${newStatus}.`, 'info');
+        }
         fetchSupabaseOrders();
       } catch (err) {
-        showToast('Error updating status: ' + err.message);
+        window.notifyUser('Status Update Error ❌', err.message, 'error');
       }
     } else {
       if (allOrders[orderId]) {
@@ -504,7 +514,11 @@
         saveOrderLocally(allOrders[orderId]);
         renderAdminTable();
         updateAdminMetrics();
-        showToast(`Order ${orderId} marked as ${newStatus}`);
+        if (newStatus === 'PAID') {
+          window.notifyUser('Payment Verified! ✅', `Order ${orderId} marked as PAID locally.`, 'success');
+        } else {
+          window.notifyUser('Status Updated 📝', `Order ${orderId} is now ${newStatus}.`, 'info');
+        }
       }
     }
   };
@@ -520,24 +534,24 @@
           .eq('id', orderId);
 
         if (error) throw error;
-        showToast(`Order ${orderId} deleted`);
+        window.notifyUser('Order Deleted 🗑️', `Order ${orderId} removed from database.`, 'info');
         fetchSupabaseOrders();
       } catch (err) {
-        showToast('Error deleting order: ' + err.message);
+        window.notifyUser('Delete Error ❌', err.message, 'error');
       }
     } else {
       delete allOrders[orderId];
       localStorage.setItem('bw_supabase_orders', JSON.stringify(allOrders));
       renderAdminTable();
       updateAdminMetrics();
-      showToast(`Order ${orderId} deleted`);
+      window.notifyUser('Order Deleted 🗑️', `Order ${orderId} removed from cache.`, 'info');
     }
   };
 
   window.exportOrdersToCsv = function () {
     const ordersList = Object.values(allOrders);
     if (ordersList.length === 0) {
-      showToast('No orders to export');
+      window.notifyUser('No Orders 📁', 'No book orders available to export.', 'warning');
       return;
     }
 
@@ -563,18 +577,101 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Orders exported to CSV!');
+    window.notifyUser('Orders Exported! 📊', `Downloaded BeatWave_Orders_${new Date().toISOString().slice(0, 10)}.csv`, 'success');
   };
 
-  function showToast(msg) {
-    const toast = document.getElementById('toastBox');
-    if (!toast) return;
-    toast.innerText = msg;
-    toast.classList.add('is-visible');
-    setTimeout(() => {
-      toast.classList.remove('is-visible');
-    }, 3200);
+  // Web Audio Synth Atmospheric Feedback
+  function playAudioCue(type) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      if (type === 'success') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.22);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'error' || type === 'warning') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.18);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+    } catch(e) {}
   }
+
+  window.notifyUser = function(title, msg, type = 'info', duration = 4200) {
+    let container = document.getElementById('bwToastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'bwToastContainer';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `bw-toast bw-toast-${type}`;
+
+    let iconSymbol = '🌊';
+    if (type === 'success') iconSymbol = '✓';
+    else if (type === 'error') iconSymbol = '✕';
+    else if (type === 'warning') iconSymbol = '⚠';
+
+    toast.innerHTML = `
+      <div class="bw-toast-icon">${iconSymbol}</div>
+      <div class="bw-toast-content">
+        <div class="bw-toast-title">${escapeHtml(title)}</div>
+        ${msg ? `<div class="bw-toast-msg">${escapeHtml(msg)}</div>` : ''}
+      </div>
+      <button type="button" class="bw-toast-close" title="Dismiss">&times;</button>
+      <div class="bw-toast-progress" style="animation-duration: ${duration}ms;"></div>
+    `;
+
+    container.appendChild(toast);
+    playAudioCue(type);
+
+    const removeToast = () => {
+      if (toast.classList.contains('is-leaving')) return;
+      toast.classList.add('is-leaving');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 350);
+    };
+
+    const timer = setTimeout(removeToast, duration);
+    const closeBtn = toast.querySelector('.bw-toast-close');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        clearTimeout(timer);
+        removeToast();
+      };
+    }
+  };
+
+  window.showToast = function(msg, type = 'info') {
+    window.notifyUser('BeatWave', msg, type);
+  };
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -734,11 +831,13 @@
       isAudioPlaying = true;
       if (pill) pill.classList.add('is-playing');
       if (label) label.innerText = 'Freq 432Hz Active';
+      window.notifyUser('Synth Stream Active 🎧', 'BeatWave 432Hz harmonic ambient synthesizer started.', 'info', 3000);
     } else {
       stopSynthTheme();
       isAudioPlaying = false;
       if (pill) pill.classList.remove('is-playing');
       if (label) label.innerText = 'Play Synth Frequency';
+      window.notifyUser('Synth Stream Paused 🔇', 'Ambient frequency muted.', 'info', 2000);
     }
   };
 

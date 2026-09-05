@@ -528,21 +528,110 @@
     };
     function switchAuthTab(tab) { window.switchAuthTab(tab); }
 
-    // 2. Notification Helper
+    // 2. Audio-Visual Notification Suite
+    function playAudioCue(type) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.22);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'error' || type === 'warning') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.18);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        }
+      } catch(e) {}
+    }
+
+    window.notifyUser = function(title, msg, type = 'info', duration = 4500) {
+      let container = document.getElementById('bwToastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'bwToastContainer';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `bw-toast bw-toast-${type}`;
+
+      let iconSymbol = '🌊';
+      if (type === 'success') iconSymbol = '✓';
+      else if (type === 'error') iconSymbol = '✕';
+      else if (type === 'warning') iconSymbol = '⚠';
+
+      toast.innerHTML = `
+        <div class="bw-toast-icon">${iconSymbol}</div>
+        <div class="bw-toast-content">
+          <div class="bw-toast-title">${title}</div>
+          ${msg ? `<div class="bw-toast-msg">${msg}</div>` : ''}
+        </div>
+        <button type="button" class="bw-toast-close" title="Dismiss">&times;</button>
+        <div class="bw-toast-progress" style="animation-duration: ${duration}ms;"></div>
+      `;
+
+      container.appendChild(toast);
+      playAudioCue(type);
+
+      const removeToast = () => {
+        if (toast.classList.contains('is-leaving')) return;
+        toast.classList.add('is-leaving');
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 350);
+      };
+
+      const timer = setTimeout(removeToast, duration);
+      const closeBtn = toast.querySelector('.bw-toast-close');
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          clearTimeout(timer);
+          removeToast();
+        };
+      }
+    };
+
     window.showNotice = function(msg, isSuccess = false) {
       try {
         const el = document.getElementById('authNotice');
-        if (!el) return;
-        el.innerHTML = msg;
-        el.style.display = 'block';
-        if (isSuccess) {
-          el.style.background = 'rgba(0, 255, 136, 0.12)';
-          el.style.border = '1px solid rgba(0, 255, 136, 0.35)';
-          el.style.color = '#00ff88';
-        } else {
-          el.style.background = 'rgba(255, 80, 80, 0.12)';
-          el.style.border = '1px solid rgba(255, 80, 80, 0.35)';
-          el.style.color = '#ff7070';
+        if (el) {
+          el.innerHTML = msg;
+          el.style.display = 'block';
+          if (isSuccess) {
+            el.style.background = 'rgba(0, 255, 136, 0.12)';
+            el.style.border = '1px solid rgba(0, 255, 136, 0.35)';
+            el.style.color = '#00ff88';
+          } else {
+            el.style.background = 'rgba(255, 80, 80, 0.12)';
+            el.style.border = '1px solid rgba(255, 80, 80, 0.35)';
+            el.style.color = '#ff7070';
+          }
         }
       } catch(e) {}
     };
@@ -760,10 +849,13 @@
             if (resendCard) resendCard.style.display = 'flex';
             if (promptText) promptText.innerText = `Your email ${email} has not been verified yet. Check your inbox or click resend below.`;
             window.showNotice('Email not confirmed yet. Please verify your email to log in.');
+            window.notifyUser('Email Unverified ✉️', `Please verify ${email} to unlock all reader features.`, 'warning');
           } else if (error.code === 'invalid_credentials' || errMsg.toLowerCase().includes('invalid login credentials')) {
             window.showNotice('Invalid email or password. Please check your credentials or click "Forgot Password?".');
+            window.notifyUser('Sign In Failed ❌', 'Incorrect email or password. Please try again.', 'error');
           } else {
             window.showNotice('Sign In: ' + errMsg);
+            window.notifyUser('Authentication Notice', errMsg, 'error');
           }
         } else {
           safeStorage.set('bw_failed_auth_attempts', '0');
@@ -774,6 +866,7 @@
           if (resendCard) resendCard.style.display = 'none';
           
           window.showNotice('Signed In Successfully! Redirecting to BeatWave...', true);
+          window.notifyUser('Welcome Back! 👋', `Signed in as ${email}. Entering story...`, 'success');
           window.renderReaderSession(data.session);
 
           const urlParams = new URLSearchParams(window.location.search);
@@ -789,6 +882,7 @@
         }
         recordFailedAttempt();
         window.showNotice('Authentication error: ' + err.message);
+        window.notifyUser('Sign In Error ❌', err.message, 'error');
       }
     };
 
@@ -804,23 +898,28 @@
 
       if (!name) {
         window.showNotice('Please enter your full name.');
+        window.notifyUser('Missing Name', 'Please enter your full name.', 'warning');
         return;
       }
       if (!email || !email.includes('@')) {
         window.showNotice('Please enter a valid email address.');
+        window.notifyUser('Invalid Email', 'Please enter a valid email address.', 'warning');
         return;
       }
       if (!password || password.length < 6) {
         window.showNotice('Password must be at least 6 characters long.');
+        window.notifyUser('Short Password', 'Password must be at least 6 characters long.', 'warning');
         return;
       }
       if (password !== confirmPass) {
         window.showNotice('Passwords do not match. Please verify both password fields.');
+        window.notifyUser('Password Mismatch', 'Passwords do not match. Please check both fields.', 'error');
         return;
       }
 
       if (!supabase) {
         window.showNotice('Supabase client connection offline.');
+        window.notifyUser('Network Offline', 'Cannot connect to database.', 'error');
         return;
       }
 
@@ -854,18 +953,22 @@
           recordFailedAttempt();
           if (error.status === 429 || error.message.includes('rate limit')) {
             window.showNotice('Supabase email limit reached. Please wait a minute before trying again.');
+            window.notifyUser('Rate Limit Reached', 'Please wait a minute before requesting another confirmation email.', 'warning');
           } else if (error.message.toLowerCase().includes('already registered')) {
             window.showNotice('An account with this email already exists. Switching to Sign In...', false);
+            window.notifyUser('Account Exists', 'This email is already registered. Switched to Sign In.', 'info');
             window.switchReaderMode('signin');
             const lEmail = document.getElementById('loginEmail');
             if (lEmail) lEmail.value = email;
           } else {
             window.showNotice('Sign Up Notice: ' + error.message);
+            window.notifyUser('Sign Up Notice', error.message, 'error');
           }
         } else {
           safeStorage.set('bw_saved_email', email);
           if (data && data.session) {
             window.showNotice('Account created and verified! Redirecting to BeatWave...', true);
+            window.notifyUser('Account Created! 🎉', `Welcome to BeatWave, ${name}! Your reader journey begins now.`, 'success');
             window.renderReaderSession(data.session);
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -876,6 +979,7 @@
           } else {
             if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
               window.showNotice('An account with this email already exists. Please switch to Sign In.', false);
+              window.notifyUser('Account Exists', 'This email is already registered. Switched to Sign In.', 'info');
               window.switchReaderMode('signin');
               const lEmail = document.getElementById('loginEmail');
               if (lEmail) lEmail.value = email;
@@ -886,6 +990,7 @@
               if (resendCard) resendCard.style.display = 'flex';
               if (promptText) promptText.innerText = `Verification email sent to ${email}. Check your inbox, or click below to proceed to the book.`;
               window.showNotice(`Account registered! Verification email sent to ${email}.<div style="margin-top: 8px;"><a href="index.html" class="btn-primary" style="display: inline-flex; padding: 6px 16px; font-size: 0.82rem; text-decoration: none;"><span>Proceed to Story &rarr;</span></a></div>`, true);
+              window.notifyUser('Welcome to BeatWave! 🎉', `Confirmation email sent to ${email}. Enjoy the book!`, 'success');
             }
           }
         }
@@ -896,6 +1001,7 @@
         }
         recordFailedAttempt();
         window.showNotice('Sign Up Error: ' + err.message);
+        window.notifyUser('Sign Up Error ❌', err.message, 'error');
       }
     };
 
@@ -905,10 +1011,12 @@
       const email = pendingUnconfirmedEmail || document.getElementById('loginEmail')?.value.trim() || document.getElementById('signUpEmail')?.value.trim() || safeStorage.get('bw_saved_email');
       if (!email) {
         window.showNotice('Please enter your email to resend confirmation.');
+        window.notifyUser('Missing Email', 'Please enter your email address.', 'warning');
         return;
       }
       if (resendCooldown > 0) {
         window.showNotice(`Please wait ${resendCooldown}s before requesting another confirmation email.`);
+        window.notifyUser('Cooldown Active', `Please wait ${resendCooldown}s before requesting again.`, 'warning');
         return;
       }
 
@@ -933,12 +1041,14 @@
 
         if (error) {
           window.showNotice('Resend Notice: ' + error.message);
+          window.notifyUser('Resend Notice', error.message, 'error');
           if (resendBtn) {
             resendBtn.disabled = false;
             resendBtn.innerText = 'Resend Confirmation Email';
           }
         } else {
           window.showNotice('Fresh confirmation email dispatched to ' + email + '! Check your inbox.', true);
+          window.notifyUser('Email Dispatched ✉️', `Fresh verification link sent to ${email}!`, 'success');
           resendCooldown = 60;
           const cdInterval = setInterval(() => {
             resendCooldown--;
@@ -959,6 +1069,7 @@
           resendBtn.innerText = 'Resend Confirmation Email';
         }
         window.showNotice('Error resending email: ' + err.message);
+        window.notifyUser('Error Resending Email', err.message, 'error');
       }
     };
 
@@ -967,6 +1078,7 @@
       const email = document.getElementById('loginEmail')?.value.trim();
       if (!email) {
         window.showNotice('Please type your email address above to receive a Magic Login Link.');
+        window.notifyUser('Email Required', 'Type your email address above to get a Magic Link.', 'warning');
         document.getElementById('loginEmail')?.focus();
         return;
       }
@@ -986,11 +1098,14 @@
 
         if (error) {
           window.showNotice('Magic Link Notice: ' + error.message);
+          window.notifyUser('Magic Link Notice', error.message, 'error');
         } else {
           window.showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
+          window.notifyUser('Magic Link Sent! ✉️', `Check ${email} to sign in with 1 tap.`, 'success');
         }
       } catch(err) {
         window.showNotice('Error sending magic link: ' + err.message);
+        window.notifyUser('Magic Link Error', err.message, 'error');
       }
     };
 
@@ -998,7 +1113,7 @@
     window.handleResetPassword = async function() {
       const email = document.getElementById('resetEmail')?.value.trim();
       if (!email) {
-        alert('Please enter your registered email address.');
+        window.notifyUser('Email Required', 'Please enter your registered email address.', 'warning');
         return;
       }
       if (!supabase) return;
@@ -1014,12 +1129,15 @@
 
         if (error) {
           window.showNotice('Password Reset Notice: ' + error.message);
+          window.notifyUser('Reset Error', error.message, 'error');
         } else {
           window.showNotice('Password reset link sent to ' + email + '! Check your inbox.', true);
+          window.notifyUser('Reset Link Dispatched 🔑', `Password recovery link sent to ${email}!`, 'success');
           window.toggleForgotPasswordBox(false);
         }
       } catch(err) {
         window.showNotice('Error resetting password: ' + err.message);
+        window.notifyUser('Reset Error', err.message, 'error');
       }
     };
 
@@ -1032,6 +1150,7 @@
         }
         window.renderReaderSession(null);
         window.showNotice('You have been signed out cleanly.', true);
+        window.notifyUser('Signed Out 👋', 'You have been signed out cleanly. See you soon!', 'info');
       } catch(e) {
         console.warn('Sign out err:', e);
         window.renderReaderSession(null);
@@ -1065,12 +1184,14 @@
       if (isValid) {
         try { sessionStorage.setItem('bw_admin_auth', 'true'); } catch(e) {}
         window.showNotice('Master Admin Authenticated! Opening Author Panel...', true);
+        window.notifyUser('Master Admin Verified 🔐', 'Welcome Akshansh & Team! Unlocking Author Dashboard...', 'success');
         setTimeout(() => {
           window.location.href = 'index.html#admin';
         }, 600);
       } else {
         recordFailedAttempt();
         window.showNotice('Access Denied: Invalid Master Password.');
+        window.notifyUser('Access Denied ⛔', 'Invalid master password entered.', 'error');
       }
     };
 
