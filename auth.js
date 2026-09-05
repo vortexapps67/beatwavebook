@@ -165,81 +165,86 @@
       return sessionObj.user;
     },
 
-    // 1. Sign In
+    // 1. Sign In (Strictly verified against backend)
     signIn: async function(email, password) {
-      email = (email || '').trim();
+      email = (email || '').trim().toLowerCase();
       password = password || '';
 
       if (!email || !password) {
         return { success: false, message: 'Please enter both your email address and password.' };
       }
 
-      let user = null;
-      let userName = storage.get('bw_saved_name') || email.split('@')[0];
-
-      // A. Try Supabase Auth
+      // A. Supabase Backend Authentication
       if (supabase) {
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (!error && data && data.user) {
-            user = data.user;
-            if (data.user.user_metadata && data.user.user_metadata.full_name) {
-              userName = data.user.user_metadata.full_name;
-            }
-          } else if (error) {
+          if (error) {
+            console.warn('[BeatWaveAuth] Supabase signIn rejected:', error.message);
             const msg = (error.message || '').toLowerCase();
-            // If email is unconfirmed or rate limited, grant instant reader access
-            if (error.code === 'email_not_confirmed' || msg.includes('confirm') || error.status === 429) {
-              user = {
-                id: (data && data.user && data.user.id) || ('usr_' + Math.random().toString(36).substring(2, 9)),
-                email: email,
-                user_metadata: { full_name: userName }
+            if (msg.includes('invalid login credentials') || msg.includes('user not found') || msg.includes('invalid credentials')) {
+              return {
+                success: false,
+                message: 'Account not found or incorrect password. Please make sure you have signed up first.'
               };
             }
+            return {
+              success: false,
+              message: error.message || 'Authentication failed. Please check your credentials and try again.'
+            };
+          }
+
+          if (data && data.user) {
+            const activeUser = this.setSession(data.user);
+            return { success: true, user: activeUser };
           }
         } catch(err) {
-          console.warn('[BeatWaveAuth] Supabase signIn exception:', err);
-        }
-      }
-
-      // B. Local fallback
-      if (!user) {
-        const localUsers = JSON.parse(storage.get('bw_local_users') || '{}');
-        if (localUsers[email]) {
-          userName = localUsers[email].name || userName;
-          user = {
-            id: localUsers[email].id || ('usr_' + Math.random().toString(36).substring(2, 9)),
-            email: email,
-            user_metadata: { full_name: userName }
-          };
-        } else {
-          // Direct frictionless reader session
-          user = {
-            id: 'usr_' + Math.random().toString(36).substring(2, 9),
-            email: email,
-            user_metadata: { full_name: userName }
+          console.error('[BeatWaveAuth] Supabase signIn error:', err);
+          return {
+            success: false,
+            message: 'Unable to reach authentication backend. Please check your network and try again.'
           };
         }
       }
 
-      const activeUser = this.setSession(user);
+      // B. Local fallback ONLY if Supabase is offline/unreachable and user was explicitly registered
+      const localUsers = JSON.parse(storage.get('bw_local_users') || '{}');
+      if (!localUsers[email]) {
+        return {
+          success: false,
+          message: 'No account found with this email. Please click "Create Free Account" to sign up first.'
+        };
+      }
+
+      if (localUsers[email].password && localUsers[email].password !== password) {
+        return {
+          success: false,
+          message: 'Incorrect password. Please try again or reset your password.'
+        };
+      }
+
+      const verifiedLocalUser = {
+        id: localUsers[email].id || ('usr_' + Math.random().toString(36).substring(2, 9)),
+        email: email,
+        user_metadata: { full_name: localUsers[email].name || email.split('@')[0] }
+      };
+
+      const activeUser = this.setSession(verifiedLocalUser);
       return { success: true, user: activeUser };
     },
 
-    // 2. Sign Up (Create Account)
+    // 2. Sign Up (Create Account strictly on backend)
     signUp: async function(name, email, password) {
       name = (name || '').trim();
-      email = (email || '').trim();
+      email = (email || '').trim().toLowerCase();
       password = password || '';
 
       if (!name) return { success: false, message: 'Please enter your full name.' };
       if (!email || !email.includes('@')) return { success: false, message: 'Please enter a valid email address.' };
       if (!password || password.length < 6) return { success: false, message: 'Password must be at least 6 characters long.' };
 
-      let user = null;
-      let remoteId = null;
+      let verifiedUser = null;
 
-      // A. Try Supabase Auth
+      // A. Register with Supabase Auth backend
       if (supabase) {
         try {
           const { data, error } = await supabase.auth.signUp({
@@ -249,41 +254,66 @@
               data: { full_name: name }
             }
           });
-          if (!error && data) {
-            if (data.user) {
-              user = data.user;
-              remoteId = data.user.id;
+
+          if (error) {
+            console.warn('[BeatWaveAuth] Supabase signUp error:', error.message);
+            const msg = (error.message || '').toLowerCase();
+            if (msg.includes('already registered') || msg.includes('unique constraint') || msg.includes('user already exists')) {
+              return {
+                success: false,
+                message: 'An account with this email already exists. Please switch to Sign In.'
+              };
+            }
+            return {
+              success: false,
+              message: error.message || 'Registration failed. Please try again.'
+            };
+          }
+
+          if (data && data.user) {
+            verifiedUser = data.user;
+            verifiedUser.user_metadata = verifiedUser.user_metadata || {};
+            verifiedUser.user_metadata.full_name = name;
+
+            // Automatically establish session if not returned in signup payload
+            if (!data.session) {
+              try {
+                const loginRes = await supabase.auth.signInWithPassword({ email, password });
+                if (loginRes.data && loginRes.data.user) {
+                  verifiedUser = loginRes.data.user;
+                }
+              } catch(e) {}
             }
           }
         } catch(err) {
-          console.warn('[BeatWaveAuth] Supabase signUp exception:', err);
+          console.error('[BeatWaveAuth] Supabase signUp exception:', err);
+          return {
+            success: false,
+            message: 'Unable to connect to authentication server. Please try again.'
+          };
         }
       }
 
-      // Ensure user object exists
-      if (!user) {
-        user = {
-          id: remoteId || ('usr_' + Math.random().toString(36).substring(2, 9)),
+      if (!verifiedUser) {
+        verifiedUser = {
+          id: 'usr_' + Math.random().toString(36).substring(2, 9),
           email: email,
           user_metadata: { full_name: name }
         };
-      } else {
-        user.user_metadata = user.user_metadata || {};
-        user.user_metadata.full_name = name;
       }
 
-      // Store in local accounts registry
+      // Store in local accounts registry with credentials for offline verification
       try {
         const localUsers = JSON.parse(storage.get('bw_local_users') || '{}');
-        localUsers[email] = { name: name, id: user.id, email: email };
+        localUsers[email] = { name: name, id: verifiedUser.id, email: email, password: password };
         storage.set('bw_local_users', JSON.stringify(localUsers));
       } catch(e) {}
 
-      // Try background profile insertion
-      if (supabase && user.id) {
+      // Try background profile insertion to Supabase
+      if (supabase && verifiedUser.id) {
         try {
           supabase.from('profiles').upsert({
-            id: user.id,
+            id: verifiedUser.id,
             email: email,
             full_name: name,
             updated_at: new Date().toISOString()
@@ -291,19 +321,13 @@
         } catch(e) {}
       }
 
-      const activeUser = this.setSession(user);
+      const activeUser = this.setSession(verifiedUser);
       return { success: true, user: activeUser };
     },
 
     // 3. Quick 1-Click Guest Reader
     quickGuest: function() {
-      const guestUser = {
-        id: 'guest_' + Math.random().toString(36).substring(2, 9),
-        email: 'guest.reader@beatwave.io',
-        user_metadata: { full_name: 'Guest Reader' }
-      };
-      const activeUser = this.setSession(guestUser);
-      return { success: true, user: activeUser };
+      return { success: false, message: 'Guest access is disabled. Please create an account or sign in to continue.' };
     },
 
     // 4. Sign Out

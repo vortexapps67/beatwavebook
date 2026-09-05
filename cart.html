@@ -185,17 +185,17 @@
             </div>
 
             <!-- Auth Gate Card (If not signed in) -->
-            <div id="cartAuthGateBox" class="checkout-auth-gate-box" style="display: none;">
-              <div style="font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #fff;">Reader Account Required</div>
+            <div id="cartAuthGateBox" class="checkout-auth-gate-box" style="display: block; padding: 18px; text-align: center;">
+              <div style="font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #fff;">🔐 Reader Account Required</div>
               <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin-bottom: var(--space-md);">
-                Sign in or continue as reader to link this book copy to your personal profile &amp; order ledger.
+                Please sign in or create an account to verify your identity and link this book order to your account.
               </p>
-              <div style="display: flex; gap: var(--space-xs); justify-content: center; flex-wrap: wrap;">
-                <button type="button" onclick="cartQuickGuestAccess()" class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem;">
-                  <span>1-Click Continue as Reader &rarr;</span>
-                </button>
-                <a href="login.html?redirect=cart.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.82rem;">
-                  <span>Sign In / Sign Up</span>
+              <div style="display: flex; gap: var(--space-sm); justify-content: center; flex-wrap: wrap;">
+                <a href="login.html?redirect=cart.html" class="btn-primary" style="padding: 9px 20px; font-size: 0.82rem; text-decoration: none;">
+                  <span>Sign In &rarr;</span>
+                </a>
+                <a href="login.html?mode=signup&redirect=cart.html" class="btn-secondary" style="padding: 9px 20px; font-size: 0.82rem; text-decoration: none;">
+                  <span>Create Free Account</span>
                 </a>
               </div>
             </div>
@@ -482,7 +482,7 @@
 
     async function submitCartOrder() {
       if (!isReaderAuthenticated) {
-        BeatWaveAuth.toast('Sign In Required 🔐', 'Please sign in or click "1-Click Continue as Reader" above to place an order.', 'warning');
+        BeatWaveAuth.toast('Sign In Required 🔐', 'Please sign in or create an account to place your order.', 'warning');
         const gateBox = document.getElementById('cartAuthGateBox');
         if (gateBox) {
           gateBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
