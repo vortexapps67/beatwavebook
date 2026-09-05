@@ -719,32 +719,17 @@
 
     let currentPercent = 0;
     const targetPercent = 100;
-    const duration = 1200; // 1.2s smooth cinematic load
+    const duration = 400; // Fast 400ms elegant fade
     const startTime = performance.now();
 
     function updatePreloader(now) {
       const elapsed = now - startTime;
       const progress = Math.min(1, elapsed / duration);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       currentPercent = Math.floor(eased * targetPercent);
 
       counter.innerText = (currentPercent < 10 ? '0' : '') + currentPercent + '%';
       fill.style.width = currentPercent + '%';
-
-      // Update status text
-      for (let i = milestones.length - 1; i >= 0; i--) {
-        if (currentPercent >= milestones[i].at) {
-          if (status.innerText !== milestones[i].text) {
-            status.style.opacity = '0';
-            setTimeout(() => {
-              status.innerText = milestones[i].text;
-              status.style.opacity = '1';
-            }, 80);
-          }
-          break;
-        }
-      }
 
       if (progress < 1) {
         requestAnimationFrame(updatePreloader);
@@ -756,21 +741,21 @@
           triggerInitialScrollReveal();
           setTimeout(() => {
             preloader.style.display = 'none';
-          }, 850);
-        }, 220);
+          }, 350);
+        }, 100);
       }
     }
 
     requestAnimationFrame(updatePreloader);
 
-    // Global Safety Guard: Dismiss preloader after 2.0s under all network conditions
+    // Global Safety Guard: Dismiss preloader after 700ms under all network conditions
     setTimeout(() => {
       if (!preloader.classList.contains('is-loaded')) {
         preloader.classList.add('is-loaded');
         triggerInitialScrollReveal();
-        setTimeout(() => { preloader.style.display = 'none'; }, 600);
+        setTimeout(() => { preloader.style.display = 'none'; }, 250);
       }
-    }, 2000);
+    }, 700);
   }
 
   // ==========================================================================

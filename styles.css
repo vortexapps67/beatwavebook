@@ -19,8 +19,9 @@
   --color-accent-red: oklch(65% 0.23 20);
   --color-success: oklch(82% 0.19 145);
 
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Fraunces', 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Space Mono', monospace;
 
   --space-2xs: 4px;
   --space-xs: 8px;
@@ -34,13 +35,13 @@
 
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 22px;
-  --radius-xl: 32px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
-  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 *, *::before, *::after {
@@ -471,35 +472,48 @@ body {
   opacity: 0.55;
 }
 
-/* Strict Normal Roman Headers */
+/* Editorial Display Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   font-style: normal;
-  font-weight: 800;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: 1.12;
   color: var(--color-ink);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
   min-width: 0;
 }
 
 h1 {
-  font-size: clamp(2.5rem, 5.5vw, 4.4rem);
-  font-weight: 900;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.6rem, 5.8vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
 }
 
 h2 {
-  font-size: clamp(1.8rem, 3.8vw, 2.8rem);
-  font-weight: 800;
+  font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 h3 {
-  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+h4 {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  font-weight: 600;
 }
 
 p {
   color: var(--color-ink-muted);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.72;
 }
 
 a {
@@ -717,25 +731,30 @@ a {
 }
 
 .hero-quote-box {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(14px);
-  border-left: 3px solid var(--color-accent-cyan);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px);
+  border-left: 3px solid var(--color-accent-warm);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: var(--space-md) var(--space-lg);
-  font-size: 0.95rem;
+  padding: var(--space-lg) var(--space-xl);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-style: italic;
+  line-height: 1.68;
   color: var(--color-ink);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
 }
 
 .hero-quote-box span {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-ink-faint);
-  margin-top: var(--space-xs);
+  font-style: normal;
+  font-size: 0.76rem;
+  color: var(--color-accent-warm);
+  margin-top: var(--space-sm);
+  letter-spacing: 0.04em;
 }
 
 .hero-actions {
@@ -947,19 +966,25 @@ a {
 
 .chapter-num {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--color-accent-warm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .chapter-title {
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
 .chapter-desc {
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--color-ink-muted);
 }
 
 /* Expandable Full Table of Contents (Chapters 5-14) */
@@ -1093,20 +1118,25 @@ a {
 }
 
 .tier-name {
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .tier-desc {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-ink-muted);
   margin-top: 4px;
 }
 
 .tier-amount {
-  font-size: 3rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 700;
   color: var(--color-ink);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
