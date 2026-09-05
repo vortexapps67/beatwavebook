@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart & Checkout — The Story of BeatWave</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Animated Background Layer -->
+  <div class="ambient-bg-wrapper">
+    <div class="ambient-bg-img"></div>
+  </div>
+  <div class="ambient-glow-orb orb-1"></div>
+  <div class="ambient-glow-orb orb-2"></div>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- LIQUID GLASS NAV PRO -->
+  <header class="liquid-nav-container">
+    <nav class="liquid-glass-nav">
+      <a href="index.html" class="liquid-brand">
+        <img src="beatwave new new.png" alt="BeatWave Logo">
+        <span>BeatWave</span>
+      </a>
+      <ul class="liquid-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#book-preview">Chapters</a></li>
+        <li><a href="track.html">Track Order</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+      <a href="index.html#pricing" class="liquid-cta-btn">
+        <span>&larr; Back to Editions</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="subpage-wrapper">
+    <div class="container">
+      <div class="page-header">
+        <div class="hero-tag" style="margin: 0 auto var(--space-xs);">
+          <span class="tag-dot"></span>
+          <span>Instant Checkout</span>
+        </div>
+        <h2>Review Your Order</h2>
+        <p>Complete your reservation for &ldquo;The Story of BeatWave&rdquo; by Vortex Apps.</p>
+      </div>
+
+      <div class="cart-grid">
+        <!-- Left: Item selection & Customer details -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+          <div class="cart-item-card">
+            <img src="front cover.jpg" alt="The Story of BeatWave" class="cart-book-thumb">
+            <div style="flex: 1;">
+              <span class="hero-tag" style="margin-bottom: 6px; font-size: 0.72rem;">Official First Edition</span>
+              <h3 style="font-size: 1.25rem;">The Story of BeatWave</h3>
+              <p style="font-size: 0.85rem; margin-top: 2px;">By Vortex Apps &middot; Akshansh Sinha, Aarav Sharma, Aarav Singh</p>
+
+              <!-- Edition Radio Selector -->
+              <div class="cart-tier-selector">
+                <label class="cart-radio-label is-selected" id="radioLabelEbook" onclick="selectCartTier('ebook')">
+                  <div>
+                    <strong style="font-size: 0.95rem; color: var(--color-ink);">Digital E-Book Edition</strong>
+                    <div style="font-size: 0.75rem; color: var(--color-ink-muted);">PDF + EPUB &middot; Instant delivery upon verification</div>
+                  </div>
+                  <strong style="color: var(--color-accent-cyan); font-family: var(--font-mono);">&#8377;150</strong>
+                </label>
+
+                <label class="cart-radio-label" id="radioLabelPrint" onclick="selectCartTier('print')">
+                  <div>
+                    <strong style="font-size: 0.95rem; color: var(--color-ink);">Collector's Printed Copy</strong>
+                    <div style="font-size: 0.75rem; color: var(--color-ink-muted);">Matte Softcover + Free Companion E-Book</div>
+                  </div>
+                  <strong style="color: var(--color-accent-cyan); font-family: var(--font-mono);">&#8377;250 <span style="font-size: 0.7rem; color: var(--color-ink-faint);">+ &#8377;40 del.</span></strong>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Form -->
+          <div class="cart-item-card" style="flex-direction: column; align-items: stretch;">
+            <h3 style="font-size: 1.15rem; margin-bottom: var(--space-xs);">1. Contact & Delivery Details</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="form-group">
+                <label class="form-label" for="cartName">Full Name *</label>
+                <input type="text" id="cartName" class="form-input" placeholder="e.g. Rahul Verma" required>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                <div class="form-group">
+                  <label class="form-label" for="cartEmail">Email Address *</label>
+                  <input type="email" id="cartEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cartPhone">WhatsApp Number *</label>
+                  <input type="tel" id="cartPhone" class="form-input" placeholder="e.g. 9876543210" required>
+                </div>
+              </div>
+
+              <div class="form-group" id="cartAddressGroup" style="display: none;">
+                <label class="form-label" for="cartAddress">Shipping Delivery Address (with PIN Code) *</label>
+                <textarea id="cartAddress" class="form-textarea" placeholder="House/Flat No., Landmark, City, State, PIN Code"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Summary & Instant UPI Payment -->
+        <div class="cart-item-card" style="flex-direction: column; align-items: stretch; position: sticky; top: 120px;">
+          <h3 style="font-size: 1.15rem;">2. Payment & Confirmation</h3>
+          
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <span id="summaryTierTitle">Digital E-Book Edition</span>
+            <strong id="summaryTierBase">&#8377;150</strong>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--color-ink-faint);" id="deliveryFeeRow" style="display: none;">
+            <span>Delivery & Packaging</span>
+            <strong id="summaryDeliveryFee">&#8377;0</strong>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; padding: 12px 0; color: var(--color-ink);">
+            <span>Total Payable:</span>
+            <span style="color: var(--color-accent-cyan); font-family: var(--font-mono);" id="cartTotalPayable">&#8377;150</span>
+          </div>
+
+          <!-- Instant UPI Section -->
+          <div class="upi-qr-card" style="padding: var(--space-md); margin-top: var(--space-xs);">
+            <img src="upi qr aarav.jpg" alt="UPI QR Code" style="width: 150px; height: 150px;">
+            <a id="cartUpiBtn" href="#" class="btn-primary" style="width: 100%; padding: 8px; font-size: 0.85rem;">
+              <span>Pay via PhonePe / GPay</span>
+            </a>
+            <div class="upi-id-badge" onclick="copyUpiId()" style="font-size: 0.78rem;">
+              <span>akshanshsinha67@axl</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: var(--space-sm);">
+            <label class="form-label" for="cartSenderName" style="font-size: 0.75rem;">Your UPI Name / Phone (Optional)</label>
+            <input type="text" id="cartSenderName" class="form-input" placeholder="e.g. rahul@oksbi" style="padding: 6px 12px; font-size: 0.85rem;">
+          </div>
+
+          <button class="btn-primary" style="width: 100%; background: var(--color-success); color: #000; margin-top: var(--space-xs);" onclick="submitCartOrder()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>I Have Paid &middot; Place Order</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-statement">
+    <div class="container">
+      <div class="footer-meta">
+        <span>&copy; 2026 Vortex Apps &middot; BeatWave</span>
+        <a href="track.html" style="color: var(--color-accent-cyan);">Track Your Order</a>
+        <a href="login.html">Author Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-msg" id="toastBox"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let activeTier = 'ebook';
+
+    function selectCartTier(tier) {
+      activeTier = tier;
+      document.getElementById('radioLabelEbook').classList.toggle('is-selected', tier === 'ebook');
+      document.getElementById('radioLabelPrint').classList.toggle('is-selected', tier === 'print');
+      
+      const addrGroup = document.getElementById('cartAddressGroup');
+      const delRow = document.getElementById('deliveryFeeRow');
+      const totalPayable = document.getElementById('cartTotalPayable');
+      const tierTitle = document.getElementById('summaryTierTitle');
+      const tierBase = document.getElementById('summaryTierBase');
+      const deliveryFee = document.getElementById('summaryDeliveryFee');
+
+      if (tier === 'print') {
+        addrGroup.style.display = 'flex';
+        delRow.style.display = 'flex';
+        tierTitle.innerText = "Collector's Printed Copy";
+        tierBase.innerText = "₹250";
+        deliveryFee.innerText = "₹40";
+        totalPayable.innerText = "₹290";
+        updateUpiLink(290);
+      } else {
+        addrGroup.style.display = 'none';
+        delRow.style.display = 'none';
+        tierTitle.innerText = "Digital E-Book Edition";
+        tierBase.innerText = "₹150";
+        deliveryFee.innerText = "₹0";
+        totalPayable.innerText = "₹150";
+        updateUpiLink(150);
+      }
+    }
+
+    function updateUpiLink(amount) {
+      const btn = document.getElementById('cartUpiBtn');
+      if (btn) {
+        btn.href = `upi://pay?pa=akshanshsinha67@axl&pn=VortexApps_BeatWave&am=${amount}&cu=INR&tn=BeatWaveBook_Cart`;
+      }
+    }
+    updateUpiLink(150);
+
+    // Read URL param if user navigated with ?tier=print
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tier') === 'print') {
+      selectCartTier('print');
+    }
+
+    async function submitCartOrder() {
+      const name = document.getElementById('cartName').value.trim();
+      const email = document.getElementById('cartEmail').value.trim();
+      const phone = document.getElementById('cartPhone').value.trim();
+      const address = document.getElementById('cartAddress').value.trim();
+      const sender = document.getElementById('cartSenderName').value.trim() || name;
+
+      if (!name || !email || !phone) {
+        alert('Please fill your name, email, and phone number.');
+        return;
+      }
+      if (activeTier === 'print' && !address) {
+        alert('Please provide your shipping delivery address with PIN code.');
+        return;
+      }
+
+      const orderId = 'BW-' + Math.floor(100000 + Math.random() * 900000);
+      const amount = activeTier === 'print' ? 290 : 150;
+      const tierName = activeTier === 'print' ? "Collector's Printed Copy" : "Digital E-Book Edition";
+
+      const orderData = {
+        id: orderId,
+        customer_name: name,
+        email: email,
+        phone: phone,
+        tier_id: activeTier,
+        tier_name: tierName,
+        amount: amount,
+        delivery_address: address || 'N/A (Digital)',
+        payment_method: 'UPI',
+        sender_handle: sender,
+        status: 'PENDING',
+        created_at: new Date().toISOString()
+      };
+
+      // Push to Supabase
+      try {
+        if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
+          const client = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
+          await client.from('book_orders').insert([orderData]);
+        }
+      } catch(e) {
+        console.warn('Saved order locally:', e.message);
+      }
+
+      // Save active order locally
+      localStorage.setItem('bw_last_order', JSON.stringify(orderData));
+
+      // Redirect to Thank You Page
+      window.location.href = `thankyou.html?orderId=${orderId}&name=${encodeURIComponent(name)}&amount=${amount}`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed — The Story of BeatWave</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Animated Background Layer -->
+  <div class="ambient-bg-wrapper">
+    <div class="ambient-bg-img"></div>
+  </div>
+  <div class="ambient-glow-orb orb-1"></div>
+  <div class="ambient-glow-orb orb-2"></div>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- LIQUID GLASS NAV PRO -->
+  <header class="liquid-nav-container">
+    <nav class="liquid-glass-nav">
+      <a href="index.html" class="liquid-brand">
+        <img src="beatwave new new.png" alt="BeatWave Logo">
+        <span>BeatWave</span>
+      </a>
+      <ul class="liquid-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="track.html">Track Order</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+      <a href="index.html" class="liquid-cta-btn">
+        <span>&larr; Back to Home</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="subpage-wrapper">
+    <div class="container" style="max-width: 680px;">
+      <div class="track-search-box" style="text-align: center;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0, 255, 136, 0.15); border: 2px solid var(--color-success); color: var(--color-success); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+
+        <span class="hero-tag" style="margin: 0 auto var(--space-xs);">Order Submitted</span>
+        <h2 style="font-size: 2.2rem; margin-bottom: 8px;">Thank You!</h2>
+        <p style="font-size: 1rem; color: var(--color-ink-muted); margin-bottom: var(--space-xl);">
+          Your order for <strong style="color: var(--color-ink);">&ldquo;The Story of BeatWave&rdquo;</strong> has been placed into our live database.
+        </p>
+
+        <!-- Order Snapshot Card -->
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: var(--space-lg); text-align: left; margin-bottom: var(--space-xl);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 12px;">
+            <span style="font-size: 0.85rem; color: var(--color-ink-faint);">Order Reference:</span>
+            <strong style="font-family: var(--font-mono); color: var(--color-accent-cyan); font-size: 1.15rem;" id="tyOrderId">BW-000000</strong>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+            <span style="color: var(--color-ink-muted);">Customer:</span>
+            <span style="color: var(--color-ink); font-weight: 700;" id="tyCustomerName">Customer</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px;">
+            <span style="color: var(--color-ink-muted);">Total Amount:</span>
+            <span style="color: var(--color-ink); font-family: var(--font-mono); font-weight: 700;" id="tyAmount">&#8377;150</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+            <span style="color: var(--color-ink-muted);">Current Status:</span>
+            <span class="status-badge status-pending" id="tyStatus">Pending Verification</span>
+          </div>
+        </div>
+
+        <!-- Next Steps Explainer -->
+        <div style="background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); padding: var(--space-md); text-align: left; margin-bottom: var(--space-xl); font-size: 0.85rem; color: var(--color-ink-muted); line-height: 1.6;">
+          <strong style="color: var(--color-ink); display: block; margin-bottom: 4px;">What Happens Next?</strong>
+          1. The Vortex Apps team matches your payment notification on our author dashboard.<br>
+          2. Once verified, your status updates to <strong style="color: var(--color-success);">PAID</strong>.<br>
+          3. For E-Books, instant download unlocks on your tracking page. For printed copies, speed post dispatch tracking will be sent.
+        </div>
+
+        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+          <a id="trackOrderBtn" href="track.html" class="btn-primary" style="flex: 1; text-align: center;">
+            <span>Track Order Status &rarr;</span>
+          </a>
+          <a href="index.html" class="btn-secondary" style="flex: 1; text-align: center;">
+            <span>Return to Homepage</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-statement">
+    <div class="container">
+      <div class="footer-meta">
+        <span>&copy; 2026 Vortex Apps &middot; BeatWave</span>
+        <a href="track.html">Track Order</a>
+        <a href="login.html">Author Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Read parameters from URL or localStorage
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('orderId') || 'BW-' + Math.floor(100000 + Math.random() * 900000);
+    const name = params.get('name') || 'Valued Reader';
+    const amount = params.get('amount') || '150';
+
+    document.getElementById('tyOrderId').innerText = orderId;
+    document.getElementById('tyCustomerName').innerText = decodeURIComponent(name);
+    document.getElementById('tyAmount').innerText = '₹' + amount;
+    document.getElementById('trackOrderBtn').href = `track.html?orderId=${orderId}`;
+  </script>
+</body>
+</html>

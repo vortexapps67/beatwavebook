@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Authentication — The Story of BeatWave</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Animated Background Layer -->
+  <div class="ambient-bg-wrapper">
+    <div class="ambient-bg-img"></div>
+  </div>
+  <div class="ambient-glow-orb orb-1"></div>
+  <div class="ambient-glow-orb orb-2"></div>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- LIQUID GLASS NAV PRO -->
+  <header class="liquid-nav-container">
+    <nav class="liquid-glass-nav">
+      <a href="index.html" class="liquid-brand">
+        <img src="beatwave new new.png" alt="BeatWave Logo">
+        <span>BeatWave</span>
+      </a>
+      <ul class="liquid-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="track.html">Track Order</a></li>
+      </ul>
+      <a href="cart.html" class="liquid-cta-btn">
+        <span>Order Book</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="subpage-wrapper">
+    <div class="container">
+      <div class="auth-container">
+        <!-- Auth Tabs: Reader Login vs Admin Portal -->
+        <div class="auth-tabs">
+          <button class="auth-tab-btn is-active" id="tabReaderBtn" onclick="switchAuthTab('reader')">Reader Sign In</button>
+          <button class="auth-tab-btn" id="tabAdminBtn" onclick="switchAuthTab('admin')">Admin Portal</button>
+        </div>
+
+        <!-- Rate Limit Alert Card -->
+        <div class="rate-limit-card" id="rateLimitCard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Too many attempts.</strong>
+            <div style="font-size: 0.78rem;">Please wait <span id="rateLimitTimer" style="font-weight: 800; font-family: var(--font-mono);">60</span>s before trying again.</div>
+          </div>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="authNotice" style="display: none; padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem;"></div>
+
+        <!-- TAB 1: Reader Login / Register with Supabase Email Verification -->
+        <div id="readerAuthView">
+          <div style="text-align: center; margin-bottom: var(--space-md);">
+            <h3 style="font-size: 1.4rem;">Reader Account</h3>
+            <p style="font-size: 0.85rem;">Sign in to access your digital books and track all your orders.</p>
+          </div>
+
+          <form id="readerAuthForm" onsubmit="handleReaderAuth(event)">
+            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="form-group">
+                <label class="form-label" for="authEmail">Email Address *</label>
+                <input type="email" id="authEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="authPassword">Password *</label>
+                <input type="password" id="authPassword" class="form-input" placeholder="Enter password (min 6 chars)" required minlength="6">
+              </div>
+
+              <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-xs);">
+                <button type="submit" id="btnSignIn" class="btn-primary" style="flex: 1;">
+                  <span>Sign In</span>
+                </button>
+                <button type="button" id="btnSignUp" class="btn-secondary" style="flex: 1;" onclick="handleReaderSignUp()">
+                  <span>Create Account</span>
+                </button>
+              </div>
+
+              <div style="text-align: center; margin-top: var(--space-xs);">
+                <button type="button" onclick="handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+                  Send Passwordless Magic Link to Email
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB 2: Admin Master Portal -->
+        <div id="adminAuthView" style="display: none;">
+          <div style="text-align: center; margin-bottom: var(--space-md);">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); color: var(--color-accent-cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-xs);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3 style="font-size: 1.4rem;">Author Admin</h3>
+            <p style="font-size: 0.85rem;">Enter master password to access live Supabase orders ledger.</p>
+          </div>
+
+          <form id="adminAuthForm" onsubmit="handleAdminLogin(event)">
+            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="form-group">
+                <label class="form-label" for="adminPass">Master Password *</label>
+                <input type="password" id="adminPass" class="form-input" placeholder="admin00" required>
+              </div>
+
+              <button type="submit" class="btn-primary" style="width: 100%;">
+                <span>Unlock Author Panel</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-statement">
+    <div class="container">
+      <div class="footer-meta">
+        <span>&copy; 2026 Vortex Apps &middot; BeatWave</span>
+        <a href="track.html">Track Order</a>
+        <a href="cart.html">Cart</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script>
+    let supabase = null;
+    try {
+      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
+        supabase = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
+      }
+    } catch(e) {}
+
+    // Rate Limiting Logic (Blocks after 5 failed attempts for 60 seconds)
+    let failedAttempts = parseInt(localStorage.getItem('bw_failed_auth_attempts') || '0');
+    let lockoutUntil = parseInt(localStorage.getItem('bw_auth_lockout_until') || '0');
+
+    function checkRateLimit() {
+      const now = Date.now();
+      if (lockoutUntil && now < lockoutUntil) {
+        const remaining = Math.ceil((lockoutUntil - now) / 1000);
+        showRateLimitBanner(remaining);
+        return true;
+      } else if (lockoutUntil && now >= lockoutUntil) {
+        lockoutUntil = 0;
+        failedAttempts = 0;
+        localStorage.removeItem('bw_auth_lockout_until');
+        localStorage.setItem('bw_failed_auth_attempts', '0');
+        document.getElementById('rateLimitCard').style.display = 'none';
+      }
+      return false;
+    }
+
+    function recordFailedAttempt() {
+      failedAttempts++;
+      localStorage.setItem('bw_failed_auth_attempts', failedAttempts.toString());
+      if (failedAttempts >= 5) {
+        lockoutUntil = Date.now() + 60000; // 60 seconds lock
+        localStorage.setItem('bw_auth_lockout_until', lockoutUntil.toString());
+        showRateLimitBanner(60);
+      }
+    }
+
+    function showRateLimitBanner(seconds) {
+      const card = document.getElementById('rateLimitCard');
+      const timer = document.getElementById('rateLimitTimer');
+      card.style.display = 'flex';
+      timer.innerText = seconds;
+
+      const interval = setInterval(() => {
+        const now = Date.now();
+        const rem = Math.ceil((lockoutUntil - now) / 1000);
+        if (rem <= 0) {
+          clearInterval(interval);
+          checkRateLimit();
+        } else {
+          timer.innerText = rem;
+        }
+      }, 1000);
+    }
+    checkRateLimit();
+
+    // Tab switcher
+    function switchAuthTab(tab) {
+      document.getElementById('tabReaderBtn').classList.toggle('is-active', tab === 'reader');
+      document.getElementById('tabAdminBtn').classList.toggle('is-active', tab === 'admin');
+      document.getElementById('readerAuthView').style.display = tab === 'reader' ? 'block' : 'none';
+      document.getElementById('adminAuthView').style.display = tab === 'admin' ? 'block' : 'none';
+    }
+
+    function showNotice(msg, isSuccess = false) {
+      const el = document.getElementById('authNotice');
+      el.innerText = msg;
+      el.style.display = 'block';
+      if (isSuccess) {
+        el.style.background = 'rgba(0, 255, 136, 0.15)';
+        el.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+        el.style.color = '#00ff88';
+      } else {
+        el.style.background = 'rgba(255, 80, 80, 0.15)';
+        el.style.border = '1px solid rgba(255, 80, 80, 0.3)';
+        el.style.color = '#ff7070';
+      }
+    }
+
+    // Reader Sign In with Supabase
+    async function handleReaderAuth(e) {
+      e.preventDefault();
+      if (checkRateLimit()) return;
+
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      if (!supabase) {
+        showNotice('Supabase client offline. Check configuration.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          recordFailedAttempt();
+          showNotice('Sign In Failed: ' + error.message);
+        } else {
+          localStorage.setItem('bw_failed_auth_attempts', '0');
+          showNotice('Signed In Successfully! Redirecting to tracking...', true);
+          setTimeout(() => {
+            window.location.href = 'track.html?orderId=' + encodeURIComponent(email);
+          }, 1200);
+        }
+      } catch(err) {
+        recordFailedAttempt();
+        showNotice('Authentication error: ' + err.message);
+      }
+    }
+
+    // Reader Sign Up with Supabase (Sends verification email!)
+    async function handleReaderSignUp() {
+      if (checkRateLimit()) return;
+
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      if (!email || !password) {
+        alert('Please provide an email and password (min 6 characters).');
+        return;
+      }
+
+      if (!supabase) {
+        showNotice('Supabase offline.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/track.html'
+          }
+        });
+
+        if (error) {
+          recordFailedAttempt();
+          showNotice('Sign Up Error: ' + error.message);
+        } else {
+          showNotice('Verification email sent to ' + email + '! Please click the verification link in your inbox.', true);
+        }
+      } catch(err) {
+        showNotice('Error: ' + err.message);
+      }
+    }
+
+    // Passwordless Magic Link via Supabase
+    async function handleSendMagicLink() {
+      const email = document.getElementById('authEmail').value.trim();
+      if (!email) {
+        alert('Please enter your email above to receive a login link.');
+        return;
+      }
+
+      if (!supabase) return;
+
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            emailRedirectTo: window.location.origin + '/track.html'
+          }
+        });
+
+        if (error) {
+          showNotice('Magic Link Error: ' + error.message);
+        } else {
+          showNotice('Magic login link dispatched to ' + email + '! Check your inbox.', true);
+        }
+      } catch(err) {
+        showNotice('Error: ' + err.message);
+      }
+    }
+
+    // Admin Portal Access (Password: admin00)
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      if (checkRateLimit()) return;
+
+      const pass = document.getElementById('adminPass').value.trim();
+      if (pass === 'admin00') {
+        sessionStorage.setItem('bw_admin_auth', 'true');
+        showNotice('Admin Authenticated! Opening Dashboard...', true);
+        setTimeout(() => {
+          window.location.href = 'index.html#admin';
+        }, 800);
+      } else {
+        recordFailedAttempt();
+        showNotice('Access Denied: Invalid Master Password.');
+      }
+    }
+  </script>
+</body>
+</html>

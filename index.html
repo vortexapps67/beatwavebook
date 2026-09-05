@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Story of BeatWave — Official Book by Vortex Apps</title>
+  <meta name="description" content="Discover how three high school friends turned a 2:00 AM late-night study call into India's premier ad-free open source music app. Get the book now.">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="The Story of BeatWave — The Official Book">
+  <meta property="og:description" content="From 2:00 AM study calls to 1,000+ listeners. Get the official book.">
+  <meta property="og:image" content="front cover.jpg">
+  <meta property="og:type" content="book">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Animated Background Layer (bg-glow.png + dynamic orbs) -->
+  <div class="ambient-bg-wrapper">
+    <div class="ambient-bg-img"></div>
+  </div>
+  <div class="ambient-glow-orb orb-1"></div>
+  <div class="ambient-glow-orb orb-2"></div>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- LIQUID GLASS NAV PRO -->
+  <header class="liquid-nav-container">
+    <nav class="liquid-glass-nav">
+      <a href="#" class="liquid-brand">
+        <img src="beatwave new new.png" alt="BeatWave Logo">
+        <span>BeatWave</span>
+      </a>
+      <ul class="liquid-nav-links">
+        <li><a href="#story">Origin</a></li>
+        <li><a href="#book-preview">Chapters</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="track.html">Track Order</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+      <button class="liquid-cta-btn" onclick="scrollToPricing()">
+        <span>Get Book</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 15 · Split Studio Hero -->
+    <section class="hero-section" id="story">
+      <div class="container diptych-grid">
+        <!-- Left: Story positioning -->
+        <div class="diptych-left">
+          <div class="hero-tag">
+            <span class="tag-dot"></span>
+            <span>The Official Chronicle &middot; Vortex Apps</span>
+          </div>
+          <h1>The Story of BeatWave</h1>
+          <p class="hero-subtitle">
+            How a late-night study call at 2:00 AM sparked an independent software rebellion—ditching commercial ad trackers to build India’s cleanest open-source audio player.
+          </p>
+
+          <div class="hero-quote-box">
+            &ldquo;We were studying, writing code, and every second song on our shared stream was interrupted by high-volume tracking ads. That night, we stopped complaining and started building.&rdquo;
+            <span>&mdash; Excerpt from Chapter 1 &middot; The Spark of Inspiration</span>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="scrollToPricing()">
+              <span>Order Your Copy</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn-secondary" onclick="flipBookCard()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+              <span>Inspect Back Cover</span>
+            </button>
+          </div>
+
+          <div class="hero-badges-row">
+            <span>&check; 14 Full Chapters</span>
+            <span>&check; E-Book (&#8377;150)</span>
+            <span>&check; Printed Softcover (&#8377;250)</span>
+          </div>
+        </div>
+
+        <!-- Right: 3D Book Interactive Object -->
+        <div class="book-stage">
+          <div class="book-card-3d" id="bookCard" onclick="flipBookCard()" title="Click to flip front & back cover">
+            <!-- Front Cover -->
+            <div class="book-face book-face-front">
+              <img src="front cover.jpg" alt="The Story of BeatWave Front Cover">
+            </div>
+            <!-- Back Cover -->
+            <div class="book-face book-face-back">
+              <img src="back cober.jpg" alt="The Story of BeatWave Back Cover">
+            </div>
+          </div>
+
+          <div class="book-controls">
+            <button class="book-flip-pill" onclick="flipBookCard()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span id="flipButtonLabel">Click to Flip Cover</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inside The Book: Chapters (First 4 Highlighted + Expandable Full 14) -->
+    <section class="section" id="book-preview">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-eyebrow">Table of Contents</span>
+          <h2>Inside The Unfiltered Journey</h2>
+          <p>Fourteen chapters of genuine indie development: late-night debugging, breaking production, viral threads, and triumphs.</p>
+        </div>
+
+        <!-- First 4 Chapters -->
+        <div class="chapters-grid">
+          <article class="chapter-card">
+            <span class="chapter-num">01 &middot; CHAPTER ONE</span>
+            <h3 class="chapter-title">The Spark of Inspiration</h3>
+            <p class="chapter-desc">
+              Three friends on an endless 2:00 AM Discord call pushed to the edge by disruptive tracking ads. The moment frustration turned into the first commit of an ad-free client.
+            </p>
+          </article>
+
+          <article class="chapter-card">
+            <span class="chapter-num">02 &middot; CHAPTER TWO</span>
+            <h3 class="chapter-title">Fix One, Get 3 More Bugs</h3>
+            <p class="chapter-desc">
+              The brutal reality of young self-taught developers facing playback memory leaks, async thread collisions, and Android lifecycle crashes.
+            </p>
+          </article>
+
+          <article class="chapter-card">
+            <span class="chapter-num">03 &middot; CHAPTER THREE</span>
+            <h3 class="chapter-title">End Of BeatWave (Almost)</h3>
+            <p class="chapter-desc">
+              When motivation collapsed, APIs broke, and school exams approached. The pivotal team decision that kept the repository alive when quitting was easy.
+            </p>
+          </article>
+
+          <article class="chapter-card">
+            <span class="chapter-num">04 &middot; CHAPTER FOUR</span>
+            <h3 class="chapter-title">The First Beat</h3>
+            <p class="chapter-desc">
+              The first stable build where audio played gaplessly with zero telemetry hooks. The feeling of listening to pure music on an app built by your own hands.
+            </p>
+          </article>
+        </div>
+
+        <!-- Expandable Full 14-Chapter Journey -->
+        <div class="toc-expand-container">
+          <button class="btn-toggle-toc" onclick="toggleFullToc()">
+            <span id="tocToggleText">Explore All 14 Chapters</span>
+            <svg id="tocChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition: transform 0.3s;"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+
+          <div class="all-chapters-drawer" id="allChaptersDrawer">
+            <div class="chapters-subgrid">
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">05</span>
+                <span class="chapter-mini-title">did it work?</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">06</span>
+                <span class="chapter-mini-title">Double Life: Students and Developers</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">07</span>
+                <span class="chapter-mini-title">V3: The New Era</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">08</span>
+                <span class="chapter-mini-title">May 7th 2026: The Century Mark</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">09</span>
+                <span class="chapter-mini-title">The Link Engine: 150 Users</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">10</span>
+                <span class="chapter-mini-title">Liquid Glass: The V4 Redesign</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">11</span>
+                <span class="chapter-mini-title">The Double Century: 200 Waves</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">12</span>
+                <span class="chapter-mini-title">The Flop Era</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">13</span>
+                <span class="chapter-mini-title">The Viral Thread</span>
+              </div>
+              <div class="chapter-mini-node">
+                <span class="chapter-mini-num">14</span>
+                <span class="chapter-mini-title">One Thousand : The Promised Party</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING MATRIX (2 Tiers Only: E-Book ₹150, Physical ₹250) -->
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-eyebrow">Pricing & Formats</span>
+          <h2>Select Your Edition</h2>
+          <p>Direct from the makers. 100% of proceeds support independent open-source server nodes.</p>
+        </div>
+
+        <div class="pricing-grid-2">
+          <!-- Card 1: E-Book -->
+          <div class="pricing-card featured">
+            <div class="tier-badge">Instant Digital</div>
+            <div>
+              <h3 class="tier-name">Digital E-Book</h3>
+              <p class="tier-desc">Complete unabridged 14-chapter edition formatted for all devices.</p>
+            </div>
+            <div>
+              <div class="tier-amount">&#8377;150</div>
+              <div class="tier-amount-sub">Full DRM-Free package</div>
+            </div>
+            <ul class="tier-features">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>High-resolution PDF + EPUB files</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Full architecture blueprints & diagrams</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Direct delivery to Email & WhatsApp</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Lifetime future digital revisions</span>
+              </li>
+            </ul>
+            <button class="btn-primary" style="width: 100%;" onclick="openCheckoutModal('ebook')">
+              Get E-Book for &#8377;150
+            </button>
+          </div>
+
+          <!-- Card 2: Printed Copy -->
+          <div class="pricing-card">
+            <div>
+              <h3 class="tier-name">Collector’s Printed Copy</h3>
+              <p class="tier-desc">Physical softcover collector's paperback delivered to your door.</p>
+            </div>
+            <div>
+              <div class="tier-amount">&#8377;250</div>
+              <div class="tier-amount-sub">+ &#8377;40 delivery across India</div>
+            </div>
+            <ul class="tier-features">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Matte finish cover on premium paper stock</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Includes free companion E-Book copy</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Official BeatWave holographic sticker</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>Speed Post delivery tracking</span>
+              </li>
+            </ul>
+            <button class="btn-secondary" style="width: 100%;" onclick="openCheckoutModal('print')">
+              Order Printed Copy (&#8377;250)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authors -->
+    <section class="section" id="authors">
+      <div class="container">
+        <div class="authors-box">
+          <img src="beatwave new new.png" alt="Vortex Apps" class="authors-avatar">
+          <div class="authors-info">
+            <span class="hero-tag" style="margin: 0;">Authored by Vortex Apps</span>
+            <h3 style="margin-top: 8px;">The Architects Behind BeatWave</h3>
+            <p>
+              Built by high school indie developers who believed that music playback should belong to listeners, not corporate ad-brokers.
+            </p>
+            <div class="authors-names">
+              <a href="https://www.instagram.com/akshansh_6969/" target="_blank" class="author-chip">
+                <span>Akshansh Sinha</span>
+                <span style="opacity: 0.6;">@akshansh_6969</span>
+              </a>
+              <a href="https://www.instagram.com/aarav_sharma_sui/" target="_blank" class="author-chip">
+                <span>Aarav Sharma</span>
+                <span style="opacity: 0.6;">@aarav_sharma_sui</span>
+              </a>
+              <a href="https://www.instagram.com/precizerr/" target="_blank" class="author-chip">
+                <span>Aarav Singh</span>
+                <span style="opacity: 0.6;">@precizerr</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Ft5 Statement Footer -->
+  <footer class="footer-statement">
+    <div class="container">
+      <p class="footer-quote">
+        &ldquo;The instrument is open. The code is transparent. The story is yours to read.&rdquo;
+      </p>
+      <div class="footer-meta">
+        <span>&copy; 2026 Vortex Apps &middot; BeatWave</span>
+        <span>Based on ConvX FOSS foundation</span>
+        <span>Made with pride in India</span>
+        <button class="admin-lock-btn" onclick="openAdminModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Admin Portal</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHECKOUT MODAL (Fast 1-Tap Manual Approval Flow) -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="checkoutModalTitle">Complete Your Order</h3>
+        <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+      </div>
+
+      <!-- Step 1: Customer Info -->
+      <form id="checkoutForm" onsubmit="handleProceedToPayment(event)">
+        <div class="order-summary-box">
+          <div>
+            <strong id="summaryTierName">Digital E-Book Edition</strong>
+            <div style="font-size: 0.75rem; color: var(--color-ink-muted);" id="summaryTierNote">Delivered instantly upon verification</div>
+          </div>
+          <div class="order-summary-price" id="summaryTierPrice">&#8377;150</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-md); margin-top: var(--space-md);">
+          <div class="form-group">
+            <label class="form-label" for="custName">Full Name *</label>
+            <input type="text" id="custName" class="form-input" placeholder="e.g. Rahul Verma" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="custEmail">Email Address *</label>
+            <input type="email" id="custEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="custPhone">Phone / WhatsApp Number *</label>
+            <input type="tel" id="custPhone" class="form-input" placeholder="e.g. 9876543210" required>
+          </div>
+
+          <div class="form-group" id="addressGroup" style="display: none;">
+            <label class="form-label" for="custAddress">Shipping Delivery Address (with PIN Code) *</label>
+            <textarea id="custAddress" class="form-textarea" placeholder="House / Flat No., Street, City, State, PIN Code"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width: 100%; margin-top: var(--space-xs);">
+            <span>Proceed to Payment</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Step 2: Payment Stage -->
+      <div id="paymentStage" style="display: none; flex-direction: column; gap: var(--space-md); text-align: center;">
+        <p style="font-size: 0.9rem; color: var(--color-ink-muted);">
+          Tap below to launch any UPI app (<strong style="color: var(--color-ink);">GPay, PhonePe, Paytm, CRED, BHIM</strong>)
+        </p>
+
+        <div class="upi-qr-card">
+          <img src="upi qr aarav.jpg" alt="UPI QR Code for Payment" id="paymentQrImg">
+          <a id="upiIntentBtn" href="#" class="btn-primary" style="width: 100%; padding: 10px var(--space-md); font-size: 0.88rem;">
+            <span>Pay on PhonePe / GPay (Instant)</span>
+          </a>
+          <div class="upi-id-badge" onclick="copyUpiId()" title="Click to copy UPI ID">
+            <span id="upiDisplayId">akshanshsinha67@axl</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+        </div>
+
+        <!-- 1-Tap Confirmation -->
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: var(--space-md); text-align: left; display: flex; flex-direction: column; gap: var(--space-xs);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            <strong style="font-size: 0.9rem; color: var(--color-ink);">Fast 1-Tap Verification</strong>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--color-ink-muted); margin: 0;">
+            After sending the amount in your UPI app, just tap the button below. Your order will instantly sync to our author dashboard.
+          </p>
+          <div class="form-group" style="margin-top: 6px;">
+            <label class="form-label" for="paymentSenderName" style="font-size: 0.75rem;">Your UPI Name / Handle (Optional)</label>
+            <input type="text" id="paymentSenderName" class="form-input" placeholder="e.g. rahul@oksbi or Rahul Verma" style="padding: 6px 12px; font-size: 0.85rem;">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: var(--space-sm);">
+          <button type="button" class="btn-secondary" style="flex: 1;" onclick="backToCustomerDetails()">Back</button>
+          <button type="button" class="btn-primary" style="flex: 2; background: var(--color-success); color: #000;" onclick="submitOrderFinal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>I Have Paid &middot; Confirm</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Success Confirmation -->
+      <div id="successStage" style="display: none; text-align: center; padding: var(--space-lg) 0;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 255, 136, 0.15); border: 2px solid var(--color-success); color: var(--color-success); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 8px;">Order Placed!</h3>
+        <p style="font-size: 0.92rem; margin-bottom: var(--space-md);">
+          Your order has been recorded in the database. Order Reference:
+        </p>
+        <div style="background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.15); padding: var(--space-sm); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 1.1rem; color: var(--color-accent-cyan); margin-bottom: var(--space-lg);" id="confirmedOrderId">
+          BW-BK-0000
+        </div>
+        <p style="font-size: 0.8rem; color: var(--color-ink-faint); margin-bottom: var(--space-lg);">
+          The Vortex Apps team will verify the payment and dispatch your book updates directly to your WhatsApp and Email.
+        </p>
+        <button class="btn-primary" style="width: 100%;" onclick="closeCheckoutModal()">Close Window</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL MODAL (Supabase Backend Sync, pass: admin00) -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-card modal-admin">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: var(--space-xs);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <h3 class="modal-title">Admin Dashboard &middot; Supabase Sync</h3>
+        </div>
+        <button class="modal-close" onclick="closeAdminModal()">&times;</button>
+      </div>
+
+      <!-- Password Prompt View -->
+      <div id="adminLoginStep" class="admin-login-step">
+        <p style="font-size: 0.9rem; color: var(--color-ink-muted);">
+          Protected portal for Vortex Apps maintainers. Enter admin master password to synchronize orders across your devices.
+        </p>
+        <div class="form-group">
+          <input type="password" id="adminPasswordInput" class="form-input" placeholder="Enter admin password (admin00)..." autofocus>
+          <span id="adminErrorMsg" style="color: var(--color-accent-red); font-size: 0.78rem; font-weight: 700;"></span>
+        </div>
+        <button class="btn-primary" onclick="verifyAdminPassword()" style="width: 100%;">
+          <span>Unlock Admin Panel</span>
+        </button>
+      </div>
+
+      <!-- Logged In Live Dashboard -->
+      <div id="adminDashboard" class="admin-dashboard">
+        <!-- Live Metrics Cards -->
+        <div class="admin-metrics-row">
+          <div class="metric-card">
+            <span class="metric-label">Total Orders</span>
+            <span class="metric-value" id="metricTotalOrders">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Revenue Collected</span>
+            <span class="metric-value" id="metricTotalRevenue" style="color: var(--color-accent-cyan);">&#8377;0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Pending Verification</span>
+            <span class="metric-value" id="metricPendingOrders" style="color: var(--color-accent-warm);">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Printed Copies</span>
+            <span class="metric-value" id="metricPrintOrders">0</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="admin-toolbar">
+          <div class="admin-filters">
+            <button class="filter-btn is-active" onclick="filterAdminOrders('all', this)">All</button>
+            <button class="filter-btn" onclick="filterAdminOrders('PENDING', this)">Pending</button>
+            <button class="filter-btn" onclick="filterAdminOrders('PAID', this)">Verified</button>
+            <button class="filter-btn" onclick="filterAdminOrders('SHIPPED', this)">Shipped</button>
+          </div>
+
+          <div style="display: flex; gap: var(--space-xs);">
+            <input type="text" id="adminSearchInput" class="form-input" placeholder="Search orders..." style="padding: 6px 12px; font-size: 0.8rem; width: 180px;" oninput="searchAdminOrders(this.value)">
+            <button class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;" onclick="exportOrdersToCsv()">Export CSV</button>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="admin-orders-table-wrapper">
+          <table class="admin-orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Edition</th>
+                <th>Amount</th>
+                <th>Sender / Handle</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminOrdersTbody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: var(--space-xl); color: var(--color-ink-faint);">
+                  Listening for real-time orders on Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toastBox">Notification message</div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
