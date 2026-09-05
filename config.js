@@ -17,6 +17,7 @@ const paymentConfig = {
       name: "Digital E-Book Edition",
       price: 150,
       formattedPrice: "₹150",
+      isAvailable: true,
       description: "Full unabridged PDF + EPUB edition with architecture blueprints and interactive code. Delivered upon verification."
     },
     print: {
@@ -25,7 +26,9 @@ const paymentConfig = {
       price: 250,
       deliveryCharge: 40,
       formattedPrice: "₹250 + delivery",
-      description: "Collector's softcover paperback on premium book stock, free companion e-book included, delivered to your doorstep."
+      isAvailable: false,
+      isComingSoon: true,
+      description: "Collector's softcover paperback on premium book stock (Printing in progress — Coming Soon)."
     }
   }
 };

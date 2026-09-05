@@ -77,11 +77,11 @@
         <a href="cart.html" class="bw-ticker-pill">
           <span class="bw-ticker-dot"></span>
           <span class="bw-ticker-tag">NEW RELEASE</span>
-          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official Digital Edition is Now Live!</span>
         </a>
-        <a href="cart.html?tier=print" class="bw-ticker-pill">
-          <span class="bw-ticker-tag">COLLECTOR COPY</span>
-          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COMING SOON</span>
+          <span>Collector's Softcover Paperback Edition Printing Soon &middot; Instant Digital Available</span>
         </a>
         <a href="index.html#story" class="bw-ticker-pill">
           <span class="bw-ticker-tag">100% FOSS</span>
@@ -95,11 +95,11 @@
         <a href="cart.html" class="bw-ticker-pill">
           <span class="bw-ticker-dot"></span>
           <span class="bw-ticker-tag">NEW RELEASE</span>
-          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official Digital Edition is Now Live!</span>
         </a>
-        <a href="cart.html?tier=print" class="bw-ticker-pill">
-          <span class="bw-ticker-tag">COLLECTOR COPY</span>
-          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COMING SOON</span>
+          <span>Collector's Softcover Paperback Edition Printing Soon &middot; Instant Digital Available</span>
         </a>
         <a href="index.html#story" class="bw-ticker-pill">
           <span class="bw-ticker-tag">100% FOSS</span>
@@ -163,12 +163,15 @@
                   <strong style="color: var(--color-accent-cyan); font-family: var(--font-mono);">&#8377;150</strong>
                 </label>
 
-                <label class="cart-radio-label" id="radioLabelPrint" onclick="selectCartTier('print')">
+                <label class="cart-radio-label" id="radioLabelPrint" onclick="selectCartTier('print')" style="opacity: 0.7; cursor: pointer;">
                   <div>
-                    <strong style="font-size: 0.95rem; color: var(--color-ink);">Collector's Printed Copy</strong>
-                    <div style="font-size: 0.75rem; color: var(--color-ink-muted);">Matte Softcover + Free Companion E-Book</div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <strong style="font-size: 0.95rem; color: var(--color-ink);">Collector's Printed Copy</strong>
+                      <span class="status-badge status-pending" style="font-size: 0.68rem; padding: 2px 6px; background: rgba(255,180,0,0.15); color: #ffb400;">Coming Soon</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-ink-muted);">Matte Softcover Paperback &middot; Printing in progress</div>
                   </div>
-                  <strong style="color: var(--color-accent-cyan); font-family: var(--font-mono);">&#8377;250 <span style="font-size: 0.7rem; color: var(--color-ink-faint);">+ &#8377;40 del.</span></strong>
+                  <strong style="color: var(--color-ink-faint); font-family: var(--font-mono);">&#8377;250</strong>
                 </label>
               </div>
             </div>
@@ -366,9 +369,9 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
             <span>GitHub Repository</span>
           </a>
-          <a href="login.html?mode=admin" class="admin-lock-btn">
+          <a href="admin.html" class="admin-lock-btn">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Admin Portal</span>
+            <span>Admin Dashboard</span>
           </a>
         </div>
       </div>
@@ -385,9 +388,19 @@
     let authenticatedReader = null;
 
     function selectCartTier(tier) {
-      activeTier = tier;
-      document.getElementById('radioLabelEbook').classList.toggle('is-selected', tier === 'ebook');
-      document.getElementById('radioLabelPrint').classList.toggle('is-selected', tier === 'print');
+      if (tier === 'print') {
+        if (window.notifyUser) {
+          window.notifyUser('Paperback Coming Soon 📖', "Collector's printed paperback is in printing! Digital E-Book is selected for instant access.", 'info');
+        } else if (typeof showToast === 'function') {
+          showToast('Paperback Edition Coming Soon! E-Book selected.');
+        } else {
+          alert("Collector's printed paperback is in printing & coming soon! Digital E-Book is selected for instant access.");
+        }
+        tier = 'ebook';
+      }
+      activeTier = 'ebook';
+      document.getElementById('radioLabelEbook').classList.add('is-selected');
+      document.getElementById('radioLabelPrint').classList.remove('is-selected');
       
       const addrGroup = document.getElementById('cartAddressGroup');
       const delRow = document.getElementById('deliveryFeeRow');
@@ -396,23 +409,13 @@
       const tierBase = document.getElementById('summaryTierBase');
       const deliveryFee = document.getElementById('summaryDeliveryFee');
 
-      if (tier === 'print') {
-        addrGroup.style.display = 'flex';
-        delRow.style.display = 'flex';
-        tierTitle.innerText = "Collector's Printed Copy";
-        tierBase.innerText = "₹250";
-        deliveryFee.innerText = "₹40";
-        totalPayable.innerText = "₹290";
-        updateUpiLink(290);
-      } else {
-        addrGroup.style.display = 'none';
-        delRow.style.display = 'none';
-        tierTitle.innerText = "Digital E-Book Edition";
-        tierBase.innerText = "₹150";
-        deliveryFee.innerText = "₹0";
-        totalPayable.innerText = "₹150";
-        updateUpiLink(150);
-      }
+      addrGroup.style.display = 'none';
+      delRow.style.display = 'none';
+      tierTitle.innerText = "Digital E-Book Edition";
+      tierBase.innerText = "₹150";
+      deliveryFee.innerText = "₹0";
+      totalPayable.innerText = "₹150";
+      updateUpiLink(150);
     }
 
     function updateUpiLink(amount) {
