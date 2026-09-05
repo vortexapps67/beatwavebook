@@ -3165,5 +3165,104 @@ a {
   font-size: 0.85rem;
 }
 
+/* ==========================================================================
+   MOBILE FLOATING BOTTOM DOCK WITH ADMIN PORTAL (iOS-STYLE LIQUID DOCK)
+   ========================================================================== */
+.mobile-bottom-dock {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  body {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .mobile-bottom-dock {
+    display: flex;
+    position: fixed;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4px;
+    background: rgba(12, 9, 26, 0.92);
+    backdrop-filter: blur(28px) saturate(210%);
+    -webkit-backdrop-filter: blur(28px) saturate(210%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 
+      0 20px 50px rgba(0, 0, 0, 0.8),
+      0 0 30px rgba(0, 242, 254, 0.15),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.35);
+    padding: 6px 10px;
+    border-radius: 9999px;
+    max-width: calc(100vw - 24px);
+    width: auto;
+    pointer-events: auto !important;
+  }
+
+  .mobile-dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    position: relative;
+    user-select: none;
+  }
+
+  .mobile-dock-item svg {
+    width: 19px;
+    height: 19px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    transition: transform 0.2s ease, stroke 0.2s ease;
+  }
+
+  .mobile-dock-item:hover,
+  .mobile-dock-item:active {
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .mobile-dock-item.is-active {
+    color: #05030d;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.5);
+    font-weight: 800;
+  }
+
+  .mobile-dock-item.is-active svg {
+    stroke: #05030d;
+    transform: scale(1.1);
+  }
+
+  .mobile-dock-item-admin {
+    color: #facc15;
+  }
+
+  .mobile-dock-item-admin.is-active {
+    background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+    color: #05030d;
+    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.55);
+    font-weight: 800;
+  }
+
+  .mobile-dock-item-admin.is-active svg {
+    stroke: #05030d;
+  }
+}
+
+
 
 
