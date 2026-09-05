@@ -12,6 +12,10 @@
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="beatwave new new.png">
+  <link rel="apple-touch-icon" href="beatwave new new.png">
+
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -526,74 +530,6 @@
       }
     };
 
-    // Check URL parameters, errors, and existing active session on load
-    async function initAuthSession() {
-      // 1. Check URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('mode') === 'signup') {
-        window.switchReaderMode('signup');
-      } else if (urlParams.get('mode') === 'admin' || window.location.hash === '#admin') {
-        window.switchAuthTab('admin');
-      }
-
-      // Pre-fill email if passed or stored
-      const paramEmail = urlParams.get('email');
-      const savedEmail = localStorage.getItem('bw_saved_email') || '';
-      const emailToUse = paramEmail || savedEmail;
-      if (emailToUse) {
-        const lEmail = document.getElementById('loginEmail');
-        const sEmail = document.getElementById('signUpEmail');
-        if (lEmail) lEmail.value = emailToUse;
-        if (sEmail) sEmail.value = emailToUse;
-      }
-
-      // 2. Check Supabase Auth Hash errors (e.g. invalid OTP, expired confirmation link)
-      if (window.location.hash) {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const error = hashParams.get('error');
-        const errorDesc = hashParams.get('error_description');
-        if (error || errorDesc) {
-          const cleanDesc = (errorDesc || error || 'Link error').replace(/\+/g, ' ');
-          window.showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
-          const resendCard = document.getElementById('resendConfirmCard');
-          if (resendCard) resendCard.style.display = 'flex';
-        }
-      }
-
-      if (!supabase) return;
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        window.renderReaderSession(session);
-
-        // Listen to live auth changes (e.g. returning from email verification)
-        supabase.auth.onAuthStateChange((event, session) => {
-          window.renderReaderSession(session);
-          if (event === 'SIGNED_IN' && session) {
-            window.showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
-          } else if (event === 'SIGNED_OUT') {
-            window.showNotice('Signed out cleanly.', true);
-          }
-        });
-      } catch(e) {
-        console.warn('Auth session check error:', e);
-      }
-    }
-    initAuthSession();
-
-    // Attach explicit click listeners on tabs for 100% reliability
-    document.addEventListener('DOMContentLoaded', () => {
-      const signInBtn = document.getElementById('subTabSignInBtn');
-      const signUpBtn = document.getElementById('subTabSignUpBtn');
-      const tabReaderBtn = document.getElementById('tabReaderBtn');
-      const tabAdminBtn = document.getElementById('tabAdminBtn');
-
-      if (signInBtn) signInBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signin'); });
-      if (signUpBtn) signUpBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signup'); });
-      if (tabReaderBtn) tabReaderBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('reader'); });
-      if (tabAdminBtn) tabAdminBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('admin'); });
-    });
-
     // 10. Reader Sign In Handler
     let pendingUnconfirmedEmail = '';
 
@@ -954,6 +890,74 @@
         window.showNotice('Access Denied: Invalid Master Password.');
       }
     };
+
+    // Check URL parameters, errors, and existing active session on load
+    async function initAuthSession() {
+      // 1. Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'signup') {
+        window.switchReaderMode('signup');
+      } else if (urlParams.get('mode') === 'admin' || window.location.hash === '#admin') {
+        window.switchAuthTab('admin');
+      }
+
+      // Pre-fill email if passed or stored
+      const paramEmail = urlParams.get('email');
+      const savedEmail = localStorage.getItem('bw_saved_email') || '';
+      const emailToUse = paramEmail || savedEmail;
+      if (emailToUse) {
+        const lEmail = document.getElementById('loginEmail');
+        const sEmail = document.getElementById('signUpEmail');
+        if (lEmail) lEmail.value = emailToUse;
+        if (sEmail) sEmail.value = emailToUse;
+      }
+
+      // 2. Check Supabase Auth Hash errors (e.g. invalid OTP, expired confirmation link)
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get('error');
+        const errorDesc = hashParams.get('error_description');
+        if (error || errorDesc) {
+          const cleanDesc = (errorDesc || error || 'Link error').replace(/\+/g, ' ');
+          window.showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
+          const resendCard = document.getElementById('resendConfirmCard');
+          if (resendCard) resendCard.style.display = 'flex';
+        }
+      }
+
+      if (!supabase) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        window.renderReaderSession(session);
+
+        // Listen to live auth changes (e.g. returning from email verification)
+        supabase.auth.onAuthStateChange((event, session) => {
+          window.renderReaderSession(session);
+          if (event === 'SIGNED_IN' && session) {
+            window.showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
+          } else if (event === 'SIGNED_OUT') {
+            window.showNotice('Signed out cleanly.', true);
+          }
+        });
+      } catch(e) {
+        console.warn('Auth session check error:', e);
+      }
+    }
+    initAuthSession();
+
+    // Attach explicit click listeners on tabs for 100% reliability
+    document.addEventListener('DOMContentLoaded', () => {
+      const signInBtn = document.getElementById('subTabSignInBtn');
+      const signUpBtn = document.getElementById('subTabSignUpBtn');
+      const tabReaderBtn = document.getElementById('tabReaderBtn');
+      const tabAdminBtn = document.getElementById('tabAdminBtn');
+
+      if (signInBtn) signInBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signin'); });
+      if (signUpBtn) signUpBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signup'); });
+      if (tabReaderBtn) tabReaderBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('reader'); });
+      if (tabAdminBtn) tabAdminBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('admin'); });
+    });
   </script>
 </body>
 </html>
