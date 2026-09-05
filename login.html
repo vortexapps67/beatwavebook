@@ -282,17 +282,76 @@
 
   <script src="config.js"></script>
   <script>
-    // 1. Initialize Supabase Client
+    // 1. Particle Canvas Background Animation
+    function initParticleCanvas() {
+      const canvas = document.getElementById('particleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particles = [];
+      const count = Math.min(45, Math.floor(width / 30));
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.6 + 0.4,
+          speedX: (Math.random() - 0.5) * 0.35,
+          speedY: (Math.random() - 0.5) * 0.35,
+          alpha: Math.random() * 0.5 + 0.2
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 160, 255, ${p.alpha})`;
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = 'rgba(138, 43, 226, 0.4)';
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+    initParticleCanvas();
+
+    // 2. Initialize Supabase Client
     let supabase = null;
     try {
-      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
+      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined' && supabaseConfig.supabaseUrl) {
         supabase = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
       }
     } catch(e) {
       console.warn('Supabase initialization notice:', e);
     }
 
-    // 2. Rate Limiting Logic (Blocks after 5 failed attempts for 60 seconds)
+    // Helper: Safe Redirect URL (only HTTP/HTTPS to prevent file:/// invalid URL errors)
+    function getSafeRedirectUrl() {
+      try {
+        if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+          return window.location.origin + window.location.pathname;
+        }
+      } catch (e) {}
+      return undefined;
+    }
+
+    // 3. Rate Limiting Logic (Blocks after 5 failed attempts for 60 seconds)
     let failedAttempts = parseInt(localStorage.getItem('bw_failed_auth_attempts') || '0');
     let lockoutUntil = parseInt(localStorage.getItem('bw_auth_lockout_until') || '0');
     let rateLimitTimerInterval = null;
@@ -344,7 +403,7 @@
     }
     checkRateLimit();
 
-    // 3. Tab Switching: Reader vs Admin
+    // 4. Tab Switching: Reader vs Admin
     function switchAuthTab(tab) {
       document.getElementById('tabReaderBtn').classList.toggle('is-active', tab === 'reader');
       document.getElementById('tabAdminBtn').classList.toggle('is-active', tab === 'admin');
@@ -354,7 +413,7 @@
       document.getElementById('resendConfirmCard').style.display = 'none';
     }
 
-    // 4. Reader Sub-tab Switching: Sign In vs Sign Up
+    // 5. Reader Sub-tab Switching: Sign In vs Sign Up
     function switchReaderMode(mode) {
       const signInBtn = document.getElementById('subTabSignInBtn');
       const signUpBtn = document.getElementById('subTabSignUpBtn');
@@ -376,7 +435,7 @@
       document.getElementById('forgotPasswordBox').style.display = 'none';
     }
 
-    // 5. Notification helper
+    // 6. Notification helper
     function showNotice(msg, isSuccess = false) {
       const el = document.getElementById('authNotice');
       el.innerHTML = msg;
@@ -392,7 +451,7 @@
       }
     }
 
-    // 6. Password Visibility Toggle
+    // 7. Password Visibility Toggle
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -405,17 +464,17 @@
       }
     }
 
-    // 7. Forgot Password Box Toggle
+    // 8. Forgot Password Box Toggle
     function toggleForgotPasswordBox(show = true) {
       const box = document.getElementById('forgotPasswordBox');
       box.style.display = show ? 'block' : 'none';
       if (show) {
-        const loginEmail = document.getElementById('loginEmail').value.trim();
+        const loginEmail = document.getElementById('loginEmail').value.trim() || localStorage.getItem('bw_saved_email') || '';
         if (loginEmail) document.getElementById('resetEmail').value = loginEmail;
       }
     }
 
-    // 8. Session State Observer: Render profile if user is already logged in
+    // 9. Session State Observer: Render profile if user is logged in
     function renderReaderSession(session) {
       const profileView = document.getElementById('readerProfileView');
       const formsContainer = document.getElementById('readerFormsContainer');
@@ -433,6 +492,7 @@
 
         profileView.style.display = 'block';
         formsContainer.style.display = 'none';
+        document.getElementById('resendConfirmCard').style.display = 'none';
 
         if (navAuthLink) {
           navAuthLink.innerText = 'My Account';
@@ -447,8 +507,39 @@
       }
     }
 
-    // Check active session on load
+    // Check URL parameters, errors, and existing active session on load
     async function initAuthSession() {
+      // 1. Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'signup') {
+        switchReaderMode('signup');
+      } else if (urlParams.get('mode') === 'admin' || window.location.hash === '#admin') {
+        switchAuthTab('admin');
+      }
+
+      // Pre-fill email if passed or stored
+      const paramEmail = urlParams.get('email');
+      const savedEmail = localStorage.getItem('bw_saved_email') || '';
+      const emailToUse = paramEmail || savedEmail;
+      if (emailToUse) {
+        const lEmail = document.getElementById('loginEmail');
+        const sEmail = document.getElementById('signUpEmail');
+        if (lEmail) lEmail.value = emailToUse;
+        if (sEmail) sEmail.value = emailToUse;
+      }
+
+      // 2. Check Supabase Auth Hash errors (e.g. invalid OTP, expired confirmation link)
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get('error');
+        const errorDesc = hashParams.get('error_description');
+        if (error || errorDesc) {
+          const cleanDesc = (errorDesc || error || 'Link error').replace(/\+/g, ' ');
+          showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
+          document.getElementById('resendConfirmCard').style.display = 'flex';
+        }
+      }
+
       if (!supabase) return;
 
       try {
@@ -459,9 +550,9 @@
         supabase.auth.onAuthStateChange((event, session) => {
           renderReaderSession(session);
           if (event === 'SIGNED_IN' && session) {
-            showNotice('Authenticated successfully! Welcome to BeatWave.', true);
+            showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
           } else if (event === 'SIGNED_OUT') {
-            showNotice('Signed out cleanly.');
+            showNotice('Signed out cleanly.', true);
           }
         });
       } catch(e) {
@@ -470,7 +561,7 @@
     }
     initAuthSession();
 
-    // 9. Reader Sign In Handler
+    // 10. Reader Sign In Handler
     let pendingUnconfirmedEmail = '';
 
     async function handleReaderSignIn(e) {
@@ -480,8 +571,13 @@
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
+      if (!email || !password) {
+        showNotice('Please enter both your email address and password.');
+        return;
+      }
+
       if (!supabase) {
-        showNotice('Supabase client offline. Please check connection.');
+        showNotice('Supabase client connection offline. Please check your network.');
         return;
       }
 
@@ -502,22 +598,31 @@
           if (error.code === 'email_not_confirmed' || errMsg.toLowerCase().includes('email not confirmed')) {
             pendingUnconfirmedEmail = email;
             document.getElementById('resendConfirmCard').style.display = 'flex';
-            document.getElementById('resendPromptText').innerText = `Your email ${email} has not been confirmed yet. Please check your inbox/spam or click below.`;
+            document.getElementById('resendPromptText').innerText = `Your email ${email} has not been verified yet. Please check your inbox/spam or click below.`;
             showNotice('Email not confirmed yet. Please verify your email to log in.');
           } else if (error.code === 'invalid_credentials' || errMsg.toLowerCase().includes('invalid login credentials')) {
-            showNotice('Invalid email or password. Please check your credentials or reset your password.');
+            showNotice('Invalid email or password. Please verify your credentials or click "Forgot Password?".');
           } else {
-            showNotice('Sign In Error: ' + errMsg);
+            showNotice('Sign In Notice: ' + errMsg);
           }
         } else {
           // Success!
           localStorage.setItem('bw_failed_auth_attempts', '0');
+          localStorage.setItem('bw_saved_email', email);
           document.getElementById('rateLimitCard').style.display = 'none';
           document.getElementById('resendConfirmCard').style.display = 'none';
-          showNotice('Signed In Successfully! Redirecting to tracking...', true);
-          setTimeout(() => {
-            window.location.href = 'track.html?orderId=' + encodeURIComponent(email);
-          }, 1000);
+          
+          showNotice('Signed In Successfully! Welcome to BeatWave.', true);
+          renderReaderSession(data.session);
+
+          // Handle URL redirect query parameter if present
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect) {
+            setTimeout(() => {
+              window.location.href = redirect.endsWith('.html') ? redirect : (redirect + '.html');
+            }, 800);
+          }
         }
       } catch(err) {
         submitBtn.disabled = false;
@@ -527,7 +632,7 @@
       }
     }
 
-    // 10. Reader Sign Up Handler
+    // 11. Reader Sign Up Handler
     async function handleReaderSignUp(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
@@ -541,8 +646,12 @@
         showNotice('Please enter your full name.');
         return;
       }
+      if (!email || !email.includes('@')) {
+        showNotice('Please enter a valid email address.');
+        return;
+      }
       if (password.length < 6) {
-        showNotice('Password must be at least 6 characters.');
+        showNotice('Password must be at least 6 characters long.');
         return;
       }
       if (password !== confirmPass) {
@@ -551,7 +660,7 @@
       }
 
       if (!supabase) {
-        showNotice('Supabase client offline.');
+        showNotice('Supabase client connection offline.');
         return;
       }
 
@@ -560,13 +669,18 @@
       submitBtn.innerText = 'Creating Account...';
 
       try {
+        const redirectUrl = getSafeRedirectUrl();
+        const signUpOptions = {
+          data: { full_name: name }
+        };
+        if (redirectUrl) {
+          signUpOptions.emailRedirectTo = redirectUrl;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: { full_name: name },
-            emailRedirectTo: window.location.origin + window.location.pathname
-          }
+          options: signUpOptions
         });
 
         submitBtn.disabled = false;
@@ -576,24 +690,38 @@
           recordFailedAttempt();
           if (error.status === 429 || error.message.includes('rate limit')) {
             showNotice('Supabase email limit reached. Please wait a minute before trying again.');
+          } else if (error.message.toLowerCase().includes('already registered')) {
+            showNotice('An account with this email already exists. Switching to Sign In...', false);
+            switchReaderMode('signin');
+            document.getElementById('loginEmail').value = email;
           } else {
             showNotice('Sign Up Notice: ' + error.message);
           }
         } else {
+          localStorage.setItem('bw_saved_email', email);
+          
           // Check if session was auto-confirmed or requires confirmation
           if (data && data.session) {
             showNotice('Account created and verified! Welcome, ' + name + '!', true);
             renderReaderSession(data.session);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirect = urlParams.get('redirect');
+            if (redirect) {
+              setTimeout(() => {
+                window.location.href = redirect.endsWith('.html') ? redirect : (redirect + '.html');
+              }, 800);
+            }
           } else {
             // Check if user already exists
-            if (data.user && data.user.identities && data.user.identities.length === 0) {
+            if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
               showNotice('An account with this email already exists. Please switch to Sign In.', false);
               switchReaderMode('signin');
               document.getElementById('loginEmail').value = email;
             } else {
               pendingUnconfirmedEmail = email;
               document.getElementById('resendConfirmCard').style.display = 'flex';
-              document.getElementById('resendPromptText').innerText = `Verification email sent to ${email}. Click the confirmation link to activate.`;
+              document.getElementById('resendPromptText').innerText = `Verification email sent to ${email}. Click the link inside to activate your account.`;
               showNotice('Account created! Verification link sent to ' + email + '. Check your inbox and spam folder.', true);
             }
           }
@@ -606,16 +734,16 @@
       }
     }
 
-    // 11. Resend Confirmation Email
+    // 12. Resend Confirmation Email
     let resendCooldown = 0;
     async function handleResendConfirmation() {
-      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail').value.trim() || document.getElementById('signUpEmail').value.trim();
+      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail').value.trim() || document.getElementById('signUpEmail').value.trim() || localStorage.getItem('bw_saved_email');
       if (!email) {
         showNotice('Please enter your email to resend confirmation.');
         return;
       }
       if (resendCooldown > 0) {
-        showNotice(`Please wait ${resendCooldown}s before resending another confirmation email.`);
+        showNotice(`Please wait ${resendCooldown}s before requesting another confirmation email.`);
         return;
       }
 
@@ -624,16 +752,20 @@
       resendBtn.innerText = 'Dispatching...';
 
       try {
+        const redirectUrl = getSafeRedirectUrl();
+        const resendOptions = {};
+        if (redirectUrl) {
+          resendOptions.emailRedirectTo = redirectUrl;
+        }
+
         const { error } = await supabase.auth.resend({
           type: 'signup',
           email: email,
-          options: {
-            emailRedirectTo: window.location.origin + window.location.pathname
-          }
+          options: resendOptions
         });
 
         if (error) {
-          showNotice('Resend notice: ' + error.message);
+          showNotice('Resend Notice: ' + error.message);
           resendBtn.disabled = false;
           resendBtn.innerText = 'Resend Confirmation Email';
         } else {
@@ -657,7 +789,7 @@
       }
     }
 
-    // 12. Passwordless Magic Link
+    // 13. Passwordless Magic Link
     async function handleSendMagicLink() {
       const email = document.getElementById('loginEmail').value.trim();
       if (!email) {
@@ -668,24 +800,28 @@
       if (!supabase) return;
 
       try {
+        const redirectUrl = getSafeRedirectUrl();
+        const otpOptions = {};
+        if (redirectUrl) {
+          otpOptions.emailRedirectTo = redirectUrl;
+        }
+
         const { error } = await supabase.auth.signInWithOtp({
           email: email,
-          options: {
-            emailRedirectTo: window.location.origin + window.location.pathname
-          }
+          options: otpOptions
         });
 
         if (error) {
-          showNotice('Magic Link Error: ' + error.message);
+          showNotice('Magic Link Notice: ' + error.message);
         } else {
           showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
         }
       } catch(err) {
-        showNotice('Error: ' + err.message);
+        showNotice('Error sending magic link: ' + err.message);
       }
     }
 
-    // 13. Password Reset Flow
+    // 14. Password Reset Flow
     async function handleResetPassword() {
       const email = document.getElementById('resetEmail').value.trim();
       if (!email) {
@@ -695,9 +831,13 @@
       if (!supabase) return;
 
       try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + window.location.pathname
-        });
+        const redirectUrl = getSafeRedirectUrl();
+        const resetOptions = {};
+        if (redirectUrl) {
+          resetOptions.redirectTo = redirectUrl;
+        }
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, resetOptions);
 
         if (error) {
           showNotice('Password Reset Notice: ' + error.message);
@@ -706,23 +846,23 @@
           toggleForgotPasswordBox(false);
         }
       } catch(err) {
-        showNotice('Error: ' + err.message);
+        showNotice('Error resetting password: ' + err.message);
       }
     }
 
-    // 14. Sign Out
+    // 15. Sign Out
     async function handleSignOut() {
       if (!supabase) return;
       try {
         await supabase.auth.signOut();
         renderReaderSession(null);
-        showNotice('You have been signed out.', true);
+        showNotice('You have been signed out cleanly.', true);
       } catch(e) {
         console.warn('Sign out err:', e);
       }
     }
 
-    // 15. Admin Portal Login (Kept in .env, validated via SHA-256 hash or Supabase RPC)
+    // 16. Admin Portal Login (Kept in .env, validated via SHA-256 hash or Supabase RPC)
     async function verifyAdminSecret(pass) {
       if (supabase) {
         try {
