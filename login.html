@@ -47,10 +47,10 @@
       <div class="auth-container">
         <!-- Master Auth Tabs: Reader Account vs Admin Portal -->
         <div class="auth-tabs">
-          <button class="auth-tab-btn is-active" id="tabReaderBtn" onclick="switchAuthTab('reader')">
+          <button type="button" class="auth-tab-btn is-active" id="tabReaderBtn" onclick="window.switchAuthTab('reader')">
             Reader Account
           </button>
-          <button class="auth-tab-btn" id="tabAdminBtn" onclick="switchAuthTab('admin')">
+          <button type="button" class="auth-tab-btn" id="tabAdminBtn" onclick="window.switchAuthTab('admin')">
             Author Admin
           </button>
         </div>
@@ -115,12 +115,12 @@
           <div id="readerFormsContainer">
             <!-- Reader Sub-tabs: Sign In vs Sign Up -->
             <div class="auth-subtabs">
-              <button class="auth-subtab-btn is-active" id="subTabSignInBtn" onclick="switchReaderMode('signin')">Sign In</button>
-              <button class="auth-subtab-btn" id="subTabSignUpBtn" onclick="switchReaderMode('signup')">Create Account</button>
+              <button type="button" class="auth-subtab-btn is-active" id="subTabSignInBtn" onclick="window.switchReaderMode('signin')">Sign In</button>
+              <button type="button" class="auth-subtab-btn" id="subTabSignUpBtn" onclick="window.switchReaderMode('signup')">Create Account</button>
             </div>
 
             <!-- SUB-FORM 1: SIGN IN -->
-            <form id="signInForm" onsubmit="handleReaderSignIn(event)">
+            <form id="signInForm" onsubmit="window.handleReaderSignIn(event)">
               <div style="text-align: center; margin-bottom: var(--space-md);">
                 <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Welcome Back</h3>
                 <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Sign in to access your digital books and tracking ledger.</p>
@@ -135,13 +135,13 @@
                 <div class="form-group">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
                     <label class="form-label" for="loginPassword">Password *</label>
-                    <button type="button" onclick="toggleForgotPasswordBox()" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.76rem; cursor: pointer; padding: 0;">
+                    <button type="button" onclick="window.toggleForgotPasswordBox(true)" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.76rem; cursor: pointer; padding: 0;">
                       Forgot Password?
                     </button>
                   </div>
                   <div class="password-field-wrap">
                     <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required minlength="6" autocomplete="current-password">
-                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" title="Show / Hide Password">
+                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('loginPassword', this)" title="Show / Hide Password">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                   </div>
@@ -152,10 +152,10 @@
                 </button>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
-                  <button type="button" onclick="handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; padding: 0;">
+                  <button type="button" onclick="window.handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; padding: 0;">
                     Send Magic Link
                   </button>
-                  <button type="button" onclick="switchReaderMode('signup')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
+                  <button type="button" onclick="window.switchReaderMode('signup')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
                     New reader? <span style="color: #fff; text-decoration: underline;">Create Account</span>
                   </button>
                 </div>
@@ -163,7 +163,7 @@
             </form>
 
             <!-- SUB-FORM 2: CREATE ACCOUNT (SIGN UP) -->
-            <form id="signUpForm" style="display: none;" onsubmit="handleReaderSignUp(event)">
+            <form id="signUpForm" style="display: none;" onsubmit="window.handleReaderSignUp(event)">
               <div style="text-align: center; margin-bottom: var(--space-md);">
                 <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Create Reader Account</h3>
                 <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Join readers worldwide exploring the true story of BeatWave.</p>
@@ -184,7 +184,7 @@
                   <label class="form-label" for="signUpPassword">Choose Password (min 6 chars) *</label>
                   <div class="password-field-wrap">
                     <input type="password" id="signUpPassword" class="form-input" placeholder="Create a secure password" required minlength="6" autocomplete="new-password">
-                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('signUpPassword', this)" title="Show / Hide Password">
+                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('signUpPassword', this)" title="Show / Hide Password">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                   </div>
@@ -194,7 +194,7 @@
                   <label class="form-label" for="signUpConfirmPassword">Confirm Password *</label>
                   <div class="password-field-wrap">
                     <input type="password" id="signUpConfirmPassword" class="form-input" placeholder="Re-enter password" required minlength="6" autocomplete="new-password">
-                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('signUpConfirmPassword', this)" title="Show / Hide Password">
+                    <button type="button" class="password-toggle-btn" onclick="window.togglePasswordVisibility('signUpConfirmPassword', this)" title="Show / Hide Password">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                   </div>
@@ -209,7 +209,7 @@
                 </button>
 
                 <div style="text-align: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
-                  <button type="button" onclick="switchReaderMode('signin')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
+                  <button type="button" onclick="window.switchReaderMode('signin')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
                     Already have an account? <span style="color: var(--color-accent-cyan); text-decoration: underline;">Sign In</span>
                   </button>
                 </div>
@@ -367,7 +367,8 @@
         failedAttempts = 0;
         localStorage.removeItem('bw_auth_lockout_until');
         localStorage.setItem('bw_failed_auth_attempts', '0');
-        document.getElementById('rateLimitCard').style.display = 'none';
+        const card = document.getElementById('rateLimitCard');
+        if (card) card.style.display = 'none';
         if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
       }
       return false;
@@ -386,8 +387,8 @@
     function showRateLimitBanner(seconds) {
       const card = document.getElementById('rateLimitCard');
       const timer = document.getElementById('rateLimitTimer');
-      card.style.display = 'flex';
-      timer.innerText = seconds;
+      if (card) card.style.display = 'flex';
+      if (timer) timer.innerText = seconds;
 
       if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
       rateLimitTimerInterval = setInterval(() => {
@@ -396,7 +397,7 @@
         if (rem <= 0) {
           clearInterval(rateLimitTimerInterval);
           checkRateLimit();
-        } else {
+        } else if (timer) {
           timer.innerText = rem;
         }
       }, 1000);
@@ -404,40 +405,50 @@
     checkRateLimit();
 
     // 4. Tab Switching: Reader vs Admin
-    function switchAuthTab(tab) {
-      document.getElementById('tabReaderBtn').classList.toggle('is-active', tab === 'reader');
-      document.getElementById('tabAdminBtn').classList.toggle('is-active', tab === 'admin');
-      document.getElementById('readerAuthView').style.display = tab === 'reader' ? 'block' : 'none';
-      document.getElementById('adminAuthView').style.display = tab === 'admin' ? 'block' : 'none';
-      document.getElementById('authNotice').style.display = 'none';
-      document.getElementById('resendConfirmCard').style.display = 'none';
-    }
+    window.switchAuthTab = function(tab) {
+      const tabReaderBtn = document.getElementById('tabReaderBtn');
+      const tabAdminBtn = document.getElementById('tabAdminBtn');
+      const readerAuthView = document.getElementById('readerAuthView');
+      const adminAuthView = document.getElementById('adminAuthView');
+      const authNotice = document.getElementById('authNotice');
+      const resendConfirmCard = document.getElementById('resendConfirmCard');
+
+      if (tabReaderBtn) tabReaderBtn.classList.toggle('is-active', tab === 'reader');
+      if (tabAdminBtn) tabAdminBtn.classList.toggle('is-active', tab === 'admin');
+      if (readerAuthView) readerAuthView.style.display = tab === 'reader' ? 'block' : 'none';
+      if (adminAuthView) adminAuthView.style.display = tab === 'admin' ? 'block' : 'none';
+      if (authNotice) authNotice.style.display = 'none';
+      if (resendConfirmCard) resendConfirmCard.style.display = 'none';
+    };
 
     // 5. Reader Sub-tab Switching: Sign In vs Sign Up
-    function switchReaderMode(mode) {
+    window.switchReaderMode = function(mode) {
       const signInBtn = document.getElementById('subTabSignInBtn');
       const signUpBtn = document.getElementById('subTabSignUpBtn');
       const signInForm = document.getElementById('signInForm');
       const signUpForm = document.getElementById('signUpForm');
+      const authNotice = document.getElementById('authNotice');
+      const forgotPasswordBox = document.getElementById('forgotPasswordBox');
 
       if (mode === 'signup') {
-        signInBtn.classList.remove('is-active');
-        signUpBtn.classList.add('is-active');
-        signInForm.style.display = 'none';
-        signUpForm.style.display = 'block';
+        if (signInBtn) signInBtn.classList.remove('is-active');
+        if (signUpBtn) signUpBtn.classList.add('is-active');
+        if (signInForm) signInForm.style.display = 'none';
+        if (signUpForm) signUpForm.style.display = 'block';
       } else {
-        signUpBtn.classList.remove('is-active');
-        signInBtn.classList.add('is-active');
-        signUpForm.style.display = 'none';
-        signInForm.style.display = 'block';
+        if (signUpBtn) signUpBtn.classList.remove('is-active');
+        if (signInBtn) signInBtn.classList.add('is-active');
+        if (signUpForm) signUpForm.style.display = 'none';
+        if (signInForm) signInForm.style.display = 'block';
       }
-      document.getElementById('authNotice').style.display = 'none';
-      document.getElementById('forgotPasswordBox').style.display = 'none';
-    }
+      if (authNotice) authNotice.style.display = 'none';
+      if (forgotPasswordBox) forgotPasswordBox.style.display = 'none';
+    };
 
     // 6. Notification helper
-    function showNotice(msg, isSuccess = false) {
+    window.showNotice = function(msg, isSuccess = false) {
       const el = document.getElementById('authNotice');
+      if (!el) return;
       el.innerHTML = msg;
       el.style.display = 'block';
       if (isSuccess) {
@@ -449,10 +460,10 @@
         el.style.border = '1px solid rgba(255, 80, 80, 0.35)';
         el.style.color = '#ff7070';
       }
-    }
+    };
 
     // 7. Password Visibility Toggle
-    function togglePasswordVisibility(inputId, btn) {
+    window.togglePasswordVisibility = function(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
       if (input.type === 'password') {
@@ -462,59 +473,67 @@
         input.type = 'password';
         btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
       }
-    }
+    };
 
     // 8. Forgot Password Box Toggle
-    function toggleForgotPasswordBox(show = true) {
+    window.toggleForgotPasswordBox = function(show = true) {
       const box = document.getElementById('forgotPasswordBox');
+      if (!box) return;
       box.style.display = show ? 'block' : 'none';
       if (show) {
-        const loginEmail = document.getElementById('loginEmail').value.trim() || localStorage.getItem('bw_saved_email') || '';
-        if (loginEmail) document.getElementById('resetEmail').value = loginEmail;
+        const loginEmail = (document.getElementById('loginEmail')?.value || '').trim() || localStorage.getItem('bw_saved_email') || '';
+        const resetEmail = document.getElementById('resetEmail');
+        if (loginEmail && resetEmail) resetEmail.value = loginEmail;
       }
-    }
+    };
 
     // 9. Session State Observer: Render profile if user is logged in
-    function renderReaderSession(session) {
+    window.renderReaderSession = function(session) {
       const profileView = document.getElementById('readerProfileView');
       const formsContainer = document.getElementById('readerFormsContainer');
       const navAuthLink = document.getElementById('navAuthLink');
+      const resendConfirmCard = document.getElementById('resendConfirmCard');
 
       if (session && session.user) {
         const user = session.user;
         const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
         const initial = (name.charAt(0) || 'R').toUpperCase();
 
-        document.getElementById('profileName').innerText = name;
-        document.getElementById('profileEmail').innerText = user.email;
-        document.getElementById('profileAvatar').innerText = initial;
-        document.getElementById('btnProfileTrack').href = 'track.html?orderId=' + encodeURIComponent(user.email);
+        const pName = document.getElementById('profileName');
+        const pEmail = document.getElementById('profileEmail');
+        const pAvatar = document.getElementById('profileAvatar');
+        const btnTrack = document.getElementById('btnProfileTrack');
 
-        profileView.style.display = 'block';
-        formsContainer.style.display = 'none';
-        document.getElementById('resendConfirmCard').style.display = 'none';
+        if (pName) pName.innerText = name;
+        if (pEmail) pEmail.innerText = user.email;
+        if (pAvatar) pAvatar.innerText = initial;
+        if (btnTrack) btnTrack.href = 'track.html?orderId=' + encodeURIComponent(user.email);
+
+        if (profileView) profileView.style.display = 'block';
+        if (formsContainer) formsContainer.style.display = 'none';
+        if (resendConfirmCard) resendConfirmCard.style.display = 'none';
 
         if (navAuthLink) {
           navAuthLink.innerText = 'My Account';
           navAuthLink.title = user.email;
         }
       } else {
-        profileView.style.display = 'none';
-        formsContainer.style.display = 'block';
+        if (profileView) profileView.style.display = 'none';
+        if (formsContainer) formsContainer.style.display = 'block';
         if (navAuthLink) {
           navAuthLink.innerText = 'Login';
         }
       }
-    }
+    };
 
     // Check URL parameters, errors, and existing active session on load
     async function initAuthSession() {
       // 1. Check URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('mode') === 'signup') {
-        switchReaderMode('signup');
+        window.switchReaderMode('signup');
       } else if (urlParams.get('mode') === 'admin' || window.location.hash === '#admin') {
-        switchAuthTab('admin');
+        window.switchAuthTab('admin');
       }
 
       // Pre-fill email if passed or stored
@@ -535,8 +554,9 @@
         const errorDesc = hashParams.get('error_description');
         if (error || errorDesc) {
           const cleanDesc = (errorDesc || error || 'Link error').replace(/\+/g, ' ');
-          showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
-          document.getElementById('resendConfirmCard').style.display = 'flex';
+          window.showNotice(`Verification Notice: ${cleanDesc}. Please request a fresh confirmation link or sign in.`, false);
+          const resendCard = document.getElementById('resendConfirmCard');
+          if (resendCard) resendCard.style.display = 'flex';
         }
       }
 
@@ -544,15 +564,15 @@
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        renderReaderSession(session);
+        window.renderReaderSession(session);
 
         // Listen to live auth changes (e.g. returning from email verification)
         supabase.auth.onAuthStateChange((event, session) => {
-          renderReaderSession(session);
+          window.renderReaderSession(session);
           if (event === 'SIGNED_IN' && session) {
-            showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
+            window.showNotice('Authenticated successfully! Welcome back to BeatWave.', true);
           } else if (event === 'SIGNED_OUT') {
-            showNotice('Signed out cleanly.', true);
+            window.showNotice('Signed out cleanly.', true);
           }
         });
       } catch(e) {
@@ -561,34 +581,51 @@
     }
     initAuthSession();
 
+    // Attach explicit click listeners on tabs for 100% reliability
+    document.addEventListener('DOMContentLoaded', () => {
+      const signInBtn = document.getElementById('subTabSignInBtn');
+      const signUpBtn = document.getElementById('subTabSignUpBtn');
+      const tabReaderBtn = document.getElementById('tabReaderBtn');
+      const tabAdminBtn = document.getElementById('tabAdminBtn');
+
+      if (signInBtn) signInBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signin'); });
+      if (signUpBtn) signUpBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchReaderMode('signup'); });
+      if (tabReaderBtn) tabReaderBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('reader'); });
+      if (tabAdminBtn) tabAdminBtn.addEventListener('click', (e) => { e.preventDefault(); window.switchAuthTab('admin'); });
+    });
+
     // 10. Reader Sign In Handler
     let pendingUnconfirmedEmail = '';
 
-    async function handleReaderSignIn(e) {
+    window.handleReaderSignIn = async function(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
 
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
+      const email = document.getElementById('loginEmail')?.value.trim();
+      const password = document.getElementById('loginPassword')?.value;
 
       if (!email || !password) {
-        showNotice('Please enter both your email address and password.');
+        window.showNotice('Please enter both your email address and password.');
         return;
       }
 
       if (!supabase) {
-        showNotice('Supabase client connection offline. Please check your network.');
+        window.showNotice('Supabase client connection offline. Please check your network.');
         return;
       }
 
       const submitBtn = document.getElementById('btnSubmitSignIn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Verifying...';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Verifying...';
+      }
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
+        }
 
         if (error) {
           recordFailedAttempt();
@@ -597,23 +634,27 @@
           // Handle Email Not Confirmed specifically
           if (error.code === 'email_not_confirmed' || errMsg.toLowerCase().includes('email not confirmed')) {
             pendingUnconfirmedEmail = email;
-            document.getElementById('resendConfirmCard').style.display = 'flex';
-            document.getElementById('resendPromptText').innerText = `Your email ${email} has not been verified yet. Please check your inbox/spam or click below.`;
-            showNotice('Email not confirmed yet. Please verify your email to log in.');
+            const resendCard = document.getElementById('resendConfirmCard');
+            const promptText = document.getElementById('resendPromptText');
+            if (resendCard) resendCard.style.display = 'flex';
+            if (promptText) promptText.innerText = `Your email ${email} has not been verified yet. Please check your inbox/spam or click below.`;
+            window.showNotice('Email not confirmed yet. Please verify your email to log in.');
           } else if (error.code === 'invalid_credentials' || errMsg.toLowerCase().includes('invalid login credentials')) {
-            showNotice('Invalid email or password. Please verify your credentials or click "Forgot Password?".');
+            window.showNotice('Invalid email or password. Please verify your credentials or click "Forgot Password?".');
           } else {
-            showNotice('Sign In Notice: ' + errMsg);
+            window.showNotice('Sign In Notice: ' + errMsg);
           }
         } else {
           // Success!
           localStorage.setItem('bw_failed_auth_attempts', '0');
           localStorage.setItem('bw_saved_email', email);
-          document.getElementById('rateLimitCard').style.display = 'none';
-          document.getElementById('resendConfirmCard').style.display = 'none';
+          const rCard = document.getElementById('rateLimitCard');
+          const resendCard = document.getElementById('resendConfirmCard');
+          if (rCard) rCard.style.display = 'none';
+          if (resendCard) resendCard.style.display = 'none';
           
-          showNotice('Signed In Successfully! Welcome to BeatWave.', true);
-          renderReaderSession(data.session);
+          window.showNotice('Signed In Successfully! Welcome to BeatWave.', true);
+          window.renderReaderSession(data.session);
 
           // Handle URL redirect query parameter if present
           const urlParams = new URLSearchParams(window.location.search);
@@ -625,48 +666,52 @@
           }
         }
       } catch(err) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
+        }
         recordFailedAttempt();
-        showNotice('Authentication error: ' + err.message);
+        window.showNotice('Authentication error: ' + err.message);
       }
-    }
+    };
 
     // 11. Reader Sign Up Handler
-    async function handleReaderSignUp(e) {
+    window.handleReaderSignUp = async function(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
 
-      const name = document.getElementById('signUpName').value.trim();
-      const email = document.getElementById('signUpEmail').value.trim();
-      const password = document.getElementById('signUpPassword').value;
-      const confirmPass = document.getElementById('signUpConfirmPassword').value;
+      const name = document.getElementById('signUpName')?.value.trim();
+      const email = document.getElementById('signUpEmail')?.value.trim();
+      const password = document.getElementById('signUpPassword')?.value;
+      const confirmPass = document.getElementById('signUpConfirmPassword')?.value;
 
       if (!name) {
-        showNotice('Please enter your full name.');
+        window.showNotice('Please enter your full name.');
         return;
       }
       if (!email || !email.includes('@')) {
-        showNotice('Please enter a valid email address.');
+        window.showNotice('Please enter a valid email address.');
         return;
       }
-      if (password.length < 6) {
-        showNotice('Password must be at least 6 characters long.');
+      if (!password || password.length < 6) {
+        window.showNotice('Password must be at least 6 characters long.');
         return;
       }
       if (password !== confirmPass) {
-        showNotice('Passwords do not match. Please verify both password fields.');
+        window.showNotice('Passwords do not match. Please verify both password fields.');
         return;
       }
 
       if (!supabase) {
-        showNotice('Supabase client connection offline.');
+        window.showNotice('Supabase client connection offline.');
         return;
       }
 
       const submitBtn = document.getElementById('btnSubmitSignUp');
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Creating Account...';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Creating Account...';
+      }
 
       try {
         const redirectUrl = getSafeRedirectUrl();
@@ -683,27 +728,30 @@
           options: signUpOptions
         });
 
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Create Free Account</span>';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Create Free Account</span>';
+        }
 
         if (error) {
           recordFailedAttempt();
           if (error.status === 429 || error.message.includes('rate limit')) {
-            showNotice('Supabase email limit reached. Please wait a minute before trying again.');
+            window.showNotice('Supabase email limit reached. Please wait a minute before trying again.');
           } else if (error.message.toLowerCase().includes('already registered')) {
-            showNotice('An account with this email already exists. Switching to Sign In...', false);
-            switchReaderMode('signin');
-            document.getElementById('loginEmail').value = email;
+            window.showNotice('An account with this email already exists. Switching to Sign In...', false);
+            window.switchReaderMode('signin');
+            const lEmail = document.getElementById('loginEmail');
+            if (lEmail) lEmail.value = email;
           } else {
-            showNotice('Sign Up Notice: ' + error.message);
+            window.showNotice('Sign Up Notice: ' + error.message);
           }
         } else {
           localStorage.setItem('bw_saved_email', email);
           
           // Check if session was auto-confirmed or requires confirmation
           if (data && data.session) {
-            showNotice('Account created and verified! Welcome, ' + name + '!', true);
-            renderReaderSession(data.session);
+            window.showNotice('Account created and verified! Welcome, ' + name + '!', true);
+            window.renderReaderSession(data.session);
 
             const urlParams = new URLSearchParams(window.location.search);
             const redirect = urlParams.get('redirect');
@@ -715,41 +763,48 @@
           } else {
             // Check if user already exists
             if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-              showNotice('An account with this email already exists. Please switch to Sign In.', false);
-              switchReaderMode('signin');
-              document.getElementById('loginEmail').value = email;
+              window.showNotice('An account with this email already exists. Please switch to Sign In.', false);
+              window.switchReaderMode('signin');
+              const lEmail = document.getElementById('loginEmail');
+              if (lEmail) lEmail.value = email;
             } else {
               pendingUnconfirmedEmail = email;
-              document.getElementById('resendConfirmCard').style.display = 'flex';
-              document.getElementById('resendPromptText').innerText = `Verification email sent to ${email}. Click the link inside to activate your account.`;
-              showNotice('Account created! Verification link sent to ' + email + '. Check your inbox and spam folder.', true);
+              const resendCard = document.getElementById('resendConfirmCard');
+              const promptText = document.getElementById('resendPromptText');
+              if (resendCard) resendCard.style.display = 'flex';
+              if (promptText) promptText.innerText = `Verification email sent to ${email}. Click the link inside to activate your account.`;
+              window.showNotice('Account created! Verification link sent to ' + email + '. Check your inbox and spam folder.', true);
             }
           }
         }
       } catch(err) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Create Free Account</span>';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Create Free Account</span>';
+        }
         recordFailedAttempt();
-        showNotice('Sign Up Error: ' + err.message);
+        window.showNotice('Sign Up Error: ' + err.message);
       }
-    }
+    };
 
     // 12. Resend Confirmation Email
     let resendCooldown = 0;
-    async function handleResendConfirmation() {
-      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail').value.trim() || document.getElementById('signUpEmail').value.trim() || localStorage.getItem('bw_saved_email');
+    window.handleResendConfirmation = async function() {
+      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail')?.value.trim() || document.getElementById('signUpEmail')?.value.trim() || localStorage.getItem('bw_saved_email');
       if (!email) {
-        showNotice('Please enter your email to resend confirmation.');
+        window.showNotice('Please enter your email to resend confirmation.');
         return;
       }
       if (resendCooldown > 0) {
-        showNotice(`Please wait ${resendCooldown}s before requesting another confirmation email.`);
+        window.showNotice(`Please wait ${resendCooldown}s before requesting another confirmation email.`);
         return;
       }
 
       const resendBtn = document.getElementById('btnResendEmail');
-      resendBtn.disabled = true;
-      resendBtn.innerText = 'Dispatching...';
+      if (resendBtn) {
+        resendBtn.disabled = true;
+        resendBtn.innerText = 'Dispatching...';
+      }
 
       try {
         const redirectUrl = getSafeRedirectUrl();
@@ -765,36 +820,42 @@
         });
 
         if (error) {
-          showNotice('Resend Notice: ' + error.message);
-          resendBtn.disabled = false;
-          resendBtn.innerText = 'Resend Confirmation Email';
+          window.showNotice('Resend Notice: ' + error.message);
+          if (resendBtn) {
+            resendBtn.disabled = false;
+            resendBtn.innerText = 'Resend Confirmation Email';
+          }
         } else {
-          showNotice('Fresh confirmation email dispatched to ' + email + '! Check your inbox.', true);
+          window.showNotice('Fresh confirmation email dispatched to ' + email + '! Check your inbox.', true);
           resendCooldown = 60;
           const cdInterval = setInterval(() => {
             resendCooldown--;
             if (resendCooldown <= 0) {
               clearInterval(cdInterval);
-              resendBtn.disabled = false;
-              resendBtn.innerText = 'Resend Confirmation Email';
-            } else {
+              if (resendBtn) {
+                resendBtn.disabled = false;
+                resendBtn.innerText = 'Resend Confirmation Email';
+              }
+            } else if (resendBtn) {
               resendBtn.innerText = `Wait ${resendCooldown}s`;
             }
           }, 1000);
         }
       } catch(err) {
-        resendBtn.disabled = false;
-        resendBtn.innerText = 'Resend Confirmation Email';
-        showNotice('Error resending email: ' + err.message);
+        if (resendBtn) {
+          resendBtn.disabled = false;
+          resendBtn.innerText = 'Resend Confirmation Email';
+        }
+        window.showNotice('Error resending email: ' + err.message);
       }
-    }
+    };
 
     // 13. Passwordless Magic Link
-    async function handleSendMagicLink() {
-      const email = document.getElementById('loginEmail').value.trim();
+    window.handleSendMagicLink = async function() {
+      const email = document.getElementById('loginEmail')?.value.trim();
       if (!email) {
-        showNotice('Please type your email address above to receive a Magic Login Link.');
-        document.getElementById('loginEmail').focus();
+        window.showNotice('Please type your email address above to receive a Magic Login Link.');
+        document.getElementById('loginEmail')?.focus();
         return;
       }
       if (!supabase) return;
@@ -812,18 +873,18 @@
         });
 
         if (error) {
-          showNotice('Magic Link Notice: ' + error.message);
+          window.showNotice('Magic Link Notice: ' + error.message);
         } else {
-          showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
+          window.showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
         }
       } catch(err) {
-        showNotice('Error sending magic link: ' + err.message);
+        window.showNotice('Error sending magic link: ' + err.message);
       }
-    }
+    };
 
     // 14. Password Reset Flow
-    async function handleResetPassword() {
-      const email = document.getElementById('resetEmail').value.trim();
+    window.handleResetPassword = async function() {
+      const email = document.getElementById('resetEmail')?.value.trim();
       if (!email) {
         alert('Please enter your registered email address.');
         return;
@@ -840,27 +901,27 @@
         const { error } = await supabase.auth.resetPasswordForEmail(email, resetOptions);
 
         if (error) {
-          showNotice('Password Reset Notice: ' + error.message);
+          window.showNotice('Password Reset Notice: ' + error.message);
         } else {
-          showNotice('Password reset link sent to ' + email + '! Check your inbox.', true);
-          toggleForgotPasswordBox(false);
+          window.showNotice('Password reset link sent to ' + email + '! Check your inbox.', true);
+          window.toggleForgotPasswordBox(false);
         }
       } catch(err) {
-        showNotice('Error resetting password: ' + err.message);
+        window.showNotice('Error resetting password: ' + err.message);
       }
-    }
+    };
 
     // 15. Sign Out
-    async function handleSignOut() {
+    window.handleSignOut = async function() {
       if (!supabase) return;
       try {
         await supabase.auth.signOut();
-        renderReaderSession(null);
-        showNotice('You have been signed out cleanly.', true);
+        window.renderReaderSession(null);
+        window.showNotice('You have been signed out cleanly.', true);
       } catch(e) {
         console.warn('Sign out err:', e);
       }
-    }
+    };
 
     // 16. Admin Portal Login (Kept in .env, validated via SHA-256 hash or Supabase RPC)
     async function verifyAdminSecret(pass) {
@@ -875,24 +936,24 @@
       return hash === '006657998771eb1ef75d0a26f8824af99da8bf4f7261d3a4d896708286a618eb';
     }
 
-    async function handleAdminLogin(e) {
+    window.handleAdminLogin = async function(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
 
-      const pass = document.getElementById('adminPass').value.trim();
+      const pass = document.getElementById('adminPass')?.value.trim();
       const isValid = await verifyAdminSecret(pass);
 
       if (isValid) {
         sessionStorage.setItem('bw_admin_auth', 'true');
-        showNotice('Master Admin Authenticated! Opening Author Panel...', true);
+        window.showNotice('Master Admin Authenticated! Opening Author Panel...', true);
         setTimeout(() => {
           window.location.href = 'index.html#admin';
         }, 600);
       } else {
         recordFailedAttempt();
-        showNotice('Access Denied: Invalid Master Password.');
+        window.showNotice('Access Denied: Invalid Master Password.');
       }
-    }
+    };
   </script>
 </body>
 </html>
