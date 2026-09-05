@@ -70,6 +70,49 @@
   <div class="ambient-glow-orb orb-2"></div>
   <canvas id="particleCanvas"></canvas>
 
+  <!-- ANNOUNCEMENT TICKER BANNER (Hallmark Atmospheric) -->
+  <aside class="bw-announcement-ticker" aria-label="Announcement Ticker">
+    <div class="bw-ticker-track-wrapper">
+      <div class="bw-ticker-track">
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-dot"></span>
+          <span class="bw-ticker-tag">NEW RELEASE</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+        </a>
+        <a href="cart.html?tier=print" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COLLECTOR COPY</span>
+          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        </a>
+        <a href="index.html#story" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">100% FOSS</span>
+          <span>The True Untold High-School Journey of India's Ad-Free Open Source Music App</span>
+        </a>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">INSTANT ACCESS</span>
+          <span>Fast UPI Verification &middot; 1-Tap Delivery to WhatsApp &amp; Email</span>
+        </a>
+        <!-- Duplicate for continuous infinite scroll loop -->
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-dot"></span>
+          <span class="bw-ticker-tag">NEW RELEASE</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+        </a>
+        <a href="cart.html?tier=print" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COLLECTOR COPY</span>
+          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        </a>
+        <a href="index.html#story" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">100% FOSS</span>
+          <span>The True Untold High-School Journey of India's Ad-Free Open Source Music App</span>
+        </a>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">INSTANT ACCESS</span>
+          <span>Fast UPI Verification &middot; 1-Tap Delivery to WhatsApp &amp; Email</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
   <!-- LIQUID GLASS NAV PRO -->
   <header class="liquid-nav-container">
     <nav class="liquid-glass-nav">
@@ -81,7 +124,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="index.html#book-preview">Chapters</a></li>
         <li><a href="track.html">Track Order</a></li>
-        <li><a href="login.html">Login</a></li>
+        <li><a href="login.html" id="navLoginLink">Login</a></li>
       </ul>
       <a href="index.html#pricing" class="liquid-cta-btn">
         <span>&larr; Back to Editions</span>
@@ -133,7 +176,39 @@
 
           <!-- Customer Form -->
           <div class="cart-item-card" style="flex-direction: column; align-items: stretch;">
-            <h3 style="font-size: 1.15rem; margin-bottom: var(--space-xs);">1. Contact & Delivery Details</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+              <h3 style="font-size: 1.15rem; margin: 0;">1. Contact &amp; Delivery Details</h3>
+              <span style="font-size: 0.75rem; color: var(--color-ink-faint); font-family: var(--font-mono);">AUTH VERIFIED</span>
+            </div>
+
+            <!-- Auth Gate Card (If not signed in) -->
+            <div id="cartAuthGateBox" class="checkout-auth-gate-box" style="display: none;">
+              <div style="font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; color: #fff;">Reader Account Required</div>
+              <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin-bottom: var(--space-md);">
+                Sign in or continue as reader to link this book copy to your personal profile &amp; order ledger.
+              </p>
+              <div style="display: flex; gap: var(--space-xs); justify-content: center; flex-wrap: wrap;">
+                <button type="button" onclick="cartQuickGuestAccess()" class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem;">
+                  <span>1-Click Continue as Reader &rarr;</span>
+                </button>
+                <a href="login.html?redirect=cart.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.82rem;">
+                  <span>Sign In / Sign Up</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Signed In Badge (If authenticated) -->
+            <div id="cartAuthStatusCard" class="checkout-auth-badge-signed-in" style="display: none;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--color-success); font-size: 1.1rem; font-weight: bold;">✓</span>
+                <div>
+                  <strong style="color: var(--color-ink);" id="cartAuthUserName">Reader</strong>
+                  <span style="color: var(--color-ink-muted); font-size: 0.78rem;" id="cartAuthUserEmail">(reader@email.com)</span>
+                </div>
+              </div>
+              <a href="login.html?redirect=cart.html" style="font-size: 0.76rem; color: var(--color-accent-cyan); text-decoration: underline;">Switch Account</a>
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: var(--space-md);">
               <div class="form-group">
                 <label class="form-label" for="cartName">Full Name *</label>
@@ -161,7 +236,7 @@
 
         <!-- Right: Summary & Instant UPI Payment -->
         <div class="cart-item-card" style="flex-direction: column; align-items: stretch; position: sticky; top: 120px;">
-          <h3 style="font-size: 1.15rem;">2. Payment & Confirmation</h3>
+          <h3 style="font-size: 1.15rem;">2. Payment &amp; Confirmation</h3>
           
           <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
             <span id="summaryTierTitle">Digital E-Book Edition</span>
@@ -169,7 +244,7 @@
           </div>
 
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--color-ink-faint);" id="deliveryFeeRow" style="display: none;">
-            <span>Delivery & Packaging</span>
+            <span>Delivery &amp; Packaging</span>
             <strong id="summaryDeliveryFee">&#8377;0</strong>
           </div>
 
@@ -180,12 +255,12 @@
 
           <!-- Instant UPI Section -->
           <div class="upi-qr-card" style="padding: var(--space-md); margin-top: var(--space-xs);">
-            <img src="upi qr aarav.jpg" alt="UPI QR Code" style="width: 150px; height: 150px;">
+            <img src="upi QRCode.png" alt="UPI QR Code" style="width: 150px; height: 150px;">
             <a id="cartUpiBtn" href="#" class="btn-primary" style="width: 100%; padding: 8px; font-size: 0.85rem;">
               <span>Pay via PhonePe / GPay</span>
             </a>
             <div class="upi-id-badge" onclick="copyUpiId()" style="font-size: 0.78rem;">
-              <span>akshanshsinha67@axl</span>
+              <span>ghanshyamsharma.nlu@okicici</span>
             </div>
           </div>
 
@@ -306,6 +381,8 @@
   <script src="app.js"></script>
   <script>
     let activeTier = 'ebook';
+    let isReaderAuthenticated = false;
+    let authenticatedReader = null;
 
     function selectCartTier(tier) {
       activeTier = tier;
@@ -341,7 +418,7 @@
     function updateUpiLink(amount) {
       const btn = document.getElementById('cartUpiBtn');
       if (btn) {
-        btn.href = `upi://pay?pa=akshanshsinha67@axl&pn=VortexApps_BeatWave&am=${amount}&cu=INR&tn=BeatWaveBook_Cart`;
+        btn.href = `upi://pay?pa=ghanshyamsharma.nlu@okicici&pn=VortexApps_BeatWave&am=${amount}&cu=INR&tn=BeatWaveBook_Cart`;
       }
     }
     updateUpiLink(150);
@@ -352,27 +429,73 @@
       selectCartTier('print');
     }
 
-    // Auto-fill customer details if reader is authenticated
+    function updateReaderAuthState(user) {
+      const gateBox = document.getElementById('cartAuthGateBox');
+      const statusCard = document.getElementById('cartAuthStatusCard');
+      const nameInput = document.getElementById('cartName');
+      const emailInput = document.getElementById('cartEmail');
+      const userNameEl = document.getElementById('cartAuthUserName');
+      const userEmailEl = document.getElementById('cartAuthUserEmail');
+
+      if (user) {
+        isReaderAuthenticated = true;
+        authenticatedReader = user;
+        if (gateBox) gateBox.style.display = 'none';
+        if (statusCard) statusCard.style.display = 'flex';
+
+        const name = (user.user_metadata && user.user_metadata.full_name) || user.name || (user.email ? user.email.split('@')[0] : 'Reader');
+        const email = user.email || '';
+
+        if (userNameEl) userNameEl.innerText = name;
+        if (userEmailEl) userEmailEl.innerText = `(${email})`;
+        if (nameInput && !nameInput.value) nameInput.value = name;
+        if (emailInput && !emailInput.value) emailInput.value = email;
+      } else {
+        isReaderAuthenticated = false;
+        authenticatedReader = null;
+        if (gateBox) gateBox.style.display = 'block';
+        if (statusCard) statusCard.style.display = 'none';
+      }
+    }
+
+    window.cartQuickGuestAccess = function() {
+      const guestUser = {
+        email: 'reader.' + Math.floor(Math.random() * 8999 + 1000) + '@beatwave.io',
+        user_metadata: { full_name: 'Valued Reader' }
+      };
+      localStorage.setItem('bw_guest_session', JSON.stringify({ user: guestUser }));
+      updateReaderAuthState(guestUser);
+      if (window.notifyUser) {
+        window.notifyUser('Reader Access Verified ✓', 'You can now proceed with your order reservation.', 'success');
+      }
+    };
+
+    // Check reader authentication
     try {
+      const localGuest = localStorage.getItem('bw_guest_session');
+      if (localGuest) {
+        const parsed = JSON.parse(localGuest);
+        if (parsed && parsed.user) updateReaderAuthState(parsed.user);
+      }
+
       if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
         const client = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
         client.auth.getSession().then(({ data: { session } }) => {
           if (session && session.user) {
-            const emailInput = document.getElementById('cartEmail');
-            const nameInput = document.getElementById('cartName');
-            if (emailInput && !emailInput.value) emailInput.value = session.user.email;
-            if (nameInput && !nameInput.value && session.user.user_metadata && session.user.user_metadata.full_name) {
-              nameInput.value = session.user.user_metadata.full_name;
-            }
+            updateReaderAuthState(session.user);
+          } else if (!localGuest) {
+            updateReaderAuthState(null);
           }
         });
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('Cart auth check error:', e);
+    }
 
     function copyUpiId() {
-      const upi = "akshanshsinha67@axl";
+      const upi = "ghanshyamsharma.nlu@okicici";
       navigator.clipboard.writeText(upi).then(() => {
-        if (window.notifyUser) window.notifyUser('UPI ID Copied 📋', 'akshanshsinha67@axl copied to clipboard!', 'success');
+        if (window.notifyUser) window.notifyUser('UPI ID Copied 📋', `${upi} copied to clipboard!`, 'success');
         else alert('UPI ID copied: ' + upi);
       }).catch(() => {
         if (window.notifyUser) window.notifyUser('UPI ID 📋', upi, 'info');
@@ -380,6 +503,20 @@
     }
 
     async function submitCartOrder() {
+      if (!isReaderAuthenticated) {
+        if (window.notifyUser) {
+          window.notifyUser('Sign In Required 🔐', 'Please sign in or click "1-Click Continue as Reader" above to place an order.', 'warning');
+        } else {
+          alert('Please sign in or continue as reader to link this order.');
+        }
+        const gateBox = document.getElementById('cartAuthGateBox');
+        if (gateBox) {
+          gateBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          gateBox.style.borderColor = 'var(--color-accent-cyan)';
+        }
+        return;
+      }
+
       const name = document.getElementById('cartName').value.trim();
       const email = document.getElementById('cartEmail').value.trim();
       const phone = document.getElementById('cartPhone').value.trim();

@@ -98,6 +98,49 @@
   <div class="ambient-glow-orb orb-2"></div>
   <canvas id="particleCanvas"></canvas>
 
+  <!-- ANNOUNCEMENT TICKER BANNER (Hallmark Atmospheric) -->
+  <aside class="bw-announcement-ticker" aria-label="Announcement Ticker">
+    <div class="bw-ticker-track-wrapper">
+      <div class="bw-ticker-track">
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-dot"></span>
+          <span class="bw-ticker-tag">NEW RELEASE</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+        </a>
+        <a href="cart.html?tier=print" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COLLECTOR COPY</span>
+          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        </a>
+        <a href="index.html#story" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">100% FOSS</span>
+          <span>The True Untold High-School Journey of India's Ad-Free Open Source Music App</span>
+        </a>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">INSTANT ACCESS</span>
+          <span>Fast UPI Verification &middot; 1-Tap Delivery to WhatsApp &amp; Email</span>
+        </a>
+        <!-- Duplicate for continuous infinite scroll loop -->
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-dot"></span>
+          <span class="bw-ticker-tag">NEW RELEASE</span>
+          <span>&ldquo;The Story of BeatWave&rdquo; Official First Edition is Now Live!</span>
+        </a>
+        <a href="cart.html?tier=print" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">COLLECTOR COPY</span>
+          <span>Limited Softcover Print Paperback + Free Companion PDF Available Pan-India</span>
+        </a>
+        <a href="index.html#story" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">100% FOSS</span>
+          <span>The True Untold High-School Journey of India's Ad-Free Open Source Music App</span>
+        </a>
+        <a href="cart.html" class="bw-ticker-pill">
+          <span class="bw-ticker-tag">INSTANT ACCESS</span>
+          <span>Fast UPI Verification &middot; 1-Tap Delivery to WhatsApp &amp; Email</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
   <!-- LIQUID GLASS NAV PRO -->
   <header class="liquid-nav-container">
     <nav class="liquid-glass-nav">
@@ -118,7 +161,7 @@
   </header>
 
   <main class="subpage-wrapper">
-    <div class="container">
+    <div class="container" style="max-width: 820px;">
       <div class="auth-container">
         <!-- Master Auth Tabs: Reader Account vs Admin Portal -->
         <div class="auth-tabs">
@@ -156,7 +199,7 @@
         <!-- ============================================ -->
         <div id="readerAuthView">
           
-          <!-- STATE A: Authenticated Reader Profile Card -->
+          <!-- STATE A: Authenticated Reader Profile Card & Orders -->
           <div id="readerProfileView" style="display: none;">
             <div class="reader-profile-card">
               <div class="reader-avatar-circle" id="profileAvatar">R</div>
@@ -173,18 +216,33 @@
                 <a href="index.html" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-purple)); color: #000; font-weight: 800;">
                   <span>Enter Story &amp; Read Book &rarr;</span>
                 </a>
-                <a id="btnProfileTrack" href="track.html" class="btn-secondary" style="width: 100%; justify-content: center;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  <span>Track My Orders</span>
-                </a>
                 <a href="cart.html" class="btn-secondary" style="width: 100%; justify-content: center;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                  <span>Order Physical Edition</span>
+                  <span>Order Another Edition</span>
                 </a>
                 <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; color: var(--color-accent-red); border-color: rgba(255, 80, 80, 0.25);" onclick="handleSignOut()">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   <span>Sign Out / Switch Account</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Reader's Active Orders & Book Downloads Section -->
+            <div class="reader-orders-container" id="readerOrdersContainer" style="margin-top: var(--space-xl);">
+              <div class="reader-orders-header">
+                <div>
+                  <h4 style="font-size: 1.15rem; margin: 0; color: #fff;">My Book Orders &amp; Downloads</h4>
+                  <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin: 0;">Instant access to purchased editions &amp; shipping dispatch</p>
+                </div>
+                <button type="button" onclick="loadReaderOrders()" class="btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  <span>Refresh Orders</span>
+                </button>
+              </div>
+              <div id="readerOrdersList" class="reader-orders-grid">
+                <div style="text-align: center; padding: var(--space-lg); color: var(--color-ink-faint); font-size: 0.85rem;">
+                  Loading your orders...
+                </div>
               </div>
             </div>
           </div>
@@ -796,6 +854,9 @@
             navAuthLink.innerText = 'My Account';
             navAuthLink.title = user.email;
           }
+
+          // Trigger live reader order load
+          window.loadReaderOrders(user.email);
         } else {
           if (profileView) profileView.style.display = 'none';
           if (formsContainer) formsContainer.style.display = 'block';
@@ -806,6 +867,150 @@
       } catch(e) {
         console.error('renderReaderSession error:', e);
       }
+    };
+
+    // 7c. Live Reader Orders & Instant Download Loader
+    window.loadReaderOrders = async function(overrideEmail) {
+      const listContainer = document.getElementById('readerOrdersList');
+      if (!listContainer) return;
+
+      let email = overrideEmail;
+      if (!email) {
+        const guest = safeStorage.get('bw_guest_session') ? JSON.parse(safeStorage.get('bw_guest_session')) : null;
+        if (guest && guest.user) email = guest.user.email;
+      }
+      if (!email && supabase) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session && session.user) email = session.user.email;
+        } catch(e) {}
+      }
+
+      if (!email) {
+        listContainer.innerHTML = `<div style="text-align: center; padding: var(--space-lg); color: var(--color-ink-muted); font-size: 0.85rem;">Please sign in to view your orders.</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = `
+        <div style="text-align: center; padding: var(--space-lg); color: var(--color-accent-cyan); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <span>Fetching your live orders...</span>
+        </div>
+      `;
+
+      let orders = [];
+
+      // 1. Fetch from Supabase
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('book_orders')
+            .select('*')
+            .ilike('email', email)
+            .order('created_at', { ascending: false });
+
+          if (!error && Array.isArray(data)) {
+            orders = data;
+          }
+        } catch(e) {
+          console.warn('Supabase orders fetch error:', e);
+        }
+      }
+
+      // 2. Fetch local storage orders and merge
+      try {
+        const localAll = JSON.parse(safeStorage.get('bw_supabase_orders') || '[]');
+        const lastOrder = JSON.parse(safeStorage.get('bw_last_order') || 'null');
+        const localCandidates = [...localAll];
+        if (lastOrder) localCandidates.push(lastOrder);
+
+        const emailLower = email.toLowerCase().trim();
+        localCandidates.forEach(loc => {
+          if (loc && loc.id && ((loc.email && loc.email.toLowerCase().trim() === emailLower) || emailLower === 'guest.reader@beatwave.io')) {
+            if (!orders.some(o => o.id === loc.id)) {
+              orders.push(loc);
+            }
+          }
+        });
+      } catch(e) {}
+
+      // Sort by created_at desc
+      orders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      if (orders.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: var(--space-xl) var(--space-md); background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: var(--radius-lg);">
+            <div style="font-size: 2rem; margin-bottom: 8px; opacity: 0.7;">📖</div>
+            <h5 style="font-size: 1rem; color: #fff; margin-bottom: 4px;">No Orders Found for ${email}</h5>
+            <p style="font-size: 0.8rem; color: var(--color-ink-muted); margin-bottom: var(--space-md); max-width: 400px; margin-left: auto; margin-right: auto;">
+              You haven't ordered an edition yet, or your order was placed with another email address.
+            </p>
+            <a href="cart.html" class="btn-primary" style="display: inline-flex; padding: 8px 20px; font-size: 0.82rem; text-decoration: none;">
+              <span>Order Your Copy Now &rarr;</span>
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = orders.map(order => {
+        const status = (order.status || 'PENDING_VERIFICATION').toUpperCase();
+        const isVerified = status === 'PAID' || status === 'SHIPPED' || status === 'DELIVERED';
+        const formattedDate = order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+
+        let badgeClass = 'status-pending';
+        let badgeLabel = 'Verification Pending';
+        if (isVerified) {
+          badgeClass = 'status-verified';
+          badgeLabel = status === 'SHIPPED' ? 'Shipped & Live' : (status === 'DELIVERED' ? 'Delivered' : 'Paid & Verified');
+        } else if (status === 'REJECTED' || status === 'CANCELLED') {
+          badgeClass = 'status-rejected';
+          badgeLabel = 'Cancelled';
+        }
+
+        return `
+          <div class="reader-order-card" style="background: rgba(18, 16, 32, 0.75); border: 1px solid ${isVerified ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 255, 255, 0.08)'}; border-radius: var(--radius-lg); padding: var(--space-md); margin-bottom: var(--space-sm); position: relative; overflow: hidden; backdrop-filter: blur(12px);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--color-ink-faint); letter-spacing: 0.05em;">ORDER ID</span>
+                <div style="font-family: var(--font-mono); font-size: 1.05rem; font-weight: 800; color: var(--color-accent-cyan);">${order.id || 'BW-ORDER'}</div>
+                <div style="font-size: 0.72rem; color: var(--color-ink-muted); margin-top: 2px;">Placed on ${formattedDate}</div>
+              </div>
+              <span class="status-badge ${badgeClass}" style="font-size: 0.74rem; padding: 4px 10px;">${badgeLabel}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); margin-bottom: 12px; font-size: 0.82rem;">
+              <div>
+                <span style="color: #fff; font-weight: 700;">${order.tier_name || 'BeatWave Book Edition'}</span>
+                ${order.payment_method ? `<span style="color: var(--color-ink-muted); font-size: 0.72rem; margin-left: 6px;">(${order.payment_method})</span>` : ''}
+              </div>
+              <div style="font-family: var(--font-mono); font-weight: 800; color: #fff;">&#8377;${order.amount || 150}</div>
+            </div>
+
+            ${isVerified ? `
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <a href="beatwave book_pagenumber.pdf" download="BeatWave_Book_Complete_Edition.pdf" class="btn-primary" style="flex: 1; min-width: 170px; justify-content: center; font-size: 0.78rem; padding: 8px 14px; background: #00ff88; color: #000; font-weight: 800; text-decoration: none;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>Download Book (PDF)</span>
+                </a>
+                <a href="track.html?orderId=${encodeURIComponent(order.id)}" class="btn-secondary" style="font-size: 0.78rem; padding: 8px 12px; text-decoration: none;">
+                  <span>Track Status &rarr;</span>
+                </a>
+              </div>
+            ` : `
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; color: var(--color-ink-muted);">
+                <span style="display: inline-flex; align-items: center; gap: 4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  UPI Verification in progress &middot; Download unlocks upon approval
+                </span>
+                <a href="track.html?orderId=${encodeURIComponent(order.id)}" class="btn-secondary" style="font-size: 0.74rem; padding: 4px 10px; text-decoration: none;">
+                  <span>Track Live</span>
+                </a>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
     };
 
     // 8. Sign In Handler

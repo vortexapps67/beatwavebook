@@ -2939,4 +2939,201 @@ a {
   background: #ff4d6d;
 }
 
+/* ==========================================================================
+   ANNOUNCEMENT TICKER BANNER (Hallmark Atmosphere)
+   ========================================================================== */
+.bw-announcement-ticker {
+  position: relative;
+  z-index: 999;
+  background: rgba(10, 4, 24, 0.92);
+  border-bottom: 1px solid rgba(0, 242, 254, 0.22);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 6px 16px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bw-ticker-track-wrapper {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+}
+
+.bw-ticker-track {
+  display: inline-flex;
+  gap: 36px;
+  animation: tickerSlide 28s linear infinite;
+  will-change: transform;
+}
+.bw-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes tickerSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.bw-ticker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.bw-ticker-pill:hover {
+  color: var(--color-accent-cyan);
+}
+
+.bw-ticker-tag {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(138, 43, 226, 0.2));
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: var(--color-accent-cyan);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bw-ticker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+  display: inline-block;
+}
+
+/* ==========================================================================
+   READER PROFILE ORDERS LEDGER (Hallmark Craft)
+   ========================================================================== */
+.reader-orders-container {
+  margin-top: var(--space-xl);
+  background: rgba(14, 8, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.reader-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reader-orders-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.reader-order-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+}
+.reader-order-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 242, 254, 0.35);
+  box-shadow: 0 12px 30px -10px rgba(0, 242, 254, 0.15);
+}
+
+.reader-order-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reader-order-id-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reader-order-id {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-accent-cyan);
+  font-size: 1.05rem;
+}
+
+.reader-order-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-top: 2px;
+}
+
+.reader-order-subtext {
+  font-size: 0.82rem;
+  color: var(--color-ink-muted);
+}
+
+.reader-order-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+@media (max-width: 680px) {
+  .reader-order-card {
+    grid-template-columns: 1fr;
+  }
+  .reader-order-actions {
+    align-items: stretch;
+  }
+}
+
+/* ==========================================================================
+   CHECKOUT AUTH GATE (Sign In / Sign Up Gate)
+   ========================================================================== */
+.checkout-auth-gate-box {
+  background: rgba(14, 8, 30, 0.85);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.checkout-auth-badge-signed-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: var(--space-md);
+  font-size: 0.85rem;
+}
+
+
 

@@ -8,9 +8,9 @@ const supabaseConfig = {
 
 // Global Payment & Pricing Configuration
 const paymentConfig = {
-  upiId: "akshanshsinha67@axl",
+  upiId: "ghanshyamsharma.nlu@okicici",
   merchantName: "Vortex Apps (BeatWave)",
-  qrImage: "upi qr aarav.jpg",
+  qrImage: "upi QRCode.png",
   tiers: {
     ebook: {
       id: "ebook",
