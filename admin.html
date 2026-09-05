@@ -254,6 +254,11 @@
             <span class="admin-stat-number" id="statTotalOrders">0</span>
           </div>
 
+          <div class="admin-stat-box" style="--stat-glow: #00e5ff;">
+            <span class="admin-stat-label">Unique Customers</span>
+            <span class="admin-stat-number" id="statUniqueCustomers" style="color: #00e5ff;">0</span>
+          </div>
+
           <div class="admin-stat-box" style="--stat-glow: #00ff88;">
             <span class="admin-stat-label">Total Revenue</span>
             <span class="admin-stat-number" id="statTotalRevenue" style="color: #00ff88;">₹0</span>
@@ -519,6 +524,7 @@
       let pendingCount = 0;
       let paidCount = 0;
       let shippedCount = 0;
+      const uniqueCustomerSet = new Set();
 
       allOrders.forEach(o => {
         const s = (o.status || 'PENDING_VERIFICATION').toUpperCase();
@@ -529,9 +535,15 @@
         if (s === 'PAID') paidCount++;
         else if (s === 'SHIPPED' || s === 'DELIVERED') shippedCount++;
         else if (s !== 'CANCELLED' && s !== 'REJECTED') pendingCount++;
+
+        const userIdentifier = (o.email || o.phone || o.customer_name || '').toLowerCase().trim();
+        if (userIdentifier) {
+          uniqueCustomerSet.add(userIdentifier);
+        }
       });
 
       document.getElementById('statTotalOrders').innerText = allOrders.length;
+      document.getElementById('statUniqueCustomers').innerText = uniqueCustomerSet.size;
       document.getElementById('statTotalRevenue').innerText = '₹' + totalRevenue.toLocaleString('en-IN');
       document.getElementById('statPendingOrders').innerText = pendingCount;
       document.getElementById('statPaidOrders').innerText = paidCount;
