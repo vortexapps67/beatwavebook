@@ -654,6 +654,15 @@
     }
 
     requestAnimationFrame(updatePreloader);
+
+    // Global Safety Guard: Dismiss preloader after 2.0s under all network conditions
+    setTimeout(() => {
+      if (!preloader.classList.contains('is-loaded')) {
+        preloader.classList.add('is-loaded');
+        triggerInitialScrollReveal();
+        setTimeout(() => { preloader.style.display = 'none'; }, 600);
+      }
+    }, 2000);
   }
 
   // ==========================================================================
