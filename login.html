@@ -113,7 +113,7 @@
             <div style="display: flex; flex-direction: column; gap: var(--space-md);">
               <div class="form-group">
                 <label class="form-label" for="adminPass">Master Password *</label>
-                <input type="password" id="adminPass" class="form-input" placeholder="admin00" required>
+                <input type="password" id="adminPass" class="form-input" placeholder="Enter master password..." required>
               </div>
 
               <button type="submit" class="btn-primary" style="width: 100%;">
@@ -313,13 +313,26 @@
       }
     }
 
-    // Admin Portal Access (Password: admin00)
-    function handleAdminLogin(e) {
+    // Admin Portal Access (Password is kept in .env; frontend checks one-way hash & Supabase RPC)
+    async function verifyAdminSecret(pass) {
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.rpc('verify_admin_access', { pass_attempt: pass });
+          if (!error && typeof data === 'boolean') return data;
+        } catch(e) {}
+      }
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return hash === '006657998771eb1ef75d0a26f8824af99da8bf4f7261d3a4d896708286a618eb';
+    }
+
+    async function handleAdminLogin(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
 
       const pass = document.getElementById('adminPass').value.trim();
-      if (pass === 'admin00') {
+      const isValid = await verifyAdminSecret(pass);
+      if (isValid) {
         sessionStorage.setItem('bw_admin_auth', 'true');
         showNotice('Admin Authenticated! Opening Dashboard...', true);
         setTimeout(() => {

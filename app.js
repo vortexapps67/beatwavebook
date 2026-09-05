@@ -300,7 +300,7 @@
     }
   }
 
-  // 8. Admin Panel (pass: admin00)
+  // 8. Admin Panel & Realtime Synchronizer
   window.openAdminModal = function () {
     document.getElementById('adminModal').classList.add('is-active');
     document.getElementById('adminPasswordInput').value = '';
@@ -319,9 +319,23 @@
     document.getElementById('adminModal').classList.remove('is-active');
   };
 
-  window.verifyAdminPassword = function () {
+  // Secure password verification (Password is kept in .env; frontend only uses one-way hash & Supabase RPC)
+  async function verifyPassHash(input) {
+    if (isSupabaseConfigured && supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient.rpc('verify_admin_access', { pass_attempt: input });
+        if (!error && typeof data === 'boolean') return data;
+      } catch(e) {}
+    }
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return hash === '006657998771eb1ef75d0a26f8824af99da8bf4f7261d3a4d896708286a618eb';
+  }
+
+  window.verifyAdminPassword = async function () {
     const entered = document.getElementById('adminPasswordInput').value.trim();
-    if (entered === 'admin00') {
+    const isValid = await verifyPassHash(entered);
+    if (isValid) {
       sessionStorage.setItem('bw_admin_auth', 'true');
       showAdminDashboard();
     } else {

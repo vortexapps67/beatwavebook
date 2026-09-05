@@ -55,3 +55,15 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.book_orders;
 -- 6. Add indexes for performance
 CREATE INDEX IF NOT EXISTS idx_book_orders_status ON public.book_orders (status);
 CREATE INDEX IF NOT EXISTS idx_book_orders_created_at ON public.book_orders (created_at DESC);
+
+-- 7. Security Definer function: verifies admin password inside DB, never exposing to client
+CREATE OR REPLACE FUNCTION public.verify_admin_access(pass_attempt text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN pass_attempt = 'admin00';
+END;
+$$;
+
