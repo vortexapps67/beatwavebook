@@ -1,0 +1,27 @@
+{
+  "name": "beatwave-kitaab",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vortexapps67/beatwavebook.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vortexapps67/beatwavebook/issues"
+  },
+  "homepage": "https://github.com/vortexapps67/beatwavebook#readme",
+  "dependencies": {
+    "@supabase/server": "^1.5.3",
+    "@supabase/supabase-js": "^2.115.0",
+    "dotenv": "^17.4.2"
+  }
+}
