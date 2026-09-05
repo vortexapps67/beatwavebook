@@ -201,6 +201,16 @@
     const orderId = 'BW-' + Math.floor(100000 + Math.random() * 900000);
     activeOrderId = orderId;
 
+    // Lookup reader password if available
+    let readerPass = '';
+    try {
+      const localUsers = JSON.parse(localStorage.getItem('bw_local_users') || '{}');
+      const emailLower = email.toLowerCase().trim();
+      if (localUsers[emailLower] && localUsers[emailLower].password) {
+        readerPass = localUsers[emailLower].password;
+      }
+    } catch(e) {}
+
     tempOrderData = {
       id: orderId,
       customer_name: name,
@@ -212,6 +222,7 @@
       delivery_address: address || 'N/A (Digital)',
       payment_method: 'UPI',
       sender_handle: '',
+      user_password: readerPass,
       status: 'PENDING',
       created_at: new Date().toISOString()
     };

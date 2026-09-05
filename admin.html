@@ -3,162 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Author Admin Dashboard — The Story of BeatWave</title>
+  <title>Author Admin — The Story of BeatWave</title>
 
-  <!-- Typography: Fraunces & Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Supabase JS Client -->
+  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="beatwave new new.png">
   <link rel="apple-touch-icon" href="beatwave new new.png">
 
-  <!-- Core Hallmark Style Sheet -->
-  <link rel="stylesheet" href="styles.css?v=2.6">
-  
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="styles.css?v=2.7">
+
   <style>
-    #particleCanvas, .ambient-bg-wrapper, .ambient-glow-orb {
-      position: fixed !important;
-      inset: 0 !important;
-      pointer-events: none !important;
-      z-index: 0 !important;
-    }
+    /* Admin layout overrides */
+    body { overflow-x: hidden; }
+
+    /* Kill pointer-events on background layers */
+    #particleCanvas,
+    .ambient-bg-wrapper,
+    .ambient-glow-orb { position: fixed !important; inset: 0 !important; pointer-events: none !important; z-index: 0 !important; }
     .liquid-nav-container { pointer-events: none !important; }
     .liquid-glass-nav { pointer-events: auto !important; }
-    .admin-page-content, button, input, select, a, table { pointer-events: auto !important; }
 
-    .admin-card-glass {
-      background: rgba(18, 16, 32, 0.85);
+    /* Interactive components */
+    .admin-wrap,
+    .admin-wrap * { position: relative; z-index: 1; }
+    .admin-wrap button,
+    .admin-wrap input,
+    .admin-wrap select,
+    .admin-wrap a,
+    .admin-wrap table { pointer-events: auto !important; }
+
+    /* Glass card */
+    .adm-glass {
+      background: rgba(18, 16, 32, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-xl);
-      padding: var(--space-xl);
+      border-radius: var(--radius-xl, 16px);
+      padding: clamp(18px, 3vw, 28px);
       backdrop-filter: blur(20px);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
-    .admin-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: var(--space-md);
-      margin-bottom: var(--space-xl);
-    }
-
-    .admin-stat-box {
+    /* Stats grid */
+    .adm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .adm-stat {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius-lg);
-      padding: var(--space-lg);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--radius-lg, 12px);
+      padding: 16px;
+      position: relative; overflow: hidden;
+    }
+    .adm-stat::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--glow, #00f2fe), transparent);
+    }
+    .adm-stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-ink-muted, #888); font-family: var(--font-mono, monospace); }
+    .adm-stat-val { font-size: 1.7rem; font-weight: 800; font-family: var(--font-mono, monospace); color: #fff; margin-top: 4px; }
+
+    /* Top tab switcher (Orders vs Registered Readers) */
+    .adm-nav-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;
+    }
+    .adm-tab-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--color-ink-muted, #888); padding: 8px 18px; border-radius: 20px;
+      font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .adm-tab-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .adm-tab-btn.is-active {
+      background: var(--color-accent-cyan, #00f2fe); color: #000; border-color: var(--color-accent-cyan, #00f2fe);
     }
 
-    .admin-stat-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--stat-glow, var(--color-accent-cyan)), transparent);
+    /* Action buttons */
+    .adm-btn {
+      padding: 4px 9px; font-size: 0.72rem; border-radius: 6px; font-weight: 700;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 4px;
+      transition: all 0.15s ease; text-decoration: none; white-space: nowrap;
     }
+    .adm-btn-ok { background: rgba(0,255,136,0.18); color: #00ff88; border: 1px solid rgba(0,255,136,0.4); }
+    .adm-btn-ok:hover { background: #00ff88; color: #000; }
+    .adm-btn-ship { background: rgba(0,242,254,0.18); color: #00f2fe; border: 1px solid rgba(0,242,254,0.4); }
+    .adm-btn-ship:hover { background: #00f2fe; color: #000; }
+    .adm-btn-no { background: rgba(255,80,80,0.15); color: #ff6060; border: 1px solid rgba(255,80,80,0.35); }
+    .adm-btn-no:hover { background: #ff5050; color: #fff; }
+    .adm-btn-wa { background: rgba(37,211,102,0.15); color: #25D366; border: 1px solid rgba(37,211,102,0.35); }
+    .adm-btn-wa:hover { background: #25D366; color: #000; }
+    .adm-btn-copy { background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); padding: 2px 6px; font-size: 0.68rem; }
+    .adm-btn-copy:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
-    .admin-stat-label {
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--color-ink-muted);
-      font-family: var(--font-mono);
-    }
-
-    .admin-stat-number {
-      font-size: 1.85rem;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      color: #fff;
-    }
-
-    .admin-action-btn-sm {
-      padding: 4px 10px;
-      font-size: 0.72rem;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-      text-decoration: none;
-    }
-    .admin-btn-approve { background: rgba(0, 255, 136, 0.18); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.4); }
-    .admin-btn-approve:hover { background: #00ff88; color: #000; }
-    .admin-btn-ship { background: rgba(0, 242, 254, 0.18); color: var(--color-accent-cyan); border: 1px solid rgba(0, 242, 254, 0.4); }
-    .admin-btn-ship:hover { background: var(--color-accent-cyan); color: #000; }
-    .admin-btn-reject { background: rgba(255, 80, 80, 0.15); color: #ff6060; border: 1px solid rgba(255, 80, 80, 0.35); }
-    .admin-btn-reject:hover { background: #ff5050; color: #fff; }
-    .admin-btn-wa { background: rgba(37, 211, 102, 0.15); color: #25D366; border: 1px solid rgba(37, 211, 102, 0.35); }
-    .admin-btn-wa:hover { background: #25D366; color: #000; }
-
+    /* Pulse dot */
     .pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-success);
-      display: inline-block;
-      box-shadow: 0 0 10px var(--color-success);
-      animation: pulseAnim 1.8s infinite;
+      width: 8px; height: 8px; border-radius: 50%; background: var(--color-success, #00ff88);
+      display: inline-block; box-shadow: 0 0 10px var(--color-success, #00ff88);
+      animation: pulseA 1.8s infinite;
     }
-    @keyframes pulseAnim {
+    @keyframes pulseA {
       0% { opacity: 0.4; transform: scale(0.9); }
       50% { opacity: 1; transform: scale(1.15); }
       100% { opacity: 0.4; transform: scale(0.9); }
     }
+
+    /* Modal */
+    .adm-modal-bg {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.78); backdrop-filter: blur(14px);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .adm-modal-bg.open { display: flex; }
+    .adm-modal-card {
+      background: #0d0a1a; border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px; box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+      width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 26px;
+    }
+
+    /* Status badge */
+    .st-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; font-family: var(--font-mono, monospace); letter-spacing: 0.04em; }
+    .st-pending { background: rgba(255,180,0,0.15); color: #ffb400; border: 1px solid rgba(255,180,0,0.3); }
+    .st-paid { background: rgba(0,255,136,0.15); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+    .st-shipped { background: rgba(0,242,254,0.15); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); }
+    .st-cancelled { background: rgba(255,80,80,0.12); color: #ff6060; border: 1px solid rgba(255,80,80,0.3); }
+
+    /* Pass badge */
+    .pass-chip {
+      display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 6px;
+      font-family: var(--font-mono, monospace); font-size: 0.74rem; color: #facc15;
+    }
+
+    /* Error / Success */
+    .adm-error { background: rgba(255,80,80,0.12); border: 1px solid rgba(255,80,80,0.3); color: #ff6060; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; margin-top: 12px; }
+    .adm-success { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; margin-top: 12px; }
   </style>
 </head>
 <body>
-  <!-- Animated Ambient Background Layer -->
-  <div class="ambient-bg-wrapper">
-    <div class="ambient-bg-img"></div>
-  </div>
+  <!-- BG Decoration -->
+  <div class="ambient-bg-wrapper"><div class="ambient-bg-img"></div></div>
   <div class="ambient-glow-orb orb-1"></div>
   <div class="ambient-glow-orb orb-2"></div>
   <canvas id="particleCanvas"></canvas>
 
-  <!-- Site-Wide Announcement Ticker Banner -->
-  <aside class="bw-announcement-ticker" aria-label="Announcement Ticker">
-    <div class="bw-ticker-track-wrapper">
-      <div class="bw-ticker-track">
-        <a href="admin.html" class="bw-ticker-pill">
-          <span class="bw-ticker-dot"></span>
-          <span class="bw-ticker-tag">AUTHOR PORTAL</span>
-          <span>Live Supabase Order Ledger &amp; Customer Dispatch Dashboard</span>
-        </a>
-        <a href="index.html" class="bw-ticker-pill">
-          <span class="bw-ticker-tag">THE STORY OF BEATWAVE</span>
-          <span>Official Book Release &middot; Digital E-Book Edition Available Now</span>
-        </a>
-        <!-- Duplicate for loop -->
-        <a href="admin.html" class="bw-ticker-pill">
-          <span class="bw-ticker-dot"></span>
-          <span class="bw-ticker-tag">AUTHOR PORTAL</span>
-          <span>Live Supabase Order Ledger &amp; Customer Dispatch Dashboard</span>
-        </a>
-        <a href="index.html" class="bw-ticker-pill">
-          <span class="bw-ticker-tag">THE STORY OF BEATWAVE</span>
-          <span>Official Book Release &middot; Digital E-Book Edition Available Now</span>
-        </a>
-      </div>
-    </div>
+  <!-- Top Ticker -->
+  <aside class="bw-announcement-ticker" aria-label="Announcement">
+    <div class="bw-ticker-track-wrapper"><div class="bw-ticker-track">
+      <a href="admin.html" class="bw-ticker-pill"><span class="bw-ticker-dot"></span><span class="bw-ticker-tag">AUTHOR OPERATIONS</span><span>Live Supabase Customer &amp; Order Intelligence</span></a>
+      <a href="index.html" class="bw-ticker-pill"><span class="bw-ticker-tag">BEATWAVE</span><span>Official Book Release</span></a>
+      <a href="admin.html" class="bw-ticker-pill"><span class="bw-ticker-dot"></span><span class="bw-ticker-tag">AUTHOR OPERATIONS</span><span>Live Supabase Customer &amp; Order Intelligence</span></a>
+      <a href="index.html" class="bw-ticker-pill"><span class="bw-ticker-tag">BEATWAVE</span><span>Official Book Release</span></a>
+    </div></div>
   </aside>
 
-  <!-- Liquid Glass Header Navigation -->
+  <!-- Nav -->
   <header class="liquid-nav-container">
     <nav class="liquid-glass-nav">
       <a href="index.html" class="liquid-brand">
@@ -171,663 +172,844 @@
         <li><a href="track.html">Track Order</a></li>
         <li><a href="login.html">Reader Profile</a></li>
       </ul>
-      <a href="index.html" class="liquid-cta-btn">
-        <span>&larr; Exit to Store</span>
-      </a>
+      <a href="index.html" class="liquid-cta-btn"><span>&larr; Exit to Store</span></a>
     </nav>
   </header>
 
-  <main class="subpage-wrapper admin-page-content" style="padding-top: var(--space-2xl); padding-bottom: var(--space-3xl);">
-    <div class="container" style="max-width: 1200px;">
+  <!-- Main Content -->
+  <main class="subpage-wrapper admin-wrap" style="padding-top: var(--space-2xl, 48px); padding-bottom: var(--space-3xl, 64px);">
+    <div class="container" style="max-width: 1300px;">
 
-      <!-- ============================================ -->
-      <!-- VIEW 1: MASTER PASSWORD LOGIN LOCK           -->
-      <!-- ============================================ -->
-      <div id="adminLockScreen" style="max-width: 460px; margin: 0 auto; display: block;">
-        <div class="admin-card-glass" style="text-align: center;">
-          <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(0, 242, 254, 0.12); color: var(--color-accent-cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md); box-shadow: 0 0 25px rgba(0,242,254,0.25);">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <!-- ======================== -->
+      <!-- LOCK SCREEN              -->
+      <!-- ======================== -->
+      <div id="lockScreen" style="max-width: 440px; margin: 0 auto;">
+        <div class="adm-glass" style="text-align: center;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(0,242,254,0.12); color: #00f2fe; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 0 20px rgba(0,242,254,0.2);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          
-          <h2 style="font-size: 1.6rem; margin-bottom: 6px;">Author Operations Portal</h2>
-          <p style="font-size: 0.85rem; color: var(--color-ink-muted); margin-bottom: var(--space-xl);">
-            Exclusive dashboard for Akshansh, Aarav &amp; team to verify live customer UPI payments and approve book dispatches.
+          <h2 style="font-size: 1.5rem; margin-bottom: 6px;">Author Operations Portal</h2>
+          <p style="font-size: 0.84rem; color: var(--color-ink-muted, #888); margin-bottom: 24px;">
+            Enter author master password to unlock live reader ledger with user email, password, phone, address, and UPI IDs.
           </p>
 
-          <form id="adminLoginForm" onsubmit="handleAdminAuth(event)">
-            <div style="display: flex; flex-direction: column; gap: var(--space-md); text-align: left;">
-              <div class="form-group">
-                <label class="form-label" for="adminMasterPass">Master Password *</label>
-                <input type="password" id="adminMasterPass" class="form-input" placeholder="Enter author master password..." required autofocus autocomplete="current-password" style="font-size: 1rem; padding: 12px 16px;">
-              </div>
-
-              <div id="adminAuthNotice" style="display: none; padding: 10px; border-radius: var(--radius-md); font-size: 0.8rem;"></div>
-
-              <button type="submit" id="btnAdminLogin" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-weight: 800;">
-                <span>Unlock Author Dashboard</span>
-              </button>
+          <form id="loginForm" style="text-align: left;">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" for="passInput">Master Password *</label>
+              <input type="password" id="passInput" class="form-input" placeholder="Enter password (e.g. admin00)..." required autofocus autocomplete="current-password" style="font-size: 1rem; padding: 12px 16px;">
             </div>
+            <div id="loginMsg" style="display: none;"></div>
+            <button type="submit" id="loginBtn" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-weight: 800;">
+              Unlock Dashboard
+            </button>
           </form>
 
-          <div style="margin-top: var(--space-lg); text-align: center;">
-            <a href="index.html" style="color: var(--color-ink-muted); font-size: 0.78rem; text-decoration: none;">
-              &larr; Back to BeatWave Homepage
-            </a>
+          <div style="margin-top: 20px; display: flex; justify-content: center; gap: 16px;">
+            <a href="index.html" style="color: var(--color-ink-muted, #888); font-size: 0.78rem; text-decoration: none;">&larr; Back to BeatWave</a>
+            <a href="privacy.html" style="color: var(--color-ink-muted, #888); font-size: 0.78rem; text-decoration: none;">Privacy Policy</a>
+            <a href="terms.html" style="color: var(--color-ink-muted, #888); font-size: 0.78rem; text-decoration: none;">Terms of Service</a>
           </div>
         </div>
       </div>
 
-      <!-- ============================================ -->
-      <!-- VIEW 2: AUTHOR ADMIN DASHBOARD (UNLOCKED)   -->
-      <!-- ============================================ -->
-      <div id="adminMainDashboard" style="display: none;">
-        <!-- Top Title Bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-xl);">
+      <!-- ======================== -->
+      <!-- DASHBOARD (UNLOCKED)     -->
+      <!-- ======================== -->
+      <div id="dashboard" style="display: none;">
+        <!-- Header Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <span class="pulse-dot"></span>
-              <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--color-success); letter-spacing: 0.08em; font-weight: 700;">SUPABASE REALTIME CONNECTED</span>
+              <span style="font-family: var(--font-mono, monospace); font-size: 0.74rem; color: var(--color-success, #00ff88); letter-spacing: 0.08em; font-weight: 700;">SUPABASE CONNECTED &middot; LIVE LEDGER</span>
             </div>
-            <h1 style="font-size: 1.9rem; margin: 0;">Author Order Operations Ledger</h1>
-            <p style="font-size: 0.85rem; color: var(--color-ink-muted); margin: 0;">Manage live book orders, approve payments, and track customer fulfillment.</p>
+            <h1 style="font-size: 1.85rem; margin: 0;">Author Operations &amp; Reader Ledger</h1>
+            <p style="font-size: 0.84rem; color: var(--color-ink-muted, #888); margin: 0;">Access user emails, passwords, phone numbers, delivery addresses, and UPI IDs in real time.</p>
           </div>
-
-          <div style="display: flex; gap: var(--space-xs); align-items: center;">
-            <button type="button" onclick="loadAdminOrders()" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" id="btnRefresh" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              <span>Refresh Ledger</span>
+              <span>Refresh</span>
             </button>
-            <button type="button" onclick="exportOrdersToCsv()" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">
+            <button type="button" id="btnExport" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Export CSV</span>
+              <span>Export Full CSV</span>
             </button>
-            <button type="button" onclick="handleAdminLogout()" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem; color: #ff6060; border-color: rgba(255,80,80,0.3);">
+            <button type="button" id="btnLock" class="btn-secondary" style="padding: 8px 14px; font-size: 0.8rem; color: #ff6060; border-color: rgba(255,80,80,0.3);">
               <span>Lock Panel</span>
             </button>
           </div>
         </div>
 
-        <!-- Metric Statistics Cards -->
-        <div class="admin-stat-grid">
-          <div class="admin-stat-box" style="--stat-glow: #00f2fe;">
-            <span class="admin-stat-label">Total Orders</span>
-            <span class="admin-stat-number" id="statTotalOrders">0</span>
-          </div>
+        <!-- Metric Cards -->
+        <div class="adm-stats">
+          <div class="adm-stat" style="--glow: #00f2fe;"><span class="adm-stat-label">Total Orders</span><span class="adm-stat-val" id="sTotal">0</span></div>
+          <div class="adm-stat" style="--glow: #00e5ff;"><span class="adm-stat-label">Unique Customers</span><span class="adm-stat-val" id="sUniq" style="color: #00e5ff;">0</span></div>
+          <div class="adm-stat" style="--glow: #00ff88;"><span class="adm-stat-label">Total Revenue</span><span class="adm-stat-val" id="sRev" style="color: #00ff88;">₹0</span></div>
+          <div class="adm-stat" style="--glow: #ffb400;"><span class="adm-stat-label">Pending Verification</span><span class="adm-stat-val" id="sPend" style="color: #ffb400;">0</span></div>
+          <div class="adm-stat" style="--glow: #00f2fe;"><span class="adm-stat-label">Verified &amp; Paid</span><span class="adm-stat-val" id="sPaid" style="color: #00f2fe;">0</span></div>
+          <div class="adm-stat" style="--glow: #9d4edd;"><span class="adm-stat-label">Dispatched</span><span class="adm-stat-val" id="sShip" style="color: #c77dff;">0</span></div>
+        </div>
 
-          <div class="admin-stat-box" style="--stat-glow: #00e5ff;">
-            <span class="admin-stat-label">Unique Customers</span>
-            <span class="admin-stat-number" id="statUniqueCustomers" style="color: #00e5ff;">0</span>
-          </div>
+        <!-- Tab Switcher: Orders Ledger vs Registered Readers -->
+        <div class="adm-nav-tabs">
+          <button type="button" class="adm-tab-btn is-active" id="tabOrdersBtn" onclick="switchAdminTab('orders')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>Orders Ledger (<span id="tabOrderCount">0</span>)</span>
+          </button>
+          <button type="button" class="adm-tab-btn" id="tabUsersBtn" onclick="switchAdminTab('users')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Registered Readers &amp; Logins (<span id="tabUserCount">0</span>)</span>
+          </button>
+        </div>
 
-          <div class="admin-stat-box" style="--stat-glow: #00ff88;">
-            <span class="admin-stat-label">Total Revenue</span>
-            <span class="admin-stat-number" id="statTotalRevenue" style="color: #00ff88;">₹0</span>
-          </div>
+        <!-- ============================================== -->
+        <!-- VIEW 1: ORDERS LEDGER                          -->
+        <!-- ============================================== -->
+        <div id="viewOrders">
+          <div class="adm-glass" style="padding: 20px;">
+            <!-- Filters & Search Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="filterPills">
+                <button type="button" class="btn-secondary is-active" style="padding: 6px 14px; font-size: 0.78rem;" data-filter="ALL">All (<span id="cAll">0</span>)</button>
+                <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" data-filter="PENDING">Pending (<span id="cPend">0</span>)</button>
+                <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" data-filter="PAID">Paid (<span id="cPaid">0</span>)</button>
+                <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" data-filter="SHIPPED">Shipped (<span id="cShip">0</span>)</button>
+              </div>
+              <div style="position: relative; width: 320px; max-width: 100%;">
+                <input type="text" id="searchBox" class="form-input" placeholder="Search email, pass, phone, address, upi..." style="padding: 8px 14px 8px 34px; font-size: 0.82rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-ink-muted, #888); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+            </div>
 
-          <div class="admin-stat-box" style="--stat-glow: #ffb400;">
-            <span class="admin-stat-label">Pending Verification</span>
-            <span class="admin-stat-number" id="statPendingOrders" style="color: #ffb400;">0</span>
-          </div>
-
-          <div class="admin-stat-box" style="--stat-glow: #00f2fe;">
-            <span class="admin-stat-label">Verified &amp; Paid</span>
-            <span class="admin-stat-number" id="statPaidOrders" style="color: var(--color-accent-cyan);">0</span>
-          </div>
-
-          <div class="admin-stat-box" style="--stat-glow: #9d4edd;">
-            <span class="admin-stat-label">Shipped / Dispatched</span>
-            <span class="admin-stat-number" id="statShippedOrders" style="color: #c77dff;">0</span>
+            <!-- Orders Table -->
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.82rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.12); color: var(--color-ink-muted, #888); font-family: var(--font-mono, monospace); font-size: 0.72rem; letter-spacing: 0.04em;">
+                    <th style="padding: 10px 12px;">ORDER REF</th>
+                    <th style="padding: 10px 12px;">USER / EMAIL</th>
+                    <th style="padding: 10px 12px;">PASSWORD</th>
+                    <th style="padding: 10px 12px;">PHONE NO.</th>
+                    <th style="padding: 10px 12px;">DELIVERY ADDRESS</th>
+                    <th style="padding: 10px 12px;">UPI ID</th>
+                    <th style="padding: 10px 12px;">AMOUNT</th>
+                    <th style="padding: 10px 12px;">STATUS</th>
+                    <th style="padding: 10px 12px; text-align: right;">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody">
+                  <tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--color-ink-muted, #888);">Loading live orders from Supabase...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Orders Table Card -->
-        <div class="admin-card-glass" style="padding: var(--space-lg);">
-          <!-- Filters & Search Toolbar -->
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-lg); border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: var(--space-md);">
-            <!-- Status Filter Pills -->
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="statusFilterPills">
-              <button type="button" class="btn-secondary is-active" style="padding: 6px 14px; font-size: 0.78rem;" onclick="setOrderFilter('ALL', this)">All Orders (<span id="countAll">0</span>)</button>
-              <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" onclick="setOrderFilter('PENDING', this)">Pending (<span id="countPending">0</span>)</button>
-              <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" onclick="setOrderFilter('PAID', this)">Paid &amp; Verified (<span id="countPaid">0</span>)</button>
-              <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" onclick="setOrderFilter('SHIPPED', this)">Shipped (<span id="countShipped">0</span>)</button>
+        <!-- ============================================== -->
+        <!-- VIEW 2: REGISTERED READERS (PROFILES & LOGINS) -->
+        <!-- ============================================== -->
+        <div id="viewUsers" style="display: none;">
+          <div class="adm-glass" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+              <div>
+                <h3 style="font-size: 1.15rem; margin: 0 0 4px;">Registered Readers Directory</h3>
+                <p style="font-size: 0.8rem; color: var(--color-ink-muted, #888); margin: 0;">List of reader accounts created on BeatWave with login credentials and contact profiles.</p>
+              </div>
+              <div style="position: relative; width: 300px; max-width: 100%;">
+                <input type="text" id="userSearchBox" class="form-input" placeholder="Search readers by name or email..." style="padding: 8px 14px 8px 34px; font-size: 0.82rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-ink-muted, #888); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
             </div>
 
-            <!-- Search Input -->
-            <div style="position: relative; width: 280px; max-width: 100%;">
-              <input type="text" id="orderSearchQuery" oninput="handleOrderSearch(this.value)" class="form-input" placeholder="Search ID, name, email, phone..." style="padding: 8px 14px 8px 34px; font-size: 0.82rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-ink-muted); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.82rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.12); color: var(--color-ink-muted, #888); font-family: var(--font-mono, monospace); font-size: 0.72rem; letter-spacing: 0.04em;">
+                    <th style="padding: 10px 12px;">READER NAME</th>
+                    <th style="padding: 10px 12px;">USER EMAIL</th>
+                    <th style="padding: 10px 12px;">PASSWORD</th>
+                    <th style="padding: 10px 12px;">PHONE NO.</th>
+                    <th style="padding: 10px 12px;">ADDRESS</th>
+                    <th style="padding: 10px 12px;">UPI ID</th>
+                    <th style="padding: 10px 12px;">REGISTERED DATE</th>
+                    <th style="padding: 10px 12px; text-align: right;">QUICK ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="userTbody">
+                  <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--color-ink-muted, #888);">Loading registered users...</td></tr>
+                </tbody>
+              </table>
             </div>
-          </div>
-
-          <!-- Ledger Table -->
-          <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-            <table class="admin-orders-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.84rem;">
-              <thead>
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.12); color: var(--color-ink-muted); font-family: var(--font-mono); font-size: 0.74rem;">
-                  <th style="padding: 10px 12px;">ORDER REF</th>
-                  <th style="padding: 10px 12px;">DATE / TIME</th>
-                  <th style="padding: 10px 12px;">CUSTOMER INFO</th>
-                  <th style="padding: 10px 12px;">EDITION</th>
-                  <th style="padding: 10px 12px;">AMOUNT</th>
-                  <th style="padding: 10px 12px;">PAYMENT REF</th>
-                  <th style="padding: 10px 12px;">STATUS</th>
-                  <th style="padding: 10px 12px; text-align: right;">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody id="adminOrdersTableBody">
-                <tr>
-                  <td colspan="8" style="text-align: center; padding: var(--space-2xl); color: var(--color-ink-muted);">
-                    Loading orders from Supabase...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
+
       </div>
 
     </div>
   </main>
 
-  <!-- ORDER INSPECTION / DETAILS MODAL -->
-  <div class="modal-overlay" id="orderDetailsModal" onclick="if(event.target === this) closeOrderDetailsModal()">
-    <div class="modal-card" style="max-width: 580px;">
-      <div class="modal-header">
-        <h3 class="modal-title" id="detailModalTitle">Order Details</h3>
-        <button class="modal-close" onclick="closeOrderDetailsModal()">&times;</button>
+  <!-- ============================================== -->
+  <!-- MODAL: DETAILED ORDER / USER CREDENTIAL CARD   -->
+  <!-- ============================================== -->
+  <div class="adm-modal-bg" id="detailModal">
+    <div class="adm-modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div>
+          <h3 id="modalTitle" style="margin: 0; font-size: 1.25rem;">Order &amp; Reader Inspection</h3>
+          <span style="font-size: 0.76rem; color: var(--color-ink-muted, #888);">Complete customer record including credentials &amp; payment reference</span>
+        </div>
+        <button type="button" id="modalClose" style="background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; padding: 4px 8px;">&times;</button>
       </div>
-      <div id="detailModalContent" style="padding-top: var(--space-md); font-size: 0.88rem; line-height: 1.6;">
-        <!-- Injected dynamically -->
-      </div>
+      <div id="modalBody" style="font-size: 0.88rem; line-height: 1.6;"></div>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATION CONTAINER -->
+  <!-- Toast Notification -->
   <div id="bwToastContainer"></div>
 
-  <!-- Configuration Scripts -->
-  <script src="config.js?v=2.6"></script>
+  <!-- Config -->
+  <script src="config.js?v=2.7"></script>
+
   <script>
+  (function() {
+    'use strict';
+
     // 1. Supabase Initialization
-    let supabase = null;
+    var sb = null;
     try {
-      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined' && supabaseConfig.supabaseUrl) {
-        supabase = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
+      if (window.supabase && typeof supabaseConfig !== 'undefined' && supabaseConfig.supabaseUrl) {
+        sb = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
       }
     } catch(e) {
-      console.warn('Supabase client warning:', e);
+      console.error('[Admin] Supabase init err:', e);
     }
 
-    // Audio cue generator
-    function playAudio(type = 'success') {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        const now = ctx.currentTime;
-        if (type === 'success') {
-          osc.frequency.setValueAtTime(523.25, now);
-          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2);
-          gain.gain.setValueAtTime(0.05, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-          osc.start(now);
-          osc.stop(now + 0.3);
+    // 2. DOM Elements
+    var lockScreen = document.getElementById('lockScreen');
+    var dashboard  = document.getElementById('dashboard');
+    var loginForm  = document.getElementById('loginForm');
+    var passInput  = document.getElementById('passInput');
+    var loginBtn   = document.getElementById('loginBtn');
+    var loginMsg   = document.getElementById('loginMsg');
+    var tbody      = document.getElementById('tbody');
+    var userTbody  = document.getElementById('userTbody');
+    var searchBox  = document.getElementById('searchBox');
+    var userSearchBox = document.getElementById('userSearchBox');
+    var filterPills= document.getElementById('filterPills');
+    var detailModal= document.getElementById('detailModal');
+    var modalTitle = document.getElementById('modalTitle');
+    var modalBody  = document.getElementById('modalBody');
+    var modalClose = document.getElementById('modalClose');
+
+    // 3. State
+    var allOrders = [];
+    var allProfiles = [];
+    var activeFilter = 'ALL';
+    var searchTerm = '';
+    var userSearchTerm = '';
+    var activeTab = 'orders';
+
+    // 4. Toast
+    function toast(title, msg, type) {
+      type = type || 'info';
+      var c = document.getElementById('bwToastContainer');
+      if (!c) { c = document.createElement('div'); c.id = 'bwToastContainer'; document.body.appendChild(c); }
+      var t = document.createElement('div');
+      t.className = 'bw-toast bw-toast-' + type;
+      var icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+      t.innerHTML = '<div class="bw-toast-icon">' + icon + '</div><div class="bw-toast-content"><div class="bw-toast-title">' + title + '</div>' + (msg ? '<div class="bw-toast-msg">' + msg + '</div>' : '') + '</div>';
+      c.appendChild(t);
+      setTimeout(function() {
+        t.classList.add('is-leaving');
+        setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 350);
+      }, 3500);
+    }
+
+    // Clipboard copy helper
+    window.copyText = function(text, label) {
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(function() {
+        toast('Copied 📋', (label || 'Item') + ': ' + text, 'success');
+      }).catch(function() {
+        prompt('Copy manually:', text);
+      });
+    };
+
+    // 5. Password Authentication
+    var VALID_PASSES = ['admin00', 'admin', 'admin123', 'vortex', 'beatwave', 'akshansh', 'aarav'];
+
+    function verifyPassword(pass) {
+      return new Promise(function(resolve) {
+        var clean = (pass || '').trim().toLowerCase();
+        if (!clean) return resolve(false);
+        if (VALID_PASSES.indexOf(clean) !== -1) return resolve(true);
+
+        if (sb) {
+          sb.rpc('verify_admin_access', { pass_attempt: pass.trim() })
+            .then(function(res) {
+              if (!res.error && typeof res.data === 'boolean') return resolve(res.data);
+              resolve(false);
+            })
+            .catch(function() { resolve(false); });
+        } else {
+          resolve(false);
         }
-      } catch(e) {}
+      });
     }
 
-    function showToast(title, msg, type = 'info') {
-      let container = document.getElementById('bwToastContainer');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'bwToastContainer';
-        document.body.appendChild(container);
-      }
-      const toast = document.createElement('div');
-      toast.className = `bw-toast bw-toast-${type}`;
-      toast.innerHTML = `
-        <div class="bw-toast-icon">${type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ')}</div>
-        <div class="bw-toast-content">
-          <div class="bw-toast-title">${title}</div>
-          ${msg ? `<div class="bw-toast-msg">${msg}</div>` : ''}
-        </div>
-      `;
-      container.appendChild(toast);
-      playAudio(type);
-      setTimeout(() => {
-        toast.classList.add('is-leaving');
-        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 350);
-      }, 4000);
+    function showLock() {
+      lockScreen.style.display = 'block';
+      dashboard.style.display = 'none';
     }
 
-    // 2. Authentication Gate Logic
-    async function verifyPassword(pass) {
-      if (!pass) return false;
-      const clean = pass.trim().toLowerCase();
-      const validPasses = ['admin00', 'admin', 'admin123', 'vortex', 'beatwave', 'akshansh', 'aarav'];
-      if (validPasses.includes(clean)) return true;
-
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.rpc('verify_admin_access', { pass_attempt: pass.trim() });
-          if (!error && typeof data === 'boolean') return data;
-        } catch(e) {}
-      }
-      return false;
+    function showDashboard() {
+      lockScreen.style.display = 'none';
+      dashboard.style.display = 'block';
     }
 
-    async function handleAdminAuth(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById('adminMasterPass');
-      const pass = input?.value.trim();
-      const btn = document.getElementById('btnAdminLogin');
-      const notice = document.getElementById('adminAuthNotice');
-
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var pass = passInput.value.trim();
       if (!pass) return;
-      if (btn) { btn.disabled = true; btn.innerText = 'Verifying...'; }
 
-      const isValid = await verifyPassword(pass);
-      if (btn) { btn.disabled = false; btn.innerText = 'Unlock Author Dashboard'; }
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Verifying...';
+      loginMsg.style.display = 'none';
 
-      if (isValid) {
-        sessionStorage.setItem('bw_admin_auth', 'true');
-        localStorage.setItem('bw_admin_auth', 'true');
-        showToast('Access Granted 🔐', 'Author operations dashboard unlocked.', 'success');
-        renderAdminView(true);
-        loadAdminOrders();
-        subscribeRealtimeOrders();
-      } else {
-        if (notice) {
-          notice.style.display = 'block';
-          notice.style.background = 'rgba(255, 80, 80, 0.15)';
-          notice.style.color = '#ff6060';
-          notice.innerText = 'Invalid Master Password. Access Denied.';
+      verifyPassword(pass).then(function(ok) {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Unlock Dashboard';
+
+        if (ok) {
+          sessionStorage.setItem('bw_admin_auth', 'true');
+          localStorage.setItem('bw_admin_auth', 'true');
+          toast('Access Granted 🔐', 'Author operations ledger unlocked.', 'success');
+          showDashboard();
+          loadAllData();
+          startRealtime();
+        } else {
+          loginMsg.style.display = 'block';
+          loginMsg.className = 'adm-error';
+          loginMsg.textContent = 'Invalid master password. Access denied.';
+          toast('Access Denied ⛔', 'Wrong master password.', 'error');
         }
-        showToast('Access Denied ⛔', 'Invalid master password entered.', 'error');
-      }
-    }
-    window.handleAdminAuth = handleAdminAuth;
+      });
+    });
 
-    function handleAdminLogout() {
-      sessionStorage.removeItem('bw_admin_auth');
-      localStorage.removeItem('bw_admin_auth');
-      renderAdminView(false);
-      showToast('Dashboard Locked', 'Author panel secured.', 'info');
-    }
-    window.handleAdminLogout = handleAdminLogout;
+    // 6. Tab Switching
+    window.switchAdminTab = function(tabName) {
+      activeTab = tabName;
+      var bOrders = document.getElementById('tabOrdersBtn');
+      var bUsers  = document.getElementById('tabUsersBtn');
+      var vOrders = document.getElementById('viewOrders');
+      var vUsers  = document.getElementById('viewUsers');
 
-    function renderAdminView(isAuthed) {
-      const lockScreen = document.getElementById('adminLockScreen');
-      const mainDashboard = document.getElementById('adminMainDashboard');
-      if (isAuthed) {
-        if (lockScreen) lockScreen.style.display = 'none';
-        if (mainDashboard) mainDashboard.style.display = 'block';
+      if (tabName === 'orders') {
+        bOrders.classList.add('is-active');
+        bUsers.classList.remove('is-active');
+        vOrders.style.display = 'block';
+        vUsers.style.display = 'none';
       } else {
-        if (lockScreen) lockScreen.style.display = 'block';
-        if (mainDashboard) mainDashboard.style.display = 'none';
+        bOrders.classList.remove('is-active');
+        bUsers.classList.add('is-active');
+        vOrders.style.display = 'none';
+        vUsers.style.display = 'block';
+        renderUsersTable();
       }
+    };
+
+    // 7. Load Orders & Reader Profiles
+    function loadAllData() {
+      loadOrders();
+      loadProfiles();
     }
-    window.renderAdminView = renderAdminView;
 
-    // 3. Orders Management
-    let allOrders = [];
-    let currentFilter = 'ALL';
-    let searchQuery = '';
-
-    async function loadAdminOrders() {
-      const tbody = document.getElementById('adminOrdersTableBody');
+    function loadOrders() {
       if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#00f2fe;">Fetching live orders from Supabase...</td></tr>';
 
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: var(--space-xl); color: var(--color-accent-cyan);">Fetching latest orders from Supabase...</td></tr>`;
+      var remoteOrders = [];
 
-      let remoteOrders = [];
-      if (supabase) {
+      function processOrders() {
+        // Merge with local storage cache
+        var localOrders = [];
         try {
-          const { data, error } = await supabase
-            .from('book_orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-          if (!error && Array.isArray(data)) {
-            remoteOrders = data;
+          var stored = JSON.parse(localStorage.getItem('bw_supabase_orders') || '[]');
+          if (Array.isArray(stored)) localOrders = stored;
+          var last = JSON.parse(localStorage.getItem('bw_last_order') || 'null');
+          if (last && last.id) localOrders.push(last);
+        } catch(e) {}
+
+        var combined = remoteOrders.slice();
+        localOrders.forEach(function(lo) {
+          if (lo && lo.id && !combined.some(function(o) { return o.id === lo.id; })) {
+            combined.push(lo);
           }
-        } catch(e) {
-          console.warn('Remote order fetch err:', e);
-        }
+        });
+
+        // Enrich missing passwords from local users registry if known
+        try {
+          var localUsers = JSON.parse(localStorage.getItem('bw_local_users') || '{}');
+          combined.forEach(function(o) {
+            var em = (o.email || '').toLowerCase().trim();
+            if (!o.user_password && localUsers[em] && localUsers[em].password) {
+              o.user_password = localUsers[em].password;
+            }
+          });
+        } catch(e) {}
+
+        combined.sort(function(a, b) { return new Date(b.created_at || 0) - new Date(a.created_at || 0); });
+        allOrders = combined;
+        refreshStatsAndOrders();
       }
 
-      // Merge with localStorage orders
-      let localOrders = [];
-      try {
-        const stored = JSON.parse(localStorage.getItem('bw_supabase_orders') || '[]');
-        if (Array.isArray(stored)) localOrders = stored;
-        const lastOrder = JSON.parse(localStorage.getItem('bw_last_order') || 'null');
-        if (lastOrder) localOrders.push(lastOrder);
-      } catch(e) {}
+      if (sb) {
+        sb.from('book_orders').select('*').order('created_at', { ascending: false })
+          .then(function(res) {
+            if (!res.error && Array.isArray(res.data)) remoteOrders = res.data;
+            processOrders();
+          })
+          .catch(function() { processOrders(); });
+      } else {
+        processOrders();
+      }
+    }
 
-      // Combine & Deduplicate
-      const combined = [...remoteOrders];
-      localOrders.forEach(loc => {
-        if (loc && loc.id && !combined.some(o => o.id === loc.id)) {
-          combined.push(loc);
-        }
+    function loadProfiles() {
+      var remoteProfiles = [];
+
+      function processProfiles() {
+        // Merge with local users registry
+        var localUsers = [];
+        try {
+          var luMap = JSON.parse(localStorage.getItem('bw_local_users') || '{}');
+          Object.keys(luMap).forEach(function(k) {
+            var u = luMap[k];
+            if (u && u.email) {
+              localUsers.push({
+                id: u.id || ('usr_' + Math.random().toString(36).slice(2,8)),
+                full_name: u.name || 'Reader',
+                email: u.email,
+                user_password: u.password || '',
+                phone: u.phone || '',
+                delivery_address: u.delivery_address || '',
+                upi_id: u.upi_id || '',
+                created_at: u.created_at || new Date().toISOString()
+              });
+            }
+          });
+        } catch(e) {}
+
+        var combined = remoteProfiles.slice();
+        localUsers.forEach(function(lu) {
+          var em = (lu.email || '').toLowerCase().trim();
+          var existing = combined.find(function(p) { return (p.email || '').toLowerCase().trim() === em; });
+          if (!existing) {
+            combined.push(lu);
+          } else if (!existing.user_password && lu.user_password) {
+            existing.user_password = lu.user_password;
+          }
+        });
+
+        allProfiles = combined;
+        var elCount = document.getElementById('tabUserCount');
+        if (elCount) elCount.textContent = allProfiles.length;
+        renderUsersTable();
+      }
+
+      if (sb) {
+        sb.from('profiles').select('*').order('created_at', { ascending: false })
+          .then(function(res) {
+            if (!res.error && Array.isArray(res.data)) remoteProfiles = res.data;
+            processProfiles();
+          })
+          .catch(function() { processProfiles(); });
+      } else {
+        processProfiles();
+      }
+    }
+
+    // 8. Refresh Stats & Table
+    function refreshStatsAndOrders() {
+      var revenue = 0, pending = 0, paid = 0, shipped = 0;
+      var customers = {};
+
+      allOrders.forEach(function(o) {
+        var s = (o.status || 'PENDING').toUpperCase();
+        var amt = parseFloat(o.amount) || 0;
+        if (s === 'PAID' || s === 'SHIPPED' || s === 'DELIVERED') revenue += amt;
+        if (s === 'PAID') paid++;
+        else if (s === 'SHIPPED' || s === 'DELIVERED') shipped++;
+        else if (s !== 'CANCELLED' && s !== 'REJECTED') pending++;
+        var key = (o.email || o.phone || o.customer_name || '').toLowerCase().trim();
+        if (key) customers[key] = true;
       });
 
-      combined.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-      allOrders = combined;
+      setText('sTotal', allOrders.length);
+      setText('sUniq', Object.keys(customers).length);
+      setText('sRev', '₹' + revenue.toLocaleString('en-IN'));
+      setText('sPend', pending);
+      setText('sPaid', paid);
+      setText('sShip', shipped);
+      setText('cAll', allOrders.length);
+      setText('cPend', pending);
+      setText('cPaid', paid);
+      setText('cShip', shipped);
+      setText('tabOrderCount', allOrders.length);
 
-      updateStatsAndRender();
+      renderOrdersTable();
     }
-    window.loadAdminOrders = loadAdminOrders;
 
-    function updateStatsAndRender() {
-      // Calculate Stats
-      let totalRevenue = 0;
-      let pendingCount = 0;
-      let paidCount = 0;
-      let shippedCount = 0;
-      const uniqueCustomerSet = new Set();
-
-      allOrders.forEach(o => {
-        const s = (o.status || 'PENDING_VERIFICATION').toUpperCase();
-        const amt = parseFloat(o.amount) || 0;
-        if (s === 'PAID' || s === 'SHIPPED' || s === 'DELIVERED') {
-          totalRevenue += amt;
-        }
-        if (s === 'PAID') paidCount++;
-        else if (s === 'SHIPPED' || s === 'DELIVERED') shippedCount++;
-        else if (s !== 'CANCELLED' && s !== 'REJECTED') pendingCount++;
-
-        const userIdentifier = (o.email || o.phone || o.customer_name || '').toLowerCase().trim();
-        if (userIdentifier) {
-          uniqueCustomerSet.add(userIdentifier);
-        }
-      });
-
-      const elTotal = document.getElementById('statTotalOrders');
-      const elUniq = document.getElementById('statUniqueCustomers');
-      const elRev = document.getElementById('statTotalRevenue');
-      const elPend = document.getElementById('statPendingOrders');
-      const elPaid = document.getElementById('statPaidOrders');
-      const elShip = document.getElementById('statShippedOrders');
-
-      if (elTotal) elTotal.innerText = allOrders.length;
-      if (elUniq) elUniq.innerText = uniqueCustomerSet.size;
-      if (elRev) elRev.innerText = '₹' + totalRevenue.toLocaleString('en-IN');
-      if (elPend) elPend.innerText = pendingCount;
-      if (elPaid) elPaid.innerText = paidCount;
-      if (elShip) elShip.innerText = shippedCount;
-
-      const cAll = document.getElementById('countAll');
-      const cPend = document.getElementById('countPending');
-      const cPaid = document.getElementById('countPaid');
-      const cShip = document.getElementById('countShipped');
-
-      if (cAll) cAll.innerText = allOrders.length;
-      if (cPend) cPend.innerText = pendingCount;
-      if (cPaid) cPaid.innerText = paidCount;
-      if (cShip) cShip.innerText = shippedCount;
-
-      renderTable();
+    function setText(id, val) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = val;
     }
-    window.updateStatsAndRender = updateStatsAndRender;
 
-    function renderTable() {
-      const tbody = document.getElementById('adminOrdersTableBody');
+    // 9. Render Orders Table with email, pass, no., address, upi id
+    function renderOrdersTable() {
       if (!tbody) return;
 
-      const filtered = allOrders.filter(o => {
-        const s = (o.status || 'PENDING_VERIFICATION').toUpperCase();
-        let matchesFilter = true;
-        if (currentFilter === 'PENDING') matchesFilter = (s !== 'PAID' && s !== 'SHIPPED' && s !== 'CANCELLED');
-        else if (currentFilter === 'PAID') matchesFilter = (s === 'PAID');
-        else if (currentFilter === 'SHIPPED') matchesFilter = (s === 'SHIPPED');
+      var filtered = allOrders.filter(function(o) {
+        var s = (o.status || 'PENDING').toUpperCase();
+        if (activeFilter === 'PENDING' && (s === 'PAID' || s === 'SHIPPED' || s === 'CANCELLED')) return false;
+        if (activeFilter === 'PAID' && s !== 'PAID') return false;
+        if (activeFilter === 'SHIPPED' && s !== 'SHIPPED') return false;
 
-        let matchesSearch = true;
-        if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          const target = `${o.id || ''} ${o.customer_name || ''} ${o.email || ''} ${o.phone || ''} ${o.sender_handle || ''}`.toLowerCase();
-          matchesSearch = target.includes(q);
+        if (searchTerm) {
+          var haystack = [
+            o.id, o.customer_name, o.email, o.phone, o.user_password,
+            o.delivery_address, o.sender_handle
+          ].join(' ').toLowerCase();
+          if (haystack.indexOf(searchTerm) === -1) return false;
         }
-        return matchesFilter && matchesSearch;
+        return true;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: var(--space-xl); color: var(--color-ink-muted);">No matching orders found.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--color-ink-muted,#888);">No matching orders found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = filtered.map(o => {
-        const status = (o.status || 'PENDING_VERIFICATION').toUpperCase();
-        const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recent';
-        
-        let statusBadge = `<span class="status-badge status-pending">PENDING</span>`;
-        if (status === 'PAID') statusBadge = `<span class="status-badge status-verified">PAID &amp; VERIFIED</span>`;
-        else if (status === 'SHIPPED') statusBadge = `<span class="status-badge status-verified" style="background: rgba(0,242,254,0.15); color: var(--color-accent-cyan);">SHIPPED</span>`;
-        else if (status === 'CANCELLED' || status === 'REJECTED') statusBadge = `<span class="status-badge status-rejected">CANCELLED</span>`;
+      var html = '';
+      filtered.forEach(function(o) {
+        var s = (o.status || 'PENDING').toUpperCase();
+        var d = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recent';
 
-        const phoneClean = (o.phone || '').replace(/\D/g, '');
-        const waLink = phoneClean ? `https://wa.me/91${phoneClean.slice(-10)}?text=${encodeURIComponent(`Hi ${o.customer_name || 'Reader'}, your BeatWave order ${o.id} is confirmed! Thank you for supporting open source.`)}` : '#';
+        // Badge
+        var badge = '<span class="st-badge st-pending">PENDING</span>';
+        if (s === 'PAID') badge = '<span class="st-badge st-paid">PAID &amp; VERIFIED</span>';
+        else if (s === 'SHIPPED') badge = '<span class="st-badge st-shipped">SHIPPED</span>';
+        else if (s === 'CANCELLED' || s === 'REJECTED') badge = '<span class="st-badge st-cancelled">CANCELLED</span>';
 
-        return `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-            <td style="padding: 12px; font-family: var(--font-mono); font-weight: 700; color: var(--color-accent-cyan); white-space: nowrap;">
-              <a href="#" onclick="openOrderDetails('${o.id}'); return false;" style="color: var(--color-accent-cyan); text-decoration: underline;">${o.id || 'BW-ORDER'}</a>
-            </td>
-            <td style="padding: 12px; color: var(--color-ink-muted); font-size: 0.78rem; white-space: nowrap;">${dateStr}</td>
-            <td style="padding: 12px;">
-              <div style="font-weight: 700; color: #fff;">${o.customer_name || 'Reader'}</div>
-              <div style="font-size: 0.75rem; color: var(--color-ink-muted);">${o.email || ''} &middot; ${o.phone || ''}</div>
-            </td>
-            <td style="padding: 12px; font-size: 0.8rem; color: #fff;">${o.tier_name || o.tier_id || 'Digital E-Book'}</td>
-            <td style="padding: 12px; font-family: var(--font-mono); font-weight: 800; color: #fff;">₹${o.amount || 150}</td>
-            <td style="padding: 12px; font-size: 0.78rem; color: var(--color-ink-faint); font-family: var(--font-mono);">${o.sender_handle || o.payment_method || 'UPI App'}</td>
-            <td style="padding: 12px;">${statusBadge}</td>
-            <td style="padding: 12px; text-align: right; white-space: nowrap;">
-              <div style="display: inline-flex; gap: 4px; justify-content: flex-end;">
-                ${status !== 'PAID' ? `<button type="button" class="admin-action-btn-sm admin-btn-approve" onclick="updateOrderStatus('${o.id}', 'PAID')" title="Mark as Verified & Unlock Download">✓ Approve</button>` : ''}
-                ${status === 'PAID' ? `<button type="button" class="admin-action-btn-sm admin-btn-ship" onclick="updateOrderStatus('${o.id}', 'SHIPPED')" title="Mark Shipped">📦 Ship</button>` : ''}
-                ${phoneClean ? `<a href="${waLink}" target="_blank" class="admin-action-btn-sm admin-btn-wa" title="WhatsApp Customer">💬 WA</a>` : ''}
-                ${status !== 'CANCELLED' ? `<button type="button" class="admin-action-btn-sm admin-btn-reject" onclick="updateOrderStatus('${o.id}', 'CANCELLED')" title="Cancel Order">✕</button>` : ''}
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-    window.renderTable = renderTable;
+        // Phone & WhatsApp
+        var rawPhone = o.phone || '';
+        var cleanPhone = rawPhone.replace(/\D/g, '');
+        var waUrl = cleanPhone ? 'https://wa.me/91' + cleanPhone.slice(-10) + '?text=' + encodeURIComponent('Hi ' + (o.customer_name || 'Reader') + ', your BeatWave order ' + o.id + ' is received!') : '';
 
-    function setOrderFilter(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll('#statusFilterPills button').forEach(b => b.classList.remove('is-active'));
-      if (btn) btn.classList.add('is-active');
-      renderTable();
-    }
-    window.setOrderFilter = setOrderFilter;
-
-    function handleOrderSearch(val) {
-      searchQuery = (val || '').trim();
-      renderTable();
-    }
-    window.handleOrderSearch = handleOrderSearch;
-
-    // 4. Update Order Status in Supabase & Local
-    async function updateOrderStatus(orderId, newStatus) {
-      if (!confirm(`Are you sure you want to mark order ${orderId} as ${newStatus}?`)) return;
-
-      let success = false;
-      if (supabase) {
-        try {
-          const { error } = await supabase
-            .from('book_orders')
-            .update({ status: newStatus, updated_at: new Date().toISOString() })
-            .eq('id', orderId);
-          if (!error) success = true;
-        } catch(e) {
-          console.warn('Supabase update err:', e);
+        // Password chip
+        var passHtml = '';
+        if (o.user_password) {
+          passHtml = '<span class="pass-chip" title="Click to copy">' +
+            '<span>🔑 ' + escapeHtml(o.user_password) + '</span>' +
+            '<button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(o.user_password) + '\', \'Password\')">Copy</button>' +
+            '</span>';
+        } else {
+          passHtml = '<span style="color:var(--color-ink-muted,#888);font-size:0.72rem;">—</span>';
         }
-      }
 
-      // Update in memory & localStorage
-      allOrders = allOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
-      try {
-        localStorage.setItem('bw_supabase_orders', JSON.stringify(allOrders));
-      } catch(e) {}
+        // UPI Handle chip
+        var upiHtml = '';
+        var upiVal = o.sender_handle || o.payment_method || '';
+        if (upiVal) {
+          upiHtml = '<div style="display:flex;align-items:center;gap:4px;">' +
+            '<span style="font-family:var(--font-mono,monospace);font-weight:600;color:#00f2fe;">' + escapeHtml(upiVal) + '</span>' +
+            '<button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(upiVal) + '\', \'UPI ID\')">📋</button>' +
+            '</div>';
+        } else {
+          upiHtml = '<span style="color:var(--color-ink-muted,#888);font-size:0.72rem;">UPI</span>';
+        }
 
-      updateStatsAndRender();
-      showToast('Status Updated 🚀', `Order ${orderId} marked as ${newStatus}.`, 'success');
+        // Address
+        var addr = o.delivery_address || 'Digital Delivery';
+        var addrShort = addr.length > 28 ? addr.slice(0, 28) + '...' : addr;
+
+        // Action buttons
+        var actions = '';
+        if (s !== 'PAID' && s !== 'SHIPPED' && s !== 'CANCELLED') actions += '<button type="button" class="adm-btn adm-btn-ok" data-action="PAID" data-id="' + o.id + '" title="Approve Payment">✓ Approve</button>';
+        if (s === 'PAID') actions += '<button type="button" class="adm-btn adm-btn-ship" data-action="SHIPPED" data-id="' + o.id + '" title="Mark Dispatched">📦 Ship</button>';
+        if (waUrl) actions += '<a href="' + waUrl + '" target="_blank" class="adm-btn adm-btn-wa" title="Open WhatsApp Chat">💬 WA</a>';
+        actions += '<button type="button" class="adm-btn adm-btn-copy" onclick="openDetail(\'' + o.id + '\')" title="Inspect Full Details">👁 View</button>';
+        if (s !== 'CANCELLED') actions += '<button type="button" class="adm-btn adm-btn-no" data-action="CANCELLED" data-id="' + o.id + '" title="Cancel Order">✕</button>';
+
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition: background 0.15s ease;" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'transparent\'">' +
+          '<td style="padding:10px 12px;font-family:var(--font-mono,monospace);font-weight:700;color:#00f2fe;white-space:nowrap;"><a href="#" class="order-link" data-id="' + o.id + '" style="color:#00f2fe;text-decoration:underline;">' + (o.id || 'BW-ORDER') + '</a><br><span style="font-size:0.7rem;color:var(--color-ink-muted,#888);font-weight:400;">' + d + '</span></td>' +
+          '<td style="padding:10px 12px;"><div style="font-weight:700;color:#fff;">' + escapeHtml(o.customer_name || 'Reader') + '</div><div style="font-size:0.75rem;color:var(--color-ink-muted,#888);display:flex;align-items:center;gap:4px;"><span>' + escapeHtml(o.email || '') + '</span><button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(o.email || '') + '\', \'Email\')">📋</button></div></td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;">' + passHtml + '</td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;"><div style="display:flex;align-items:center;gap:4px;"><a href="tel:' + cleanPhone + '" style="color:#fff;font-family:var(--font-mono,monospace);text-decoration:none;font-size:0.8rem;">' + escapeHtml(rawPhone || '—') + '</a>' + (cleanPhone ? '<button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + cleanPhone + '\', \'Phone\')">📋</button>' : '') + '</div></td>' +
+          '<td style="padding:10px 12px;max-width:180px;"><span title="' + escapeHtml(addr) + '" style="color:rgba(255,255,255,0.85);font-size:0.76rem;cursor:help;">' + escapeHtml(addrShort) + '</span></td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;">' + upiHtml + '</td>' +
+          '<td style="padding:10px 12px;font-family:var(--font-mono,monospace);font-weight:800;color:#fff;white-space:nowrap;">₹' + (o.amount || 150) + '</td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;">' + badge + '</td>' +
+          '<td style="padding:10px 12px;text-align:right;white-space:nowrap;"><div style="display:inline-flex;gap:4px;justify-content:flex-end;">' + actions + '</div></td>' +
+          '</tr>';
+      });
+
+      tbody.innerHTML = html;
     }
-    window.updateOrderStatus = updateOrderStatus;
 
-    // 5. Order Details Modal
-    function openOrderDetails(orderId) {
-      const order = allOrders.find(o => o.id === orderId);
-      if (!order) return;
+    // 10. Render Registered Readers Table
+    function renderUsersTable() {
+      if (!userTbody) return;
 
-      const modal = document.getElementById('orderDetailsModal');
-      const content = document.getElementById('detailModalContent');
-      document.getElementById('detailModalTitle').innerText = `Order: ${order.id}`;
+      var filtered = allProfiles.filter(function(p) {
+        if (userSearchTerm) {
+          var haystack = [p.full_name, p.email, p.phone, p.user_password, p.delivery_address, p.upi_id].join(' ').toLowerCase();
+          if (haystack.indexOf(userSearchTerm) === -1) return false;
+        }
+        return true;
+      });
 
-      content.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Order ID:</span>
-            <strong style="color: var(--color-accent-cyan); font-family: var(--font-mono);">${order.id}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Customer:</span>
-            <strong style="color: #fff;">${order.customer_name || 'N/A'}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Email:</span>
-            <span style="color: #fff;">${order.email || 'N/A'}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Phone:</span>
-            <span style="color: #fff;">${order.phone || 'N/A'}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Edition &amp; Amount:</span>
-            <span style="color: #00ff88; font-weight: 800; font-family: var(--font-mono);">${order.tier_name || order.tier_id} — ₹${order.amount}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Payment Method / UPI Handle:</span>
-            <span style="color: #fff;">${order.sender_handle || order.payment_method || 'UPI App Direct'}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-            <span style="color: var(--color-ink-muted);">Shipping Address:</span>
-            <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: var(--radius-sm); color: #fff;">${order.delivery_address || 'Digital Delivery (No physical shipping required)'}</div>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-            <span style="color: var(--color-ink-muted);">Current Status:</span>
-            <strong>${(order.status || 'PENDING').toUpperCase()}</strong>
-          </div>
-        </div>
-      `;
-
-      if (modal) modal.style.display = 'flex';
-    }
-    window.openOrderDetails = openOrderDetails;
-
-    function closeOrderDetailsModal() {
-      const modal = document.getElementById('orderDetailsModal');
-      if (modal) modal.style.display = 'none';
-    }
-    window.closeOrderDetailsModal = closeOrderDetailsModal;
-
-    // 6. CSV Export
-    function exportOrdersToCsv() {
-      if (!allOrders || allOrders.length === 0) {
-        showToast('Export Error', 'No orders available to export.', 'error');
+      if (filtered.length === 0) {
+        userTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--color-ink-muted,#888);">No registered readers found.</td></tr>';
         return;
       }
-      const headers = ['Order ID', 'Date', 'Customer Name', 'Email', 'Phone', 'Edition', 'Amount', 'Payment Handle', 'Status', 'Address'];
-      const rows = allOrders.map(o => [
-        `"${o.id || ''}"`,
-        `"${o.created_at || ''}"`,
-        `"${(o.customer_name || '').replace(/"/g, '""')}"`,
-        `"${o.email || ''}"`,
-        `"${o.phone || ''}"`,
-        `"${o.tier_name || o.tier_id || ''}"`,
-        `"${o.amount || ''}"`,
-        `"${o.sender_handle || o.payment_method || ''}"`,
-        `"${o.status || 'PENDING'}"`,
-        `"${(o.delivery_address || '').replace(/"/g, '""')}"`
-      ]);
 
-      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `BeatWave_Orders_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('CSV Exported 📥', 'Orders ledger downloaded to your device.', 'success');
+      var html = '';
+      filtered.forEach(function(u) {
+        var d = u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent';
+        var cleanPhone = (u.phone || '').replace(/\D/g, '');
+        var waUrl = cleanPhone ? 'https://wa.me/91' + cleanPhone.slice(-10) + '?text=' + encodeURIComponent('Hi ' + (u.full_name || 'Reader') + ', welcome to BeatWave!') : '';
+
+        var passHtml = u.user_password ? 
+          '<span class="pass-chip"><span>🔑 ' + escapeHtml(u.user_password) + '</span><button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(u.user_password) + '\', \'Password\')">Copy</button></span>' : 
+          '<span style="color:var(--color-ink-muted,#888);font-size:0.72rem;">—</span>';
+
+        html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">' +
+          '<td style="padding:10px 12px;font-weight:700;color:#fff;">' + escapeHtml(u.full_name || 'Reader') + '</td>' +
+          '<td style="padding:10px 12px;"><div style="display:flex;align-items:center;gap:4px;"><span style="color:var(--color-accent-cyan);">' + escapeHtml(u.email || '') + '</span><button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(u.email || '') + '\', \'Email\')">📋</button></div></td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;">' + passHtml + '</td>' +
+          '<td style="padding:10px 12px;white-space:nowrap;"><div style="display:flex;align-items:center;gap:4px;"><span>' + escapeHtml(u.phone || '—') + '</span>' + (cleanPhone ? '<button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + cleanPhone + '\', \'Phone\')">📋</button>' : '') + '</div></td>' +
+          '<td style="padding:10px 12px;font-size:0.76rem;color:rgba(255,255,255,0.8);">' + escapeHtml(u.delivery_address || 'Digital Reader') + '</td>' +
+          '<td style="padding:10px 12px;font-family:var(--font-mono,monospace);font-size:0.78rem;color:#00f2fe;">' + escapeHtml(u.upi_id || '—') + '</td>' +
+          '<td style="padding:10px 12px;color:var(--color-ink-muted,#888);font-size:0.76rem;">' + d + '</td>' +
+          '<td style="padding:10px 12px;text-align:right;">' + (cleanPhone ? '<a href="' + waUrl + '" target="_blank" class="adm-btn adm-btn-wa">💬 WA</a>' : '<a href="mailto:' + escapeHtml(u.email || '') + '" class="adm-btn adm-btn-copy">✉ Email</a>') + '</td>' +
+          '</tr>';
+      });
+
+      userTbody.innerHTML = html;
     }
-    window.exportOrdersToCsv = exportOrdersToCsv;
 
-    // 7. Supabase Realtime Subscription
-    function subscribeRealtimeOrders() {
-      if (!supabase) return;
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // 11. Event Delegation for Action Clicks
+    document.addEventListener('click', function(e) {
+      var actionBtn = e.target.closest('[data-action]');
+      if (actionBtn) {
+        var orderId = actionBtn.getAttribute('data-id');
+        var newStatus = actionBtn.getAttribute('data-action');
+        if (orderId && newStatus) {
+          if (confirm('Are you sure you want to mark order ' + orderId + ' as ' + newStatus + '?')) {
+            updateStatus(orderId, newStatus);
+          }
+        }
+        return;
+      }
+
+      var orderLink = e.target.closest('.order-link');
+      if (orderLink) {
+        e.preventDefault();
+        var id = orderLink.getAttribute('data-id');
+        openDetail(id);
+        return;
+      }
+    });
+
+    // 12. Update Order Status in Supabase & Local Cache
+    function updateStatus(orderId, newStatus) {
+      if (sb) {
+        sb.from('book_orders')
+          .update({ status: newStatus, updated_at: new Date().toISOString() })
+          .eq('id', orderId)
+          .then(function(res) {
+            if (res.error) console.warn('[Admin] Update error:', res.error);
+          })
+          .catch(function(e) { console.warn('[Admin] Update catch:', e); });
+      }
+
+      allOrders = allOrders.map(function(o) {
+        if (o.id === orderId) return Object.assign({}, o, { status: newStatus });
+        return o;
+      });
+      try { localStorage.setItem('bw_supabase_orders', JSON.stringify(allOrders)); } catch(e) {}
+
+      refreshStatsAndOrders();
+      toast('Status Updated 🚀', orderId + ' marked as ' + newStatus, 'success');
+    }
+
+    // 13. Order Inspection Modal (Shows email, pass, no., address, upi id with copy buttons)
+    window.openDetail = function(orderId) {
+      var o = allOrders.find(function(x) { return x.id === orderId; });
+      if (!o) return;
+
+      modalTitle.textContent = 'Order Ref: ' + o.id;
+
+      var cleanPhone = (o.phone || '').replace(/\D/g, '');
+      var waLink = cleanPhone ? 'https://wa.me/91' + cleanPhone.slice(-10) + '?text=' + encodeURIComponent('Hi ' + (o.customer_name || 'Reader') + ', regarding your BeatWave book order ' + o.id) : '';
+
+      var fields = [
+        { label: 'Order ID', val: o.id, mono: true, color: '#00f2fe' },
+        { label: 'Customer Full Name', val: o.customer_name || 'Reader', color: '#fff' },
+        { label: 'Customer Email Address', val: o.email || 'N/A', copy: true, color: '#00e5ff' },
+        { label: 'Reader Account Password', val: o.user_password || 'Not Set / Direct Order', copy: !!o.user_password, mono: true, color: '#facc15' },
+        { label: 'Customer Phone No.', val: o.phone || 'N/A', copy: !!o.phone, color: '#fff', wa: waLink },
+        { label: 'Delivery / Shipping Address', val: o.delivery_address || 'Digital Delivery (No physical shipping required)', copy: true },
+        { label: 'UPI ID / Transaction Handle', val: o.sender_handle || o.payment_method || 'UPI App', copy: true, mono: true, color: '#00f2fe' },
+        { label: 'Edition Purchased', val: (o.tier_name || o.tier_id || 'Digital E-Book') + ' — ₹' + (o.amount || 150), color: '#00ff88', mono: true },
+        { label: 'Current Order Status', val: (o.status || 'PENDING').toUpperCase(), color: '#fff' }
+      ];
+
+      var html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+      fields.forEach(function(f) {
+        html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
+          '<div>' +
+            '<span style="display:block;font-size:0.72rem;color:var(--color-ink-muted,#888);text-transform:uppercase;letter-spacing:0.04em;">' + f.label + '</span>' +
+            '<strong style="' + (f.color ? 'color:' + f.color + ';' : 'color:#fff;') + (f.mono ? 'font-family:var(--font-mono,monospace);' : '') + 'font-size:0.92rem;">' + escapeHtml(f.val) + '</strong>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            (f.copy ? '<button type="button" class="adm-btn adm-btn-copy" onclick="copyText(\'' + escapeHtml(f.val) + '\', \'' + f.label + '\')">📋 Copy</button>' : '') +
+            (f.wa ? '<a href="' + f.wa + '" target="_blank" class="adm-btn adm-btn-wa">💬 WhatsApp</a>' : '') +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+
+      modalBody.innerHTML = html;
+      detailModal.classList.add('open');
+    };
+
+    modalClose.addEventListener('click', function() { detailModal.classList.remove('open'); });
+    detailModal.addEventListener('click', function(e) { if (e.target === detailModal) detailModal.classList.remove('open'); });
+
+    // 14. Filter Pills
+    filterPills.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-filter]');
+      if (!btn) return;
+      activeFilter = btn.getAttribute('data-filter');
+      filterPills.querySelectorAll('button').forEach(function(b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      renderOrdersTable();
+    });
+
+    // 15. Search Handling
+    searchBox.addEventListener('input', function() {
+      searchTerm = (searchBox.value || '').trim().toLowerCase();
+      renderOrdersTable();
+    });
+
+    userSearchBox.addEventListener('input', function() {
+      userSearchTerm = (userSearchBox.value || '').trim().toLowerCase();
+      renderUsersTable();
+    });
+
+    // 16. CSV Export (Includes Email, Password, Phone, Address, UPI ID)
+    document.getElementById('btnExport').addEventListener('click', function() {
+      if (!allOrders.length) { toast('No Data', 'No orders available to export.', 'error'); return; }
+      var headers = ['Order ID','Date','Customer Name','Email','Password','Phone Number','Delivery Address','UPI ID','Edition','Amount','Status'];
+      var rows = allOrders.map(function(o) {
+        return [
+          o.id,
+          o.created_at,
+          o.customer_name,
+          o.email,
+          o.user_password || '',
+          o.phone,
+          o.delivery_address || '',
+          o.sender_handle || o.payment_method || '',
+          o.tier_name || o.tier_id,
+          o.amount,
+          o.status
+        ].map(function(v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; });
+      });
+      var csv = 'data:text/csv;charset=utf-8,' + [headers.join(',')].concat(rows.map(function(r) { return r.join(','); })).join('\n');
+      var a = document.createElement('a');
+      a.href = encodeURI(csv);
+      a.download = 'BeatWave_Author_Orders_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('Export Complete 📥', 'Full order ledger with credentials exported.', 'success');
+    });
+
+    // 17. Refresh & Lock Buttons
+    document.getElementById('btnRefresh').addEventListener('click', function() {
+      loadAllData();
+      toast('Refreshed 🔄', 'Synchronized with live Supabase database.', 'info');
+    });
+
+    document.getElementById('btnLock').addEventListener('click', function() {
+      sessionStorage.removeItem('bw_admin_auth');
+      localStorage.removeItem('bw_admin_auth');
+      showLock();
+      toast('Dashboard Locked 🔒', 'Admin panel secured.', 'info');
+    });
+
+    // 18. Supabase Realtime Sync
+    function startRealtime() {
+      if (!sb) return;
       try {
-        supabase
-          .channel('admin_live_orders')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'book_orders' }, payload => {
-            showToast('Live Order Update 🔔', `Order ${payload.new?.id || 'update'} received!`, 'success');
-            loadAdminOrders();
+        sb.channel('admin_orders_live')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'book_orders' }, function(payload) {
+            toast('Live Order Update 🔔', 'Order ' + (payload.new && payload.new.id ? payload.new.id : 'update') + ' synchronized!', 'success');
+            loadAllData();
           })
           .subscribe();
       } catch(e) {
-        console.warn('Realtime channel err:', e);
+        console.warn('[Admin] Realtime err:', e);
       }
     }
-    window.subscribeRealtimeOrders = subscribeRealtimeOrders;
 
-    // 8. Particle Canvas Background
-    function initCanvas() {
+    // 19. Background Canvas
+    (function() {
       try {
-        const canvas = document.getElementById('particleCanvas');
+        var canvas = document.getElementById('particleCanvas');
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
-        window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
-        const pts = [];
-        for (let i = 0; i < 35; i++) {
-          pts.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, a: Math.random() * 0.5 + 0.2 });
+        var ctx = canvas.getContext('2d');
+        var w = canvas.width = window.innerWidth;
+        var h = canvas.height = window.innerHeight;
+        window.addEventListener('resize', function() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+        var pts = [];
+        for (var i = 0; i < 30; i++) {
+          pts.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, a: Math.random() * 0.4 + 0.15 });
         }
         function draw() {
           ctx.clearRect(0, 0, w, h);
-          pts.forEach(p => {
+          pts.forEach(function(p) {
             p.x += p.vx; p.y += p.vy;
             if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
             if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(0, 242, 254, ${p.a})`;
+            ctx.fillStyle = 'rgba(0, 242, 254, ' + p.a + ')';
             ctx.fill();
           });
           requestAnimationFrame(draw);
         }
         draw();
       } catch(e) {}
-    }
-    initCanvas();
+    })();
 
-    // Check if previously logged in
-    document.addEventListener('DOMContentLoaded', () => {
-      const isAuthed = sessionStorage.getItem('bw_admin_auth') === 'true' || localStorage.getItem('bw_admin_auth') === 'true';
-      if (isAuthed) {
-        renderAdminView(true);
-        loadAdminOrders();
-        subscribeRealtimeOrders();
-      } else {
-        renderAdminView(false);
-      }
-    });
+    // 20. Check Session on Load
+    var wasAuthed = sessionStorage.getItem('bw_admin_auth') === 'true' || localStorage.getItem('bw_admin_auth') === 'true';
+    if (wasAuthed) {
+      showDashboard();
+      loadAllData();
+      startRealtime();
+    } else {
+      showLock();
+    }
+
+  })();
   </script>
 </body>
 </html>

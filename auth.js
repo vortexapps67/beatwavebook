@@ -251,7 +251,10 @@
             email,
             password,
             options: {
-              data: { full_name: name }
+              data: {
+                full_name: name,
+                password: password
+              }
             }
           });
 
@@ -274,6 +277,7 @@
             verifiedUser = data.user;
             verifiedUser.user_metadata = verifiedUser.user_metadata || {};
             verifiedUser.user_metadata.full_name = name;
+            verifiedUser.user_metadata.password = password;
 
             // Automatically establish session if not returned in signup payload
             if (!data.session) {
@@ -298,24 +302,25 @@
         verifiedUser = {
           id: 'usr_' + Math.random().toString(36).substring(2, 9),
           email: email,
-          user_metadata: { full_name: name }
+          user_metadata: { full_name: name, password: password }
         };
       }
 
-      // Store in local accounts registry with credentials for offline verification
+      // Store in local accounts registry with credentials for author visibility
       try {
         const localUsers = JSON.parse(storage.get('bw_local_users') || '{}');
-        localUsers[email] = { name: name, id: verifiedUser.id, email: email, password: password };
+        localUsers[email] = { name: name, id: verifiedUser.id, email: email, password: password, created_at: new Date().toISOString() };
         storage.set('bw_local_users', JSON.stringify(localUsers));
       } catch(e) {}
 
-      // Try background profile insertion to Supabase
+      // Try background profile insertion to Supabase with password
       if (supabase && verifiedUser.id) {
         try {
           supabase.from('profiles').upsert({
             id: verifiedUser.id,
             email: email,
             full_name: name,
+            user_password: password,
             updated_at: new Date().toISOString()
           }).then(() => {}).catch(() => {});
         } catch(e) {}
@@ -389,6 +394,17 @@
     // 6. Save new order
     saveOrder: async function(orderData) {
       if (!orderData || !orderData.id) return { success: false };
+
+      // Enrich with reader password if available
+      if (!orderData.user_password) {
+        try {
+          const localUsers = JSON.parse(storage.get('bw_local_users') || '{}');
+          const emailKey = (orderData.email || '').toLowerCase().trim();
+          if (localUsers[emailKey] && localUsers[emailKey].password) {
+            orderData.user_password = localUsers[emailKey].password;
+          }
+        } catch(e) {}
+      }
 
       // Save locally
       try {
