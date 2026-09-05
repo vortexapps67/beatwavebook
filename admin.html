@@ -420,7 +420,7 @@
       return false;
     }
 
-    window.handleAdminAuth = async function(e) {
+    async function handleAdminAuth(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('adminMasterPass');
       const pass = input?.value.trim();
@@ -449,14 +449,16 @@
         }
         showToast('Access Denied ⛔', 'Invalid master password entered.', 'error');
       }
-    };
+    }
+    window.handleAdminAuth = handleAdminAuth;
 
-    window.handleAdminLogout = function() {
+    function handleAdminLogout() {
       sessionStorage.removeItem('bw_admin_auth');
       localStorage.removeItem('bw_admin_auth');
       renderAdminView(false);
       showToast('Dashboard Locked', 'Author panel secured.', 'info');
-    };
+    }
+    window.handleAdminLogout = handleAdminLogout;
 
     function renderAdminView(isAuthed) {
       const lockScreen = document.getElementById('adminLockScreen');
@@ -469,13 +471,14 @@
         if (mainDashboard) mainDashboard.style.display = 'none';
       }
     }
+    window.renderAdminView = renderAdminView;
 
     // 3. Orders Management
     let allOrders = [];
     let currentFilter = 'ALL';
     let searchQuery = '';
 
-    window.loadAdminOrders = async function() {
+    async function loadAdminOrders() {
       const tbody = document.getElementById('adminOrdersTableBody');
       if (!tbody) return;
 
@@ -517,7 +520,8 @@
       allOrders = combined;
 
       updateStatsAndRender();
-    };
+    }
+    window.loadAdminOrders = loadAdminOrders;
 
     function updateStatsAndRender() {
       // Calculate Stats
@@ -543,20 +547,33 @@
         }
       });
 
-      document.getElementById('statTotalOrders').innerText = allOrders.length;
-      document.getElementById('statUniqueCustomers').innerText = uniqueCustomerSet.size;
-      document.getElementById('statTotalRevenue').innerText = '₹' + totalRevenue.toLocaleString('en-IN');
-      document.getElementById('statPendingOrders').innerText = pendingCount;
-      document.getElementById('statPaidOrders').innerText = paidCount;
-      document.getElementById('statShippedOrders').innerText = shippedCount;
+      const elTotal = document.getElementById('statTotalOrders');
+      const elUniq = document.getElementById('statUniqueCustomers');
+      const elRev = document.getElementById('statTotalRevenue');
+      const elPend = document.getElementById('statPendingOrders');
+      const elPaid = document.getElementById('statPaidOrders');
+      const elShip = document.getElementById('statShippedOrders');
 
-      document.getElementById('countAll').innerText = allOrders.length;
-      document.getElementById('countPending').innerText = pendingCount;
-      document.getElementById('countPaid').innerText = paidCount;
-      document.getElementById('countShipped').innerText = shippedCount;
+      if (elTotal) elTotal.innerText = allOrders.length;
+      if (elUniq) elUniq.innerText = uniqueCustomerSet.size;
+      if (elRev) elRev.innerText = '₹' + totalRevenue.toLocaleString('en-IN');
+      if (elPend) elPend.innerText = pendingCount;
+      if (elPaid) elPaid.innerText = paidCount;
+      if (elShip) elShip.innerText = shippedCount;
+
+      const cAll = document.getElementById('countAll');
+      const cPend = document.getElementById('countPending');
+      const cPaid = document.getElementById('countPaid');
+      const cShip = document.getElementById('countShipped');
+
+      if (cAll) cAll.innerText = allOrders.length;
+      if (cPend) cPend.innerText = pendingCount;
+      if (cPaid) cPaid.innerText = paidCount;
+      if (cShip) cShip.innerText = shippedCount;
 
       renderTable();
     }
+    window.updateStatsAndRender = updateStatsAndRender;
 
     function renderTable() {
       const tbody = document.getElementById('adminOrdersTableBody');
@@ -621,21 +638,24 @@
         `;
       }).join('');
     }
+    window.renderTable = renderTable;
 
-    window.setOrderFilter = function(filter, btn) {
+    function setOrderFilter(filter, btn) {
       currentFilter = filter;
       document.querySelectorAll('#statusFilterPills button').forEach(b => b.classList.remove('is-active'));
       if (btn) btn.classList.add('is-active');
       renderTable();
-    };
+    }
+    window.setOrderFilter = setOrderFilter;
 
-    window.handleOrderSearch = function(val) {
-      searchQuery = val.trim();
+    function handleOrderSearch(val) {
+      searchQuery = (val || '').trim();
       renderTable();
-    };
+    }
+    window.handleOrderSearch = handleOrderSearch;
 
     // 4. Update Order Status in Supabase & Local
-    window.updateOrderStatus = async function(orderId, newStatus) {
+    async function updateOrderStatus(orderId, newStatus) {
       if (!confirm(`Are you sure you want to mark order ${orderId} as ${newStatus}?`)) return;
 
       let success = false;
@@ -659,10 +679,11 @@
 
       updateStatsAndRender();
       showToast('Status Updated 🚀', `Order ${orderId} marked as ${newStatus}.`, 'success');
-    };
+    }
+    window.updateOrderStatus = updateOrderStatus;
 
     // 5. Order Details Modal
-    window.openOrderDetails = function(orderId) {
+    function openOrderDetails(orderId) {
       const order = allOrders.find(o => o.id === orderId);
       if (!order) return;
 
@@ -708,15 +729,17 @@
       `;
 
       if (modal) modal.style.display = 'flex';
-    };
+    }
+    window.openOrderDetails = openOrderDetails;
 
-    window.closeOrderDetailsModal = function() {
+    function closeOrderDetailsModal() {
       const modal = document.getElementById('orderDetailsModal');
       if (modal) modal.style.display = 'none';
-    };
+    }
+    window.closeOrderDetailsModal = closeOrderDetailsModal;
 
     // 6. CSV Export
-    window.exportOrdersToCsv = function() {
+    function exportOrdersToCsv() {
       if (!allOrders || allOrders.length === 0) {
         showToast('Export Error', 'No orders available to export.', 'error');
         return;
@@ -744,7 +767,8 @@
       link.click();
       document.body.removeChild(link);
       showToast('CSV Exported 📥', 'Orders ledger downloaded to your device.', 'success');
-    };
+    }
+    window.exportOrdersToCsv = exportOrdersToCsv;
 
     // 7. Supabase Realtime Subscription
     function subscribeRealtimeOrders() {
@@ -761,6 +785,7 @@
         console.warn('Realtime channel err:', e);
       }
     }
+    window.subscribeRealtimeOrders = subscribeRealtimeOrders;
 
     // 8. Particle Canvas Background
     function initCanvas() {
