@@ -34,6 +34,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="cart.html">Cart</a></li>
         <li><a href="track.html">Track Order</a></li>
+        <li><a href="login.html" class="active-nav-link" id="navAuthLink">Login</a></li>
       </ul>
       <a href="cart.html" class="liquid-cta-btn">
         <span>Order Book</span>
@@ -44,10 +45,14 @@
   <main class="subpage-wrapper">
     <div class="container">
       <div class="auth-container">
-        <!-- Auth Tabs: Reader Login vs Admin Portal -->
+        <!-- Master Auth Tabs: Reader Account vs Admin Portal -->
         <div class="auth-tabs">
-          <button class="auth-tab-btn is-active" id="tabReaderBtn" onclick="switchAuthTab('reader')">Reader Sign In</button>
-          <button class="auth-tab-btn" id="tabAdminBtn" onclick="switchAuthTab('admin')">Admin Portal</button>
+          <button class="auth-tab-btn is-active" id="tabReaderBtn" onclick="switchAuthTab('reader')">
+            Reader Account
+          </button>
+          <button class="auth-tab-btn" id="tabAdminBtn" onclick="switchAuthTab('admin')">
+            Author Admin
+          </button>
         </div>
 
         <!-- Rate Limit Alert Card -->
@@ -60,63 +65,202 @@
         </div>
 
         <!-- Notification Banner -->
-        <div id="authNotice" style="display: none; padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem;"></div>
+        <div id="authNotice" style="display: none; padding: 14px; border-radius: var(--radius-md); font-size: 0.86rem; line-height: 1.45;"></div>
 
-        <!-- TAB 1: Reader Login / Register with Supabase Email Verification -->
-        <div id="readerAuthView">
-          <div style="text-align: center; margin-bottom: var(--space-md);">
-            <h3 style="font-size: 1.4rem;">Reader Account</h3>
-            <p style="font-size: 0.85rem;">Sign in to access your digital books and track all your orders.</p>
-          </div>
-
-          <form id="readerAuthForm" onsubmit="handleReaderAuth(event)">
-            <div style="display: flex; flex-direction: column; gap: var(--space-md);">
-              <div class="form-group">
-                <label class="form-label" for="authEmail">Email Address *</label>
-                <input type="email" id="authEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="authPassword">Password *</label>
-                <input type="password" id="authPassword" class="form-input" placeholder="Enter password (min 6 chars)" required minlength="6">
-              </div>
-
-              <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-xs);">
-                <button type="submit" id="btnSignIn" class="btn-primary" style="flex: 1;">
-                  <span>Sign In</span>
-                </button>
-                <button type="button" id="btnSignUp" class="btn-secondary" style="flex: 1;" onclick="handleReaderSignUp()">
-                  <span>Create Account</span>
-                </button>
-              </div>
-
-              <div style="text-align: center; margin-top: var(--space-xs);">
-                <button type="button" onclick="handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
-                  Send Passwordless Magic Link to Email
-                </button>
-              </div>
-            </div>
-          </form>
+        <!-- Resend Verification Card (Displayed if Email Not Confirmed) -->
+        <div id="resendConfirmCard" class="resend-box" style="display: none;">
+          <div><strong>Email Verification Required</strong></div>
+          <p id="resendPromptText" style="margin: 0; color: var(--color-ink-muted);">Please check your inbox &amp; spam folder to confirm your reader account.</p>
+          <button type="button" id="btnResendEmail" class="btn-secondary" style="padding: 6px 16px; font-size: 0.8rem; margin-top: 6px;" onclick="handleResendConfirmation()">
+            <span>Resend Confirmation Email</span>
+          </button>
         </div>
 
-        <!-- TAB 2: Admin Master Portal -->
+        <!-- ============================================ -->
+        <!-- TAB 1: READER ACCOUNT VIEW                  -->
+        <!-- ============================================ -->
+        <div id="readerAuthView">
+          
+          <!-- STATE A: Authenticated Reader Profile Card -->
+          <div id="readerProfileView" style="display: none;">
+            <div class="reader-profile-card">
+              <div class="reader-avatar-circle" id="profileAvatar">R</div>
+              <div class="reader-profile-info">
+                <h3 id="profileName" style="font-size: 1.3rem; margin: 0;">Reader</h3>
+                <span id="profileEmail" style="font-size: 0.85rem; color: var(--color-ink-muted); font-family: var(--font-mono);">reader@email.com</span>
+                <span class="reader-badge-verified">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  Verified Reader
+                </span>
+              </div>
+
+              <div class="reader-profile-actions">
+                <a id="btnProfileTrack" href="track.html" class="btn-primary" style="width: 100%; justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span>Track My Orders</span>
+                </a>
+                <a href="cart.html" class="btn-secondary" style="width: 100%; justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                  <span>Order New Edition</span>
+                </a>
+                <button type="button" class="btn-secondary" style="width: 100%; justify-content: center; color: var(--color-accent-red); border-color: rgba(255, 80, 80, 0.25);" onclick="handleSignOut()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATE B: Reader Forms (Sign In vs Sign Up) -->
+          <div id="readerFormsContainer">
+            <!-- Reader Sub-tabs: Sign In vs Sign Up -->
+            <div class="auth-subtabs">
+              <button class="auth-subtab-btn is-active" id="subTabSignInBtn" onclick="switchReaderMode('signin')">Sign In</button>
+              <button class="auth-subtab-btn" id="subTabSignUpBtn" onclick="switchReaderMode('signup')">Create Account</button>
+            </div>
+
+            <!-- SUB-FORM 1: SIGN IN -->
+            <form id="signInForm" onsubmit="handleReaderSignIn(event)">
+              <div style="text-align: center; margin-bottom: var(--space-md);">
+                <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Welcome Back</h3>
+                <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Sign in to access your digital books and tracking ledger.</p>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                <div class="form-group">
+                  <label class="form-label" for="loginEmail">Email Address *</label>
+                  <input type="email" id="loginEmail" class="form-input" placeholder="e.g. reader@gmail.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label class="form-label" for="loginPassword">Password *</label>
+                    <button type="button" onclick="toggleForgotPasswordBox()" style="background: none; border: none; color: var(--color-accent-cyan); font-size: 0.76rem; cursor: pointer; padding: 0;">
+                      Forgot Password?
+                    </button>
+                  </div>
+                  <div class="password-field-wrap">
+                    <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required minlength="6" autocomplete="current-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" title="Show / Hide Password">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" id="btnSubmitSignIn" class="btn-primary" style="width: 100%; margin-top: 4px;">
+                  <span>Sign In to BeatWave</span>
+                </button>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+                  <button type="button" onclick="handleSendMagicLink()" style="background: none; border: none; color: var(--color-accent-cyan); cursor: pointer; text-decoration: underline; padding: 0;">
+                    Send Magic Link
+                  </button>
+                  <button type="button" onclick="switchReaderMode('signup')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
+                    New reader? <span style="color: #fff; text-decoration: underline;">Create Account</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- SUB-FORM 2: CREATE ACCOUNT (SIGN UP) -->
+            <form id="signUpForm" style="display: none;" onsubmit="handleReaderSignUp(event)">
+              <div style="text-align: center; margin-bottom: var(--space-md);">
+                <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Create Reader Account</h3>
+                <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Join readers worldwide exploring the true story of BeatWave.</p>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                <div class="form-group">
+                  <label class="form-label" for="signUpName">Full Name *</label>
+                  <input type="text" id="signUpName" class="form-input" placeholder="e.g. Rahul Sharma" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="signUpEmail">Email Address *</label>
+                  <input type="email" id="signUpEmail" class="form-input" placeholder="e.g. rahul@gmail.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="signUpPassword">Choose Password (min 6 chars) *</label>
+                  <div class="password-field-wrap">
+                    <input type="password" id="signUpPassword" class="form-input" placeholder="Create a secure password" required minlength="6" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('signUpPassword', this)" title="Show / Hide Password">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="signUpConfirmPassword">Confirm Password *</label>
+                  <div class="password-field-wrap">
+                    <input type="password" id="signUpConfirmPassword" class="form-input" placeholder="Re-enter password" required minlength="6" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('signUpConfirmPassword', this)" title="Show / Hide Password">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div style="font-size: 0.74rem; color: var(--color-ink-faint); line-height: 1.4;">
+                  &bull; A Supabase verification email will be dispatched to verify your account address.
+                </div>
+
+                <button type="submit" id="btnSubmitSignUp" class="btn-primary" style="width: 100%;">
+                  <span>Create Free Account</span>
+                </button>
+
+                <div style="text-align: center; font-size: 0.78rem; padding-top: var(--space-xs); border-top: 1px solid rgba(255,255,255,0.06);">
+                  <button type="button" onclick="switchReaderMode('signin')" style="background: none; border: none; color: var(--color-ink-muted); cursor: pointer; padding: 0;">
+                    Already have an account? <span style="color: var(--color-accent-cyan); text-decoration: underline;">Sign In</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- SUB-FORM 3: FORGOT PASSWORD BOX -->
+            <div id="forgotPasswordBox" style="display: none; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: var(--radius-lg); padding: var(--space-md); margin-top: var(--space-md);">
+              <h4 style="font-size: 0.95rem; margin-bottom: 6px; color: var(--color-accent-cyan);">Reset Reader Password</h4>
+              <p style="font-size: 0.78rem; color: var(--color-ink-muted); margin-bottom: var(--space-sm);">Enter your email address and we'll dispatch a secure recovery link.</p>
+              <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                <input type="email" id="resetEmail" class="form-input" placeholder="Your registered email address">
+                <div style="display: flex; gap: var(--space-xs); margin-top: 4px;">
+                  <button type="button" class="btn-primary" style="flex: 1; padding: 8px;" onclick="handleResetPassword()">
+                    <span>Send Reset Link</span>
+                  </button>
+                  <button type="button" class="btn-secondary" style="padding: 8px 12px;" onclick="toggleForgotPasswordBox(false)">
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TAB 2: AUTHOR ADMIN PORTAL                  -->
+        <!-- ============================================ -->
         <div id="adminAuthView" style="display: none;">
           <div style="text-align: center; margin-bottom: var(--space-md);">
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); color: var(--color-accent-cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-xs);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); color: var(--color-accent-cyan); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-xs); box-shadow: 0 0 20px rgba(0,242,254,0.2);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
-            <h3 style="font-size: 1.4rem;">Author Admin</h3>
-            <p style="font-size: 0.85rem;">Enter master password to access live Supabase orders ledger.</p>
+            <h3 style="font-size: 1.35rem; margin-bottom: 4px;">Author Admin Portal</h3>
+            <p style="font-size: 0.82rem; color: var(--color-ink-muted); margin: 0;">Enter master password to access live Supabase order ledger and approve payments.</p>
           </div>
 
           <form id="adminAuthForm" onsubmit="handleAdminLogin(event)">
             <div style="display: flex; flex-direction: column; gap: var(--space-md);">
               <div class="form-group">
                 <label class="form-label" for="adminPass">Master Password *</label>
-                <input type="password" id="adminPass" class="form-input" placeholder="Enter master password..." required>
+                <div class="password-field-wrap">
+                  <input type="password" id="adminPass" class="form-input" placeholder="Enter master password..." required autocomplete="current-password">
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('adminPass', this)" title="Show / Hide Password">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
               </div>
 
-              <button type="submit" class="btn-primary" style="width: 100%;">
+              <button type="submit" id="btnAdminSubmit" class="btn-primary" style="width: 100%;">
                 <span>Unlock Author Panel</span>
               </button>
             </div>
@@ -138,16 +282,20 @@
 
   <script src="config.js"></script>
   <script>
+    // 1. Initialize Supabase Client
     let supabase = null;
     try {
       if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
         supabase = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('Supabase initialization notice:', e);
+    }
 
-    // Rate Limiting Logic (Blocks after 5 failed attempts for 60 seconds)
+    // 2. Rate Limiting Logic (Blocks after 5 failed attempts for 60 seconds)
     let failedAttempts = parseInt(localStorage.getItem('bw_failed_auth_attempts') || '0');
     let lockoutUntil = parseInt(localStorage.getItem('bw_auth_lockout_until') || '0');
+    let rateLimitTimerInterval = null;
 
     function checkRateLimit() {
       const now = Date.now();
@@ -161,6 +309,7 @@
         localStorage.removeItem('bw_auth_lockout_until');
         localStorage.setItem('bw_failed_auth_attempts', '0');
         document.getElementById('rateLimitCard').style.display = 'none';
+        if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
       }
       return false;
     }
@@ -181,11 +330,12 @@
       card.style.display = 'flex';
       timer.innerText = seconds;
 
-      const interval = setInterval(() => {
+      if (rateLimitTimerInterval) clearInterval(rateLimitTimerInterval);
+      rateLimitTimerInterval = setInterval(() => {
         const now = Date.now();
         const rem = Math.ceil((lockoutUntil - now) / 1000);
         if (rem <= 0) {
-          clearInterval(interval);
+          clearInterval(rateLimitTimerInterval);
           checkRateLimit();
         } else {
           timer.innerText = rem;
@@ -194,126 +344,385 @@
     }
     checkRateLimit();
 
-    // Tab switcher
+    // 3. Tab Switching: Reader vs Admin
     function switchAuthTab(tab) {
       document.getElementById('tabReaderBtn').classList.toggle('is-active', tab === 'reader');
       document.getElementById('tabAdminBtn').classList.toggle('is-active', tab === 'admin');
       document.getElementById('readerAuthView').style.display = tab === 'reader' ? 'block' : 'none';
       document.getElementById('adminAuthView').style.display = tab === 'admin' ? 'block' : 'none';
+      document.getElementById('authNotice').style.display = 'none';
+      document.getElementById('resendConfirmCard').style.display = 'none';
     }
 
+    // 4. Reader Sub-tab Switching: Sign In vs Sign Up
+    function switchReaderMode(mode) {
+      const signInBtn = document.getElementById('subTabSignInBtn');
+      const signUpBtn = document.getElementById('subTabSignUpBtn');
+      const signInForm = document.getElementById('signInForm');
+      const signUpForm = document.getElementById('signUpForm');
+
+      if (mode === 'signup') {
+        signInBtn.classList.remove('is-active');
+        signUpBtn.classList.add('is-active');
+        signInForm.style.display = 'none';
+        signUpForm.style.display = 'block';
+      } else {
+        signUpBtn.classList.remove('is-active');
+        signInBtn.classList.add('is-active');
+        signUpForm.style.display = 'none';
+        signInForm.style.display = 'block';
+      }
+      document.getElementById('authNotice').style.display = 'none';
+      document.getElementById('forgotPasswordBox').style.display = 'none';
+    }
+
+    // 5. Notification helper
     function showNotice(msg, isSuccess = false) {
       const el = document.getElementById('authNotice');
-      el.innerText = msg;
+      el.innerHTML = msg;
       el.style.display = 'block';
       if (isSuccess) {
-        el.style.background = 'rgba(0, 255, 136, 0.15)';
-        el.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+        el.style.background = 'rgba(0, 255, 136, 0.12)';
+        el.style.border = '1px solid rgba(0, 255, 136, 0.35)';
         el.style.color = '#00ff88';
       } else {
-        el.style.background = 'rgba(255, 80, 80, 0.15)';
-        el.style.border = '1px solid rgba(255, 80, 80, 0.3)';
+        el.style.background = 'rgba(255, 80, 80, 0.12)';
+        el.style.border = '1px solid rgba(255, 80, 80, 0.35)';
         el.style.color = '#ff7070';
       }
     }
 
-    // Reader Sign In with Supabase
-    async function handleReaderAuth(e) {
+    // 6. Password Visibility Toggle
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+      } else {
+        input.type = 'password';
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      }
+    }
+
+    // 7. Forgot Password Box Toggle
+    function toggleForgotPasswordBox(show = true) {
+      const box = document.getElementById('forgotPasswordBox');
+      box.style.display = show ? 'block' : 'none';
+      if (show) {
+        const loginEmail = document.getElementById('loginEmail').value.trim();
+        if (loginEmail) document.getElementById('resetEmail').value = loginEmail;
+      }
+    }
+
+    // 8. Session State Observer: Render profile if user is already logged in
+    function renderReaderSession(session) {
+      const profileView = document.getElementById('readerProfileView');
+      const formsContainer = document.getElementById('readerFormsContainer');
+      const navAuthLink = document.getElementById('navAuthLink');
+
+      if (session && session.user) {
+        const user = session.user;
+        const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
+        const initial = (name.charAt(0) || 'R').toUpperCase();
+
+        document.getElementById('profileName').innerText = name;
+        document.getElementById('profileEmail').innerText = user.email;
+        document.getElementById('profileAvatar').innerText = initial;
+        document.getElementById('btnProfileTrack').href = 'track.html?orderId=' + encodeURIComponent(user.email);
+
+        profileView.style.display = 'block';
+        formsContainer.style.display = 'none';
+
+        if (navAuthLink) {
+          navAuthLink.innerText = 'My Account';
+          navAuthLink.title = user.email;
+        }
+      } else {
+        profileView.style.display = 'none';
+        formsContainer.style.display = 'block';
+        if (navAuthLink) {
+          navAuthLink.innerText = 'Login';
+        }
+      }
+    }
+
+    // Check active session on load
+    async function initAuthSession() {
+      if (!supabase) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        renderReaderSession(session);
+
+        // Listen to live auth changes (e.g. returning from email verification)
+        supabase.auth.onAuthStateChange((event, session) => {
+          renderReaderSession(session);
+          if (event === 'SIGNED_IN' && session) {
+            showNotice('Authenticated successfully! Welcome to BeatWave.', true);
+          } else if (event === 'SIGNED_OUT') {
+            showNotice('Signed out cleanly.');
+          }
+        });
+      } catch(e) {
+        console.warn('Auth session check error:', e);
+      }
+    }
+    initAuthSession();
+
+    // 9. Reader Sign In Handler
+    let pendingUnconfirmedEmail = '';
+
+    async function handleReaderSignIn(e) {
       e.preventDefault();
       if (checkRateLimit()) return;
 
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value;
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
 
       if (!supabase) {
-        showNotice('Supabase client offline. Check configuration.');
+        showNotice('Supabase client offline. Please check connection.');
         return;
       }
 
+      const submitBtn = document.getElementById('btnSubmitSignIn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Verifying...';
+
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
+
         if (error) {
           recordFailedAttempt();
-          showNotice('Sign In Failed: ' + error.message);
+          const errMsg = error.message || '';
+
+          // Handle Email Not Confirmed specifically
+          if (error.code === 'email_not_confirmed' || errMsg.toLowerCase().includes('email not confirmed')) {
+            pendingUnconfirmedEmail = email;
+            document.getElementById('resendConfirmCard').style.display = 'flex';
+            document.getElementById('resendPromptText').innerText = `Your email ${email} has not been confirmed yet. Please check your inbox/spam or click below.`;
+            showNotice('Email not confirmed yet. Please verify your email to log in.');
+          } else if (error.code === 'invalid_credentials' || errMsg.toLowerCase().includes('invalid login credentials')) {
+            showNotice('Invalid email or password. Please check your credentials or reset your password.');
+          } else {
+            showNotice('Sign In Error: ' + errMsg);
+          }
         } else {
+          // Success!
           localStorage.setItem('bw_failed_auth_attempts', '0');
+          document.getElementById('rateLimitCard').style.display = 'none';
+          document.getElementById('resendConfirmCard').style.display = 'none';
           showNotice('Signed In Successfully! Redirecting to tracking...', true);
           setTimeout(() => {
             window.location.href = 'track.html?orderId=' + encodeURIComponent(email);
-          }, 1200);
+          }, 1000);
         }
       } catch(err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Sign In to BeatWave</span>';
         recordFailedAttempt();
         showNotice('Authentication error: ' + err.message);
       }
     }
 
-    // Reader Sign Up with Supabase (Sends verification email!)
-    async function handleReaderSignUp() {
+    // 10. Reader Sign Up Handler
+    async function handleReaderSignUp(e) {
+      e.preventDefault();
       if (checkRateLimit()) return;
 
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('signUpName').value.trim();
+      const email = document.getElementById('signUpEmail').value.trim();
+      const password = document.getElementById('signUpPassword').value;
+      const confirmPass = document.getElementById('signUpConfirmPassword').value;
 
-      if (!email || !password) {
-        alert('Please provide an email and password (min 6 characters).');
+      if (!name) {
+        showNotice('Please enter your full name.');
+        return;
+      }
+      if (password.length < 6) {
+        showNotice('Password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirmPass) {
+        showNotice('Passwords do not match. Please verify both password fields.');
         return;
       }
 
       if (!supabase) {
-        showNotice('Supabase offline.');
+        showNotice('Supabase client offline.');
         return;
       }
+
+      const submitBtn = document.getElementById('btnSubmitSignUp');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating Account...';
 
       try {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + '/track.html'
+            data: { full_name: name },
+            emailRedirectTo: window.location.origin + window.location.pathname
+          }
+        });
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Create Free Account</span>';
+
+        if (error) {
+          recordFailedAttempt();
+          if (error.status === 429 || error.message.includes('rate limit')) {
+            showNotice('Supabase email limit reached. Please wait a minute before trying again.');
+          } else {
+            showNotice('Sign Up Notice: ' + error.message);
+          }
+        } else {
+          // Check if session was auto-confirmed or requires confirmation
+          if (data && data.session) {
+            showNotice('Account created and verified! Welcome, ' + name + '!', true);
+            renderReaderSession(data.session);
+          } else {
+            // Check if user already exists
+            if (data.user && data.user.identities && data.user.identities.length === 0) {
+              showNotice('An account with this email already exists. Please switch to Sign In.', false);
+              switchReaderMode('signin');
+              document.getElementById('loginEmail').value = email;
+            } else {
+              pendingUnconfirmedEmail = email;
+              document.getElementById('resendConfirmCard').style.display = 'flex';
+              document.getElementById('resendPromptText').innerText = `Verification email sent to ${email}. Click the confirmation link to activate.`;
+              showNotice('Account created! Verification link sent to ' + email + '. Check your inbox and spam folder.', true);
+            }
+          }
+        }
+      } catch(err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Create Free Account</span>';
+        recordFailedAttempt();
+        showNotice('Sign Up Error: ' + err.message);
+      }
+    }
+
+    // 11. Resend Confirmation Email
+    let resendCooldown = 0;
+    async function handleResendConfirmation() {
+      const email = pendingUnconfirmedEmail || document.getElementById('loginEmail').value.trim() || document.getElementById('signUpEmail').value.trim();
+      if (!email) {
+        showNotice('Please enter your email to resend confirmation.');
+        return;
+      }
+      if (resendCooldown > 0) {
+        showNotice(`Please wait ${resendCooldown}s before resending another confirmation email.`);
+        return;
+      }
+
+      const resendBtn = document.getElementById('btnResendEmail');
+      resendBtn.disabled = true;
+      resendBtn.innerText = 'Dispatching...';
+
+      try {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email: email,
+          options: {
+            emailRedirectTo: window.location.origin + window.location.pathname
           }
         });
 
         if (error) {
-          recordFailedAttempt();
-          showNotice('Sign Up Error: ' + error.message);
+          showNotice('Resend notice: ' + error.message);
+          resendBtn.disabled = false;
+          resendBtn.innerText = 'Resend Confirmation Email';
         } else {
-          showNotice('Verification email sent to ' + email + '! Please click the verification link in your inbox.', true);
+          showNotice('Fresh confirmation email dispatched to ' + email + '! Check your inbox.', true);
+          resendCooldown = 60;
+          const cdInterval = setInterval(() => {
+            resendCooldown--;
+            if (resendCooldown <= 0) {
+              clearInterval(cdInterval);
+              resendBtn.disabled = false;
+              resendBtn.innerText = 'Resend Confirmation Email';
+            } else {
+              resendBtn.innerText = `Wait ${resendCooldown}s`;
+            }
+          }, 1000);
         }
       } catch(err) {
-        showNotice('Error: ' + err.message);
+        resendBtn.disabled = false;
+        resendBtn.innerText = 'Resend Confirmation Email';
+        showNotice('Error resending email: ' + err.message);
       }
     }
 
-    // Passwordless Magic Link via Supabase
+    // 12. Passwordless Magic Link
     async function handleSendMagicLink() {
-      const email = document.getElementById('authEmail').value.trim();
+      const email = document.getElementById('loginEmail').value.trim();
       if (!email) {
-        alert('Please enter your email above to receive a login link.');
+        showNotice('Please type your email address above to receive a Magic Login Link.');
+        document.getElementById('loginEmail').focus();
         return;
       }
-
       if (!supabase) return;
 
       try {
         const { error } = await supabase.auth.signInWithOtp({
           email: email,
           options: {
-            emailRedirectTo: window.location.origin + '/track.html'
+            emailRedirectTo: window.location.origin + window.location.pathname
           }
         });
 
         if (error) {
           showNotice('Magic Link Error: ' + error.message);
         } else {
-          showNotice('Magic login link dispatched to ' + email + '! Check your inbox.', true);
+          showNotice('Magic login link dispatched to ' + email + '! Click it in your inbox to sign in instantly.', true);
         }
       } catch(err) {
         showNotice('Error: ' + err.message);
       }
     }
 
-    // Admin Portal Access (Password is kept in .env; frontend checks one-way hash & Supabase RPC)
+    // 13. Password Reset Flow
+    async function handleResetPassword() {
+      const email = document.getElementById('resetEmail').value.trim();
+      if (!email) {
+        alert('Please enter your registered email address.');
+        return;
+      }
+      if (!supabase) return;
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname
+        });
+
+        if (error) {
+          showNotice('Password Reset Notice: ' + error.message);
+        } else {
+          showNotice('Password reset link sent to ' + email + '! Check your inbox.', true);
+          toggleForgotPasswordBox(false);
+        }
+      } catch(err) {
+        showNotice('Error: ' + err.message);
+      }
+    }
+
+    // 14. Sign Out
+    async function handleSignOut() {
+      if (!supabase) return;
+      try {
+        await supabase.auth.signOut();
+        renderReaderSession(null);
+        showNotice('You have been signed out.', true);
+      } catch(e) {
+        console.warn('Sign out err:', e);
+      }
+    }
+
+    // 15. Admin Portal Login (Kept in .env, validated via SHA-256 hash or Supabase RPC)
     async function verifyAdminSecret(pass) {
       if (supabase) {
         try {
@@ -332,12 +741,13 @@
 
       const pass = document.getElementById('adminPass').value.trim();
       const isValid = await verifyAdminSecret(pass);
+
       if (isValid) {
         sessionStorage.setItem('bw_admin_auth', 'true');
-        showNotice('Admin Authenticated! Opening Dashboard...', true);
+        showNotice('Master Admin Authenticated! Opening Author Panel...', true);
         setTimeout(() => {
           window.location.href = 'index.html#admin';
-        }, 800);
+        }, 600);
       } else {
         recordFailedAttempt();
         showNotice('Access Denied: Invalid Master Password.');

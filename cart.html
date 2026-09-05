@@ -218,6 +218,23 @@
       selectCartTier('print');
     }
 
+    // Auto-fill customer details if reader is authenticated
+    try {
+      if (typeof window.supabase !== 'undefined' && typeof supabaseConfig !== 'undefined') {
+        const client = window.supabase.createClient(supabaseConfig.supabaseUrl, supabaseConfig.supabaseAnonKey);
+        client.auth.getSession().then(({ data: { session } }) => {
+          if (session && session.user) {
+            const emailInput = document.getElementById('cartEmail');
+            const nameInput = document.getElementById('cartName');
+            if (emailInput && !emailInput.value) emailInput.value = session.user.email;
+            if (nameInput && !nameInput.value && session.user.user_metadata && session.user.user_metadata.full_name) {
+              nameInput.value = session.user.user_metadata.full_name;
+            }
+          }
+        });
+      }
+    } catch(e) {}
+
     async function submitCartOrder() {
       const name = document.getElementById('cartName').value.trim();
       const email = document.getElementById('cartEmail').value.trim();

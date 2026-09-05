@@ -151,12 +151,19 @@
       }
     } catch(e) {}
 
-    // Check if query is prefilled via URL
+    // Check if query is prefilled via URL or user is signed in
     const urlParams = new URLSearchParams(window.location.search);
     const orderQuery = urlParams.get('orderId');
     if (orderQuery) {
       document.getElementById('trackQueryInput').value = orderQuery;
       searchOrder(orderQuery);
+    } else if (supabaseClient) {
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session && session.user && session.user.email) {
+          document.getElementById('trackQueryInput').value = session.user.email;
+          searchOrder(session.user.email);
+        }
+      });
     }
 
     function handleTrackOrder(e) {

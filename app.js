@@ -28,6 +28,17 @@
       isSupabaseConfigured = true;
       console.log('[BeatWave] Connected to Supabase backend successfully.');
       initSupabaseRealtime();
+
+      // Check Reader auth state for nav
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session && session.user) {
+          const navLink = document.getElementById('navLoginLink');
+          if (navLink) {
+            navLink.innerText = 'My Account';
+            navLink.title = session.user.email;
+          }
+        }
+      }).catch(() => {});
     } else {
       console.log('[BeatWave] Supabase credentials not set in config.js — running local sync mode.');
     }
