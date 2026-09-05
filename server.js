@@ -1,18 +1,43 @@
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ckjsrurruaxcveoxpzws.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_OTbvoTeNX5sC71AT7mqfNg_hoac-5uY';
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 
+  (process.env.SUPABASE_SECRET_KEY && !process.env.SUPABASE_SECRET_KEY.includes('•') && process.env.SUPABASE_SECRET_KEY.length > 20 ? process.env.SUPABASE_SECRET_KEY : null) ||
+  process.env.SUPABASE_ANON_KEY || 
+  process.env.SUPABASE_PUBLISHABLE_KEY || 
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNranNydXJydWF4Y3Zlb3hwendzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1OTM2NzcsImV4cCI6MjEwNDE2OTY3N30.uUcbTmFTVJusweOVyUtjjwZo5KMoqvBQtqqOGZzmx6M';
+
 const PORT = process.env.PORT || 3000;
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.pdf': 'application/pdf',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff'
+};
 
 // Initialize Supabase Server Client
 const supabaseAdmin = createClient(
   SUPABASE_URL,
-  SUPABASE_SECRET_KEY || SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_KEY,
   {
     auth: {
       persistSession: false,
@@ -21,7 +46,7 @@ const supabaseAdmin = createClient(
   }
 );
 
-// Simple lightweight HTTP server for BeatWave backend APIs
+// HTTP server for BeatWave (serves static files + backend APIs)
 const server = http.createServer(async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,9 +61,10 @@ const server = http.createServer(async (req, res) => {
 
   const host = req.headers.host || `localhost:${PORT}`;
   const url = new URL(req.url, `http://${host}`);
+  const pathname = decodeURIComponent(url.pathname);
 
-  // 1. Health check endpoint
-  if (url.pathname === '/api/health' && req.method === 'GET') {
+  // 1. Health check API endpoint
+  if (pathname === '/api/health' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'healthy',
@@ -49,8 +75,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 2. Orders summary statistics
-  if (url.pathname === '/api/stats' && req.method === 'GET') {
+  // 2. Orders summary statistics API endpoint
+  if (pathname === '/api/stats' && req.method === 'GET') {
     try {
       const { data: orders, error } = await supabaseAdmin
         .from('book_orders')
@@ -93,9 +119,46 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Default 404
-  res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Endpoint not found' }));
+  // 3. Static File Server (serves index.html, login.html, cart.html, admin.html, styles.css, etc.)
+  let relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
+  let filePath = path.join(__dirname, relativePath);
+
+  // Security: prevent directory traversal
+  if (!filePath.startsWith(__dirname)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('Forbidden');
+    return;
+  }
+
+  fs.stat(filePath, (err, stats) => {
+    if (!err && stats.isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+      res.writeHead(200, { 'Content-Type': contentType });
+      fs.createReadStream(filePath).pipe(res);
+    } else {
+      // If HTML file without .html extension requested
+      const htmlFilePath = filePath + '.html';
+      fs.stat(htmlFilePath, (htmlErr, htmlStats) => {
+        if (!htmlErr && htmlStats.isFile()) {
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          fs.createReadStream(htmlFilePath).pipe(res);
+        } else {
+          // Serve 404.html if available or json 404
+          const notFoundPath = path.join(__dirname, '404.html');
+          fs.readFile(notFoundPath, (err404, content404) => {
+            if (!err404) {
+              res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+              res.end(content404);
+            } else {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'File not found', path: pathname }));
+            }
+          });
+        }
+      });
+    }
+  });
 });
 
 if (process.env.NODE_ENV !== 'test') {
